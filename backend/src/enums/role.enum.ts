@@ -1,5 +1,7 @@
-export const Role = {
-  USER: "USER",
+export const Roles = {
+  CUSTOMER: "CUSTOMER",
   ADMIN: "ADMIN",
-  STAFF: "STAFF"
-}
+  EMPLOYEE: "EMPLOYEE"
+} as const
+
+export type RoleType = keyof typeof Roles
