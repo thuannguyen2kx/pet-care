@@ -1,0 +1,26 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 130">
+  <!-- Paw Print -->
+  <g transform="translate(56, 32) scale(1.2)">
+    <!-- Main paw pad -->
+    <ellipse cx="25" cy="30" rx="15" ry="13" fill="#4f9de0" />
+
+    <!-- Toe pads -->
+    <ellipse cx="12" cy="15" rx="8" ry="9" fill="#4f9de0" />
+    <ellipse cx="25" cy="10" rx="8" ry="9" fill="#4f9de0" />
+    <ellipse cx="38" cy="15" rx="8" ry="9" fill="#4f9de0" />
+  </g>
+
+  <!-- Text -->
+  <!-- <text x="150" y="70" font-family="Arial, sans-serif" font-size="36" font-weight="bold" text-anchor="middle" fill="#333">
+    PetCare
+  </text> -->
+  <text x="146" y="74" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#2c3e50" opacity="0.1">
+    PetCare
+  </text>
+  
+  <!-- Main text -->
+  <text x="144" y="72" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#2c3e50">
+    PetCare
+  </text>
+</svg>
