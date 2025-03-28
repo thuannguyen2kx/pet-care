@@ -111,7 +111,6 @@ userSchema.methods.omitPassword = function (): Omit<UserDocument, "password"> {
 userSchema.methods.comparePassword = async function (value: string) {
   return await compareValue(value, this.password);
 };
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
 
 const UserModel = mongoose.model<UserDocument>("User", userSchema);

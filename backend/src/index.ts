@@ -1,17 +1,22 @@
 import "dotenv/config";
 import express, {NextFunction, Request, Response} from "express"
 import cors from "cors"
+import passport from "passport";
 
 import { config } from "./config/app.config"
-import { errorHandler } from "./middlewares/errorHandler.middleware"
 import connectDatabase from "./config/database.config";
-import authRouter from "./routes/auth.route";
+import { errorHandler } from "./middlewares/errorHandler.middleware"
+import authRoutes from "./routes/auth.route";
+
+import "./config/passport.config";
 
 const app = express()
 const BASE_PATH = config.BASE_PATH
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+
+app.use(passport.initialize())
 app.use(
   cors({
     origin: config.FRONTEND_ORIGIN,
@@ -24,7 +29,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
     message: "Wellcome to PetCare"
   })
 })
-app.use(`${BASE_PATH}/auth`, authRouter)
+app.use(`${BASE_PATH}/auth`, authRoutes)
 
 app.use(errorHandler)
 
