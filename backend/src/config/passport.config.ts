@@ -10,10 +10,15 @@ import {
 
 import { config } from "./app.config";
 import { NotFoundException } from "../utils/app-error";
-import { findUserByIdService, loginOrCreateAccountService } from "../services/auth.service";
+import {
+  findUserByIdService,
+  loginOrCreateAccountService,
+  verifyUserService,
+} from "../services/auth.service";
 import { ProviderEnum } from "../enums/account-provider.enum";
 import { signJwtToken } from "../utils/jw";
 import { RoleType } from "../enums/role.enum";
+import { verify } from "crypto";
 
 passport.use(
   new GoogleStrategy(
@@ -43,6 +48,24 @@ passport.use(
         done(null, user);
       } catch (error) {
         done(error, false);
+      }
+    }
+  )
+);
+
+passport.use(
+  new LocalStraregy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+      session: false,
+    },
+    async (email, password, done) => {
+      try {
+        const user = await verifyUserService({ email, password });
+        return done(null, user);
+      } catch (error: any) {
+        return done(error, false, { message: error?.message });
       }
     }
   )

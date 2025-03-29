@@ -25,7 +25,7 @@ export interface UserDocument extends Document {
   role: RoleType;
   status: StatusUserType;
   profilePicture: string | null;
-  employeeInfo?: IEmployeeInfo;
+  employeeInfo: IEmployeeInfo | null;
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -100,6 +100,27 @@ userSchema.pre("save", async function (next) {
       this.password = await hashValue(this.password);
     }
   }
+  if (this.role === Roles.CUSTOMER) {
+    this.employeeInfo = null;
+  } else if (
+    (this.role === Roles.EMPLOYEE || this.role === Roles.ADMIN) &&
+    !this.employeeInfo
+  ) {
+    this.employeeInfo = {
+      specialties: [],
+      schedule: {
+        workDays: [],
+        workHours: {
+          start: "",
+          end: "",
+        },
+      },
+      performance: {
+        rating: 0,
+        completedServices: 0,
+      },
+    };
+  }
   next();
 });
 
@@ -109,7 +130,7 @@ userSchema.methods.omitPassword = function (): Omit<UserDocument, "password"> {
   return userObject;
 };
 userSchema.methods.comparePassword = async function (value: string) {
-  return await compareValue(value, this.password);
+  return compareValue(value, this.password);
 };
 userSchema.index({ role: 1 });
 
