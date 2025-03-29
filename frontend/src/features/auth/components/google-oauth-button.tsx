@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { baseURL } from "@/lib/base-url";
 
 
 const GoogleOauthButton = (props: { label: string }) => {
   const { label } = props;
   const handleClick = () => {
-    
+   window.location.href = `${baseURL}/auth/google` 
   };
   return (
     <Button
@@ -19,7 +20,7 @@ const GoogleOauthButton = (props: { label: string }) => {
           fill="currentColor"
         />
       </svg>
-      {label} with Google
+      {label} bằng Google
     </Button>
   );
 };

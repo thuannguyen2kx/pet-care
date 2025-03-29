@@ -8,8 +8,11 @@ import BaseLayout from "@/layouts/base.layout";
 import {
   authenticationRoutePaths,
   baseRoutesPaths,
-  protectedRoutePaths,
+  protectedCustomerRoutePaths,
 } from "./common/routes";
+import AuthRoute from "./auth.route";
+import ProtectedRoute from "./protected-route";
+import { Roles } from "@/constants";
 
 function AppRoutes() {
   return (
@@ -21,16 +24,28 @@ function AppRoutes() {
           ))}
         </Route>
 
-        <Route element={<AuthLayout />}>
-          {authenticationRoutePaths.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
+        <Route path="/" element={<AuthRoute />}>
+          <Route element={<AuthLayout />}>
+            {authenticationRoutePaths.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+              />
+            ))}
+          </Route>
         </Route>
 
-        <Route element={<AppLayout />}>
-          {protectedRoutePaths.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
+        <Route path="/" element={<ProtectedRoute role={Roles.CUSTOMER} />}>
+          <Route element={<AppLayout />}>
+            {protectedCustomerRoutePaths.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+              />
+            ))}
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFound />} />

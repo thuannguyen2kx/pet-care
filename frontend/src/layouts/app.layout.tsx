@@ -1,11 +1,14 @@
+import { AuthProvider } from "@/context/auth-provider";
 import { Outlet } from "react-router-dom";
 
 const AppLayout = () => {
   return (
-    <div>
-      Applayout
-      <Outlet />
-    </div>
+    <AuthProvider>
+      <div>
+        Applayout
+        <Outlet />
+      </div>
+    </AuthProvider>
   );
 };
 export default AppLayout;
