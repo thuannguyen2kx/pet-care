@@ -8,6 +8,7 @@ import connectDatabase from "./config/database.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
+import petRoutes from "./routes/pet.route"
 
 import "./config/passport.config";
 import { passportAuthenticateJWT } from "./config/passport.config";
@@ -35,9 +36,8 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJWT, userRoutes);
-app.use(`${BASE_PATH}/admin`, passportAuthenticateJWT, authorizeRoles([Roles.ADMIN]), (req, res) => {
-    res.json({ message: "Chào mừng Admin!" });
-  });
+app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
+
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
