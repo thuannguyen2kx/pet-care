@@ -1,5 +1,9 @@
 import { Roles, RolesType } from "@/constants";
-import { ADMIN_ROUTES, CUSTOMER_ROUTES, EMPLOYEE_ROUTES } from "@/routes/common/routePaths";
+import {
+  ADMIN_ROUTES,
+  CUSTOMER_ROUTES,
+  EMPLOYEE_ROUTES,
+} from "@/routes/common/routePaths";
 
 export const getRedirectUrl = (role: RolesType): string => {
   switch (role) {
@@ -22,4 +26,12 @@ export const getAvatarFallbackText = (name: string) => {
     .join("")
     .slice(0, 2); // Ensure only two initials
   return initials || "NA";
+};
+
+export const formatDate = (date: Date): string => {
+  return new Date(date).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 };

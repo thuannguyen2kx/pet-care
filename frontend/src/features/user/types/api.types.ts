@@ -1,4 +1,4 @@
-import { RolesType, StatusUserType } from "@/constants"
+import { GenderType, RolesType, StatusUserType } from "@/constants"
 
 export type EmployeeInfoType = {
   specialties?: string[],
@@ -18,7 +18,12 @@ export type UserType = {
   _id: string,
   fullName: string,
   email: string,
-  profilePicture: string | null,
+  profilePicture: {
+    url: string | null,
+    publicId: string | null
+  },
+  phoneNumber?: string | null,
+  gender: GenderType,
   role: RolesType,
   status: StatusUserType,
   employeeInfo: EmployeeInfoType | null,
@@ -27,6 +32,21 @@ export type UserType = {
   updatedAt: string, 
 }
 export type CurrentUserResponseType = {
+  message: string,
+  user: UserType
+}
+export type ProfileResponseType = {
+  message: string,
+  user: UserType
+}
+
+export type updateProfileInfoType = {
+  fullName?: string,
+  phoneNumber?: string,
+  email?: string,
+  gender?: string
+}
+export type UpdateProfileResponseType = {
   message: string,
   user: UserType
 }

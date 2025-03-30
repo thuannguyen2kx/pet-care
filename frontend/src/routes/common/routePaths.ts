@@ -11,6 +11,7 @@ export const CUSTOMER_ROUTES = {
   CREATE_POST: "/create-post",
   SERVICES: "/services",
   APPOINTMENTS: "/appointments",
+  PROFILE: "/profile/:profileId",
 };
 export const ADMIN_ROUTES = {
   DASHBOARD: "/admin/dashboard",

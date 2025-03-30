@@ -13,6 +13,7 @@ import { useAuthContext } from "@/context/auth-provider";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
 import { getAvatarFallbackText } from "@/lib/helper";
 import { useConfirm } from "@/hooks/use-confirm";
+import { Link } from "react-router-dom";
 
 export const UserButton = () => {
   const { user, isLoading } = useAuthContext();
@@ -45,7 +46,7 @@ export const UserButton = () => {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="relative outline-none">
           <Avatar className="transition border size-10 hover:opactiy-75 border-neutral-300">
-            <AvatarImage src={user.profilePicture || ""} alt={fullName} />
+            <AvatarImage src={user.profilePicture.url || ""} alt={fullName} />
             <AvatarFallback className="flex items-center justify-center font-medium bg-neutral-200 text-neutral-500">
               {initials}
             </AvatarFallback>
@@ -68,6 +69,12 @@ export const UserButton = () => {
               <p className="text-sm text-neutral-500">{email}</p>
             </div>
           </div>
+          <DropdownMenuItem
+            asChild
+            className="items-center justify-center h-10 font-medium cursor-pointer"
+          >
+            <Link to={`/profile/${user._id}`}>Trang cá nhân</Link>
+          </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={handleLogout}
