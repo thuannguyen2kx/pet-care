@@ -8,6 +8,9 @@ export const AUTH_ROUTES = {
 };
 export const CUSTOMER_ROUTES = {
   HOME: "/home",
+  CREATE_POST: "/create-post",
+  SERVICES: "/services",
+  APPOINTMENTS: "/appointments",
 };
 export const ADMIN_ROUTES = {
   DASHBOARD: "/admin/dashboard",

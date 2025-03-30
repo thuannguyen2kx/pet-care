@@ -145,7 +145,30 @@
 }
 
 
+@layer base {
+  * {
+    @apply scroll-smooth;
+  }
+    /* Remove scrollbar */
+  .remove-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    border-radius: 0px;
+  }
 
+  .remove-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .remove-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 0px;
+  }
+
+  .remove-scrollbar::-webkit-scrollbar-thumb:hover { 
+    background: transparent;
+  }
+}
 @layer utilities {
   /* ===== TYPOGRAPHY */
   .h1 {
@@ -184,6 +207,15 @@
   .overline {
     @apply text-[10px] leading-[14px] font-normal;
   }
+
+    /* =====  SHADCN OVERRIDES */
+  .shad-no-focus {
+    @apply outline-none ring-offset-transparent focus:ring-transparent focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0;
+  }
+  .shad-input {
+    @apply border-none shadow-none p-0 shad-no-focus placeholder:text-light-200 body-2;
+  }
+
   .primary-btn {
     background-color: var(--color-brand);
     transition: all 0.3s ease-in-out;
@@ -192,5 +224,4 @@
       background-color: var(--color-brand-100);
     }
   }
-
 }
