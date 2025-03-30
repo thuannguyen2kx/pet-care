@@ -1,9 +1,16 @@
-
 import { Router } from "express";
-import { getCurrentUserController } from "../controllers/user.controller";
+import {
+  getCurrentUserController,
+  updateProfileController,
+  updateProfilePictureController,
+} from "../controllers/user.controller";
 
-const userRoutes = Router()
+const userRoutes = Router();
 
-userRoutes.get("/current", getCurrentUserController)
+userRoutes.get("/current", getCurrentUserController);
 
-export default userRoutes 
+userRoutes.put("/profile", updateProfileController);
+userRoutes.put("/profile/picture", updateProfilePictureController);
+userRoutes.get("/profile/:id", getCurrentUserController);
+
+export default userRoutes;

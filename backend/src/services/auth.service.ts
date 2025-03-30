@@ -26,7 +26,10 @@ export const loginOrCreateAccountService = async (data: {
       user = new UserModel({
         email,
         fullName: displayName,
-        profilePicture: picture || null,
+        profilePicture: {
+          url: picture,
+          publicId: null
+        },
         role: Roles.CUSTOMER,
         status: StatusUser.ACTIVE,
       });

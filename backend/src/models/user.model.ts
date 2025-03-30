@@ -1,6 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { Roles, RoleType } from "../enums/role.enum";
-import { StatusUser, StatusUserType } from "../enums/status-user.enum";
+import {
+  GENDER,
+  GenderType,
+  StatusUser,
+  StatusUserType,
+} from "../enums/status-user.enum";
 import { compareValue, hashValue } from "../utils/bcrypt";
 
 interface IEmployeeInfo {
@@ -22,9 +27,13 @@ export interface UserDocument extends Document {
   password?: string;
   fullName: string;
   phoneNumber?: string;
+  gender: GenderType;
   role: RoleType;
   status: StatusUserType;
-  profilePicture: string | null;
+  profilePicture: {
+   url: string | null;
+   publicId: string | null;
+  };
   employeeInfo: IEmployeeInfo | null;
   lastLogin: Date | null;
   createdAt: Date;
@@ -56,14 +65,25 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: false,
     },
+    gender: {
+      type: String,
+      enum: Object.values(GENDER),
+      default: GENDER.OTHER,
+    },
     role: {
       type: String,
       enum: Object.values(Roles),
       default: Roles.CUSTOMER,
     },
     profilePicture: {
-      type: String,
-      default: null,
+      url: {
+        type: String,
+        default: null
+      },
+      publicId: {
+        type: String,
+        default: null
+      }
     },
     status: {
       type: String,

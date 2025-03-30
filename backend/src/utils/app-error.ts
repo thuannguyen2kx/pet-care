@@ -78,7 +78,20 @@ export class UnauthorizedException extends AppError {
     ) {
         super(
             message,
-            HTTPSTATUS.INTERNAL_SERVER_ERROR,
+            HTTPSTATUS.UNAUTHORIZED,
+            errorCode || ErrorCodeEnum.ACCESS_UNAUTHORIZED
+        );
+    }
+}
+
+export class ForbiddenException extends AppError {
+    constructor(
+        message = "Forbidden Access",
+        errorCode?: ErrorCodeEnumType,
+    ) {
+        super(
+            message,
+            HTTPSTATUS.FORBIDDEN,
             errorCode || ErrorCodeEnum.ACCESS_UNAUTHORIZED
         );
     }

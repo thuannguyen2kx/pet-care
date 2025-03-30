@@ -11,6 +11,8 @@ import userRoutes from "./routes/user.route";
 
 import "./config/passport.config";
 import { passportAuthenticateJWT } from "./config/passport.config";
+import { authorizeRoles } from "./middlewares/auth.middleware";
+import { Roles } from "./enums/role.enum";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -33,7 +35,9 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJWT, userRoutes);
-
+app.use(`${BASE_PATH}/admin`, passportAuthenticateJWT, authorizeRoles([Roles.ADMIN]), (req, res) => {
+    res.json({ message: "Chào mừng Admin!" });
+  });
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
