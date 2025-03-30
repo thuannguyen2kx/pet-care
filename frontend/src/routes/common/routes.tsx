@@ -5,6 +5,7 @@ import GoogleOauth from "@/pages/auth/google-oauth";
 import Landing from "@/pages/base/landing";
 import CustomerHome from "@/pages/customer/home";
 import Profile from "@/pages/customer/profile";
+import PetDetail from "@/pages/customer/pet-details";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -20,6 +21,11 @@ export const protectedCustomerRoutePaths = [
     path: CUSTOMER_ROUTES.PROFILE,
     element: <Profile />,
   },
+
+  {
+    path: CUSTOMER_ROUTES.PET_DETAILS,
+    element: <PetDetail />
+  }
 ];
 
 export const baseRoutesPaths = [

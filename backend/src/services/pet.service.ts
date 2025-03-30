@@ -16,15 +16,13 @@ export const getUserPetsService = async (userId: string) => {
  */
 export const getPetByIdService = async ({ petId, userId }: { petId: string; userId: string }) => {
   const pet = await PetModel.findById(petId);
-  
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
-  }
-  
+  } 
   // Kiểm tra quyền truy cập
-  if (pet.ownerId.toString() !== userId) {
-    throw new UnauthorizedException("Không có quyền truy cập thú cưng này");
-  }
+  if (!pet.ownerId.equals(userId)) {
+  throw new UnauthorizedException("Không có quyền truy cập thú cưng này");
+}
   
   return { pet };
 };

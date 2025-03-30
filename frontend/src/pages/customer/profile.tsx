@@ -14,13 +14,11 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Camera,
-  Check,
   Grid,
   Heart,
   MessageCircle,
   MoreHorizontal,
   Pencil,
-  Plus,
   Settings,
   User,
 } from "lucide-react";
@@ -33,26 +31,7 @@ import { ProfileNotFound } from "@/features/user/components/profile-not-found";
 import ProfileAvatar from "@/features/user/components/profile-avatar";
 import { formatDate } from "@/lib/helper";
 import { useAuthContext } from "@/context/auth-provider";
-
-interface Vaccination {
-  name: string;
-  date: Date;
-  expiryDate: Date;
-}
-
-interface Pet {
-  _id: string;
-  name: string;
-  species: string;
-  breed: string;
-  age: number;
-  weight: number;
-  gender: string;
-  profilePicture: string | null;
-  vaccinations: Vaccination[];
-  allergies: string[];
-  specialNeeds: string;
-}
+import { PetList } from "@/features/pet/components/pet-list";
 
 interface Post {
   _id: string;
@@ -63,47 +42,6 @@ interface Post {
   comments: number;
   image: string;
 }
-
-const samplePets = [
-  {
-    _id: "pet1",
-    name: "Buddy",
-    species: "Dog",
-    breed: "Golden Retriever",
-    age: 3,
-    weight: 30,
-    gender: "Male",
-    profilePicture: null,
-    vaccinations: [
-      {
-        name: "Rabies",
-        date: new Date("2023-05-15"),
-        expiryDate: new Date("2024-05-15"),
-      },
-    ],
-    allergies: ["Chicken"],
-    specialNeeds: "None",
-  },
-  {
-    _id: "pet2",
-    name: "Whiskers",
-    species: "Cat",
-    breed: "Siamese",
-    age: 2,
-    weight: 4.5,
-    gender: "Female",
-    profilePicture: null,
-    vaccinations: [
-      {
-        name: "FVRCP",
-        date: new Date("2023-07-20"),
-        expiryDate: new Date("2024-07-20"),
-      },
-    ],
-    allergies: [],
-    specialNeeds: "Sensitive stomach",
-  },
-];
 
 const samplePosts = [
   {
@@ -152,7 +90,6 @@ const SocialProfile = () => {
   const { data, isLoading: isProfileLoading } = useGetProfile(profileId!);
   const profile = data?.user;
 
-  const [petsData] = useState<Pet[]>(samplePets);
   const [postsData] = useState<Post[]>(samplePosts);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [showPostModal, setShowPostModal] = useState<boolean>(false);
@@ -247,123 +184,8 @@ const SocialProfile = () => {
         </div>
       </div>
 
-      {/* Pet Stories - Instagram style */}
-      <div className="overflow-x-auto mb-8">
-        <div className="flex gap-4 py-2">
-          {petsData.map((pet) => (
-            <Dialog key={pet._id}>
-              <DialogTrigger asChild>
-                <button className="flex flex-col items-center gap-1">
-                  <Avatar className="h-16 w-16 border-2 border-orange-400">
-                    <AvatarImage src={pet.profilePicture || ""} />
-                    <AvatarFallback className="bg-orange-300 text-white">
-                      {pet.name?.substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs font-medium">{pet.name}</span>
-                </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <span>{pet.name}</span>
-                    <Badge className="bg-orange-500 text-white text-xs">
-                      {pet.species}
-                    </Badge>
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16 border-2 border-orange-200">
-                      <AvatarImage src={pet.profilePicture || ""} />
-                      <AvatarFallback className="bg-orange-300 text-white">
-                        {pet.name?.substring(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm text-gray-700">
-                        {pet.breed || "Giống lai"}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        {pet.age} tuổi • {pet.weight} kg • {pet.gender}
-                      </p>
-                    </div>
-                  </div>
-
-                  {pet.vaccinations?.length > 0 && (
-                    <div>
-                      <p className="text-sm text-gray-700 font-medium mb-1">
-                        Tiêm phòng
-                      </p>
-                      <div className="space-y-1">
-                        {pet.vaccinations.map((vaccination, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2 text-sm"
-                          >
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>{vaccination.name}</span>
-                            <span className="text-gray-500 text-xs">
-                              (Có hiệu lực đến{" "}
-                              {formatDate(vaccination.expiryDate)})
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {pet.allergies?.length > 0 && (
-                    <div>
-                      <p className="text-sm text-gray-700 font-medium mb-1">
-                        Dị ứng
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {pet.allergies.map((allergy, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className="border-orange-200 bg-orange-50"
-                          >
-                            {allergy}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {pet.specialNeeds && pet.specialNeeds !== "Không có" && (
-                    <div>
-                      <p className="text-sm text-gray-700 font-medium mb-1">
-                        Nhu cầu đặc biệt
-                      </p>
-                      <p className="text-gray-700 text-sm">
-                        {pet.specialNeeds}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-orange-200 text-orange-600 hover:bg-orange-50"
-                  >
-                    Xem hồ sơ đầy đủ
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          ))}
-
-          <button className="flex flex-col items-center gap-1">
-            <div className="h-16 w-16 rounded-full border-2 border-dashed border-orange-400 flex items-center justify-center bg-orange-50">
-              <Plus className="h-6 w-6 text-orange-500" />
-            </div>
-            <span className="text-xs font-medium">Thêm thú cưng</span>
-          </button>
-        </div>
-      </div>
+      {/*  Pet List */}
+      <PetList />
 
       {/* Create Post Button - Instagram style */}
       <div className="flex justify-between items-center mb-6">
