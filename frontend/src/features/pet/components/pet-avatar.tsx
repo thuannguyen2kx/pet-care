@@ -30,7 +30,7 @@ const PetAvatar: React.FC<PetAvatarProps> = ({
   const sizeClasses = {
     sm: "h-10 w-10 border-2",
     md: "h-16 w-16 border-2",
-    lg: "h-24 w-24 md:h-36 md:w-36 border-4",
+    lg: "h-20 w-20 md:h-24 md:w-24 border-4",
   };
 
   // Size classes for icon

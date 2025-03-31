@@ -90,7 +90,7 @@ export const updatePetService = async ({
   }
   
   // Kiểm tra quyền truy cập
-  if (pet.ownerId.toString() !== userId) {
+  if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
   
@@ -117,7 +117,7 @@ export const deletePetService = async ({ petId, userId }: { petId: string; userI
   }
   
   // Kiểm tra quyền truy cập
-  if (pet.ownerId.toString() !== userId) {
+  if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền xóa thú cưng này");
   }
   
@@ -153,7 +153,7 @@ export const updatePetPictureService = async ({
   }
   
   // Kiểm tra quyền truy cập
-  if (pet.ownerId.toString() !== userId) {
+  if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
   
@@ -204,7 +204,7 @@ export const addVaccinationService = async ({
   }
   
   // Kiểm tra quyền truy cập
-  if (pet.ownerId.toString() !== userId) {
+  if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
   
@@ -242,7 +242,7 @@ export const addMedicalRecordService = async ({
   }
   
   // Kiểm tra quyền truy cập
-  if (pet.ownerId.toString() !== userId) {
+  if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
   

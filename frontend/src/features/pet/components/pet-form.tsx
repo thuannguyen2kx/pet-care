@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +24,7 @@ import { Camera, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdatePet } from "../hooks/mutations/update-pet";
 import { usePetCreation } from "../hooks/mutations/use-pet-creation";
+import { PetType } from "../types/api.types";
 
 // Loại giới tính
 const genderOptions = [
@@ -60,22 +60,7 @@ const petFormSchema = z.object({
 type PetFormValues = z.infer<typeof petFormSchema>;
 
 interface PetFormProps {
-  pet?: {
-    _id: string;
-    name: string;
-    species: string;
-    breed?: string;
-    age?: number;
-    weight?: number;
-    gender?: string;
-    habits?: string[];
-    allergies?: string[];
-    specialNeeds?: string;
-    profilePicture?: {
-      url: string | null;
-      publicId?: string | null;
-    };
-  };
+  pet?: PetType;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -210,18 +195,24 @@ const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess, onCancel }) => {
       const formattedData = {
         ...data,
         // Đảm bảo age và weight là số nếu có giá trị
-        age: data.age !== undefined && data.age !== null ? Number(data.age) : undefined,
-        weight: data.weight !== undefined && data.weight !== null ? Number(data.weight) : undefined,
+        age:
+          data.age !== undefined && data.age !== null
+            ? Number(data.age)
+            : undefined,
+        weight:
+          data.weight !== undefined && data.weight !== null
+            ? Number(data.weight)
+            : undefined,
         // Đảm bảo habits và allergies là mảng
         habits: filteredHabits.length > 0 ? filteredHabits : undefined,
-        allergies: filteredAllergies.length > 0 ? filteredAllergies : undefined
+        allergies: filteredAllergies.length > 0 ? filteredAllergies : undefined,
       };
 
       if (isEditMode && pet) {
         // Cập nhật thú cưng
         await updatePet.mutateAsync({
           petId: pet._id,
-          data: formattedData
+          data: formattedData,
         });
         toast("Cập nhật thành công", {
           description: "Thông tin thú cưng đã được cập nhật.",
@@ -249,13 +240,8 @@ const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess, onCancel }) => {
   const isPending = isCreating || updatePet.isPending;
 
   return (
-    <Card className="border-orange-200 max-w-3xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100">
-        <CardTitle className="text-xl text-orange-800">
-          {isEditMode ? "Cập nhật thông tin thú cưng" : "Thêm thú cưng mới"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
+    <div className="w-full">
+      <div className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Ảnh đại diện */}
@@ -384,7 +370,10 @@ const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess, onCancel }) => {
                         {...field}
                         value={field.value || ""}
                         onChange={(e) => {
-                          const value = e.target.value === "" ? undefined : Number(e.target.value);
+                          const value =
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value);
                           field.onChange(value);
                         }}
                         className="border-orange-200"
@@ -411,7 +400,10 @@ const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess, onCancel }) => {
                         {...field}
                         value={field.value || ""}
                         onChange={(e) => {
-                          const value = e.target.value === "" ? undefined : Number(e.target.value);
+                          const value =
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value);
                           field.onChange(value);
                         }}
                         className="border-orange-200"
@@ -568,8 +560,8 @@ const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess, onCancel }) => {
             </div>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -15,14 +15,19 @@ import { useNavigate } from "react-router-dom";
 import { useDeletePet } from "../hooks/mutations/delete-pet";
 import { formatDate } from "@/lib/helper";
 import { PetType } from "../types/api.types";
+import { useAuthContext } from "@/context/auth-provider";
+import useEditPetSheet from "../hooks/use-edit-pet-sheet";
+import { EditPetSheet } from "./edit-pet-sheet";
 
 interface PetCardProps {
   pet: PetType;
   onEdit?: () => void;
 }
 
-const PetCard: React.FC<PetCardProps> = ({ pet, onEdit }) => {
+const PetCard: React.FC<PetCardProps> = ({ pet}) => {
+  const { user } = useAuthContext();
   const navigate = useNavigate();
+  const {open, onOpen, onClose} = useEditPetSheet()
   const [DeleteDialog, confirmDelete] = useConfirm(
     "Xóa thú cưng",
     "Bạn có chắn chắc muốn xoá thú cưng này?"
@@ -35,13 +40,8 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onEdit }) => {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onEdit) {
-      onEdit();
-    } else {
-      navigate(`/pets/${pet._id}/edit`);
-    }
-  };
-
+    onOpen();
+  }
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -55,13 +55,17 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onEdit }) => {
   return (
     <>
       <DeleteDialog />
+      <EditPetSheet petId={pet._id} open={open} onOpenChange={onClose} />
       <Card
-        className="border-orange-200 overflow-hidden transition-shadow hover:shadow-md cursor-pointer"
-        onClick={handleViewDetails}
+        className="border-none shadow-none overflow-hidden cursor-pointer" 
       >
         <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 p-4">
           <div className="flex items-center gap-4">
-            <PetAvatar pet={pet} size="md" />
+            <PetAvatar
+              pet={pet}
+              size="md"
+              editable={user?._id === pet.ownerId}
+            />
             <div className="flex-1">
               <CardTitle className="text-xl text-orange-800 flex items-center justify-between">
                 <span>{pet.name}</span>
@@ -138,30 +142,32 @@ const PetCard: React.FC<PetCardProps> = ({ pet, onEdit }) => {
             Xem chi tiết
           </Button>
 
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 h-8 w-8"
-              onClick={handleEdit}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
+          {user?._id === pet.ownerId && (
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 h-8 w-8"
+                onClick={handleEdit}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-red-600 hover:text-red-800 hover:bg-red-100 h-8 w-8"
-              onClick={handleDelete}
-              disabled={deletePet.isPending}
-            >
-              {deletePet.isPending ? (
-                <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-red-600 hover:text-red-800 hover:bg-red-100 h-8 w-8"
+                onClick={handleDelete}
+                disabled={deletePet.isPending}
+              >
+                {deletePet.isPending ? (
+                  <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          )}
         </CardFooter>
       </Card>
     </>
