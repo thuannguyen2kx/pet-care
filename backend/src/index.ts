@@ -9,6 +9,7 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
 import petRoutes from "./routes/pet.route"
+import postRoutes from "./routes/post.route"
 
 import "./config/passport.config";
 import { passportAuthenticateJWT } from "./config/passport.config";
@@ -37,7 +38,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJWT, userRoutes);
 app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
-
+app.use(`${BASE_PATH}/post`, passportAuthenticateJWT, postRoutes);
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
