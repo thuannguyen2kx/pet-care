@@ -22,8 +22,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import CreatePostModal from "@/features/post/components/create-post-modal";
+import useCreatePostModal from "@/features/post/hooks/use-create-post-modal";
 
 const AppLayout = () => {
+  const {open, onClose} = useCreatePostModal()
   return (
     <AuthProvider>
       <div className="flex h-screen">
@@ -33,6 +36,7 @@ const AppLayout = () => {
           <Header />
           <div className="remove-scrollbar h-full flex-1 overflow-auto bg-white px-5 py-7 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-10">
             <Outlet />
+            <CreatePostModal open={open} onOpenChange={onClose} />
           </div>
         </section>
       </div>

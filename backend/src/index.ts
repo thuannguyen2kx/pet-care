@@ -38,7 +38,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, passportAuthenticateJWT, userRoutes);
 app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
-app.use(`${BASE_PATH}/post`, passportAuthenticateJWT, postRoutes);
+app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {

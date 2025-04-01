@@ -1,11 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { UserButton } from "@/features/user/components/user-button";
+import { PostFeed } from "@/features/post/components/post-feed";
 
 const CustomerHome = () => {
   return (
     <div>
-      <Button>Home</Button>
-      <UserButton />
+      <PostFeed />
     </div>
   );
 };
