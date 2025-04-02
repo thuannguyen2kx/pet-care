@@ -17,6 +17,10 @@ export const CUSTOMER_ROUTES = {
 };
 export const ADMIN_ROUTES = {
   DASHBOARD: "/admin/dashboard",
+  EMPLOYEE: "/admin/employees",
+  CUSTOMER: "/admin/customers",
+  SERVICE: "/admin/services",
+  APPOINTMENT: "/admin/appointments",
 }
 export const EMPLOYEE_ROUTES = {
   DASHBOARD: "/employee/dashboard",
