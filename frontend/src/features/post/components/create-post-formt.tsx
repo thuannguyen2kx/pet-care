@@ -139,7 +139,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
       }
     } catch {
       toast("Có lỗi xảy ra",{
-        description: 'Failed to process image files',
+        description: 'Có lỗi xảy ra khong quá trình tải ảnh',
       });
     }
   }, [activeStep, media.length]);
@@ -170,7 +170,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
       }
     } catch {
       toast("Có lỗi",{
-        description: 'Có lỗi khi kéo ảnh',
+        description: 'Có lỗi khi tải ảnh',
       });
     }
   }, [activeStep]);
@@ -203,13 +203,13 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
   // Handle form submission
   const onSubmit = useCallback(async (values: PostFormValues) => {
     if (!values.content.trim()) {
-      toast("Post content is required");
+      toast("Vui lòng nhập nội dung bài viết");
       return;
     }
     
     if (media.length === 0) {
       toast("Cảnh báo",{
-        description: "Are you sure you want to post without any media?",
+        description: "Bạn có chắn chắn muốn tạo bài viết mà không có ảnh nào?",
       });
       // You could add a confirmation step here if needed
     }
@@ -264,7 +264,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
           onClick={form.handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Posting...' : 'Post'}
+          {isSubmitting ? 'Đang tạo bài viết...' : 'Tạo bài viết'}
         </Button>
       );
     }
@@ -291,11 +291,11 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
           <ImageIcon size={48} className="mb-2" />
           <p className="text-sm">No media selected</p>
           <label className="mt-4 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded cursor-pointer">
-            Add media
+            Tải lên ảnh hoặc video
             <input 
               type="file" 
               className="hidden" 
-              accept="image/*" 
+              accept="image/* video/*" 
               multiple
               onChange={handleImageUpload}
             />
@@ -353,9 +353,6 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
         >
           {activeStep > 0 ? "Back" : ""}
         </Button>
-        <h1 className="text-xl font-semibold text-center flex-1">
-          Create New Post
-        </h1>
         {ActionButton}
       </div>
 
@@ -371,17 +368,15 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
             >
               <Camera className="h-12 w-12 text-primary/40 mb-4" />
               <p className="text-lg font-medium text-gray-700 mb-2">
-                Drag photos here
+                Kéo thả ảnh của bạn vào đây
               </p>
-              <p className="text-gray-500 text-sm mb-4 text-center">
-                Share photos of your pets, activities, or experiences
-              </p>
+              <p className="text-gray-500 text-sm mb-4 text-center">Chia sẻ ảnh thú cưng, hoạt động hoặc trải nghiệm của bạn</p>
               <label className="inline-flex items-center px-4 py-2.5 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg cursor-pointer">
-                Select from computer
+                Tải ảnh hoặc video từ thiết bị
                 <input
                   type="file"
                   className="hidden"
-                  accept="image/*"
+                  accept="image/* video/*"
                   multiple
                   onChange={handleImageUpload}
                 />
@@ -391,7 +386,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
             {/* Show already uploaded images if any */}
             {media.length > 0 && (
               <div className="mt-4">
-                <h3 className="text-sm font-medium mb-2">Uploaded media:</h3>
+                <h3 className="text-sm font-medium mb-2">Tải lên ảnh/video:</h3>
                 <div className="grid grid-cols-3 gap-2">
                   {media.map((item, index) => (
                     <div
@@ -451,7 +446,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                 {/* Title */}
                 <div>
                   <Label htmlFor="title" className="text-gray-700">
-                    Title (Optional)
+                    Tiêu đề (Tuỳ chọn)
                   </Label>
                   <Controller
                     name="title"
@@ -459,7 +454,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                     render={({ field }) => (
                       <Input
                         id="title"
-                        placeholder="Add a title..."
+                        placeholder="Thêm tiêu đề bài viết..."
                         className="mt-1"
                         {...field}
                       />
@@ -469,16 +464,14 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
 
                 {/* Content */}
                 <div>
-                  <Label htmlFor="content" className="text-gray-700">
-                    Content
-                  </Label>
+                  <Label htmlFor="content" className="text-gray-700">Nội dung</Label>
                   <Controller
                     name="content"
                     control={form.control}
                     render={({ field }) => (
                       <Textarea
                         id="content"
-                        placeholder="Share what's on your mind..."
+                        placeholder="Chia sẻ những gì bạn nghĩ..."
                         className="mt-1 min-h-32"
                         required
                         {...field}
@@ -495,7 +488,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                 {/* Media Display */}
                 {media.length > 0 && (
                   <div>
-                    <Label className="text-gray-700">Media</Label>
+                    <Label className="text-gray-700">Tải lên ảnh/video</Label>
                     <div className="space-y-3 mt-2">
                       {media.map((item, index) => (
                         <div key={index} className="flex items-center gap-3">
@@ -529,7 +522,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                     htmlFor="tags"
                     className="text-gray-700 flex items-center"
                   >
-                    <Tags className="h-4 w-4 mr-1" /> Tags
+                    <Tags className="h-4 w-4 mr-1" /> Từ khoá 
                   </Label>
                   <div className="mt-1 flex flex-wrap gap-2 mb-2">
                     {tagArray.map((tag) => (
@@ -541,7 +534,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                   <div className="flex">
                     <Input
                       id="tags-input"
-                      placeholder="Add tags..."
+                      placeholder="Theo từ khoá..."
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       className="flex-1"
@@ -558,7 +551,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                       className="ml-2"
                       disabled={!tagInput.trim()}
                     >
-                      Add
+                      Thêm
                     </Button>
                   </div>
                 </div>
@@ -569,7 +562,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                     htmlFor="petIds"
                     className="text-gray-700 flex items-center"
                   >
-                    <Tag className="h-4 w-4 mr-1" /> Tag your pets
+                    <Tag className="h-4 w-4 mr-1" /> Gắn thẻ thú cưng của bạn
                   </Label>
                   <Controller
                     name="petIds"
@@ -580,7 +573,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                         value={field.value}
                       >
                         <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select your pets" />
+                          <SelectValue placeholder="Chọn thú cưng của bạn" />
                         </SelectTrigger>
                         <SelectContent>
                           {pets?.map((pet) => (
@@ -596,7 +589,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
 
                 {/* Visibility */}
                 <div>
-                  <Label className="text-gray-700">Visibility</Label>
+                  <Label className="text-gray-700">Chế độ hiển thị</Label>
                   <Controller
                     name="visibility"
                     control={form.control}
@@ -606,9 +599,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                           <div className="flex items-center">
                             <Globe size={18} className="mr-2 text-gray-600" />
                             <div>
-                              <p className="text-sm font-medium">Public</p>
+                              <p className="text-sm font-medium">Công khai</p>
                               <p className="text-xs text-gray-500">
-                                Visible to everyone
+                                Mọi người có thể xem
                               </p>
                             </div>
                           </div>
@@ -624,9 +617,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                           <div className="flex items-center">
                             <Lock size={18} className="mr-2 text-gray-600" />
                             <div>
-                              <p className="text-sm font-medium">Private</p>
+                              <p className="text-sm font-medium">Riêng tư</p>
                               <p className="text-xs text-gray-500">
-                                Only visible to you
+                                Chỉ mình bạn có thể xem
                               </p>
                             </div>
                           </div>
@@ -643,7 +636,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                 </div>
 
                 {/* Submit button (for mobile view) */}
-                <div className="mt-6 md:hidden">
+                <div className="mt-2 md:hidden">
                   <Button
                     type="submit"
                     className="w-full"
@@ -652,10 +645,10 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                     {isSubmitting ? (
                       <>
                         <Loader2 size={16} className="mr-2 animate-spin" />
-                        Posting...
+                        Đang tạo bài viết...
                       </>
                     ) : (
-                      "Post"
+                      "Tạo bài viết"
                     )}
                   </Button>
                 </div>

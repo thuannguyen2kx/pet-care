@@ -114,6 +114,7 @@ export type UpdatePostBodyType = {
   visibility?: 'public' | 'private';
   status?: 'active' | 'under-review' | 'blocked';
 }
+export type ReasonType = 'spam' | 'harassment' | 'hate-speech' | 'inappropriate-content' | 'violence' | 'copyright' | 'other';
 
 export type ReportPostBodyType = {
   reason: 'spam' | 'harassment' | 'hate-speech' | 'inappropriate-content' | 'violence' | 'copyright' | 'other';

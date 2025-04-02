@@ -1,11 +1,39 @@
 export type CommentType = {
   _id: string;
   postId: string;
-  authorId: string;
+  authorId: {
+    _id: string;
+    fullName: string;
+    profilePicture?: {
+      url: string;
+      publicId: string;
+    };
+  };
   content: string;
   parentCommentId?: string;
-  status: 'active' | 'blocked' | 'deleted';
-  createdAt: Date;
-  updatedAt: Date;
-  replies?: Comment[];
+  status: "active" | "blocked" | "deleted";
+  createdAt: string;
+  updatedAt: string;
+  replies?: CommentType[];
+  replyCount?: number;
+};
+
+export type PaginationResultType = {
+  page: number;
+  limit: number;
+  totalPages: number;
+  totalItems: number;
+  hasNextPage: boolean;
+};
+
+export type CommentsResponseType = {
+  message: string;
+  comments: CommentType[];
+  pagination: PaginationResultType;
+};
+
+export type GetCommentParamsType = {
+  page: number;
+  postId: string;
+  parentId?: string
 }

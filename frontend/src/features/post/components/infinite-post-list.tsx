@@ -3,21 +3,18 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { PostCard } from "./post-card";
-import { PostQueryParams, PostType } from "../types/api.types";
-import { getPostsQueryFn } from "../api";
-import { postKeys } from "../query-key";
-import { toast } from "sonner";
+import { PostQueryParams, PostType } from "@/features/post/types/api.types";
+import { postKeys } from "@/features/post/query-key";
+import { getPostsQueryFn } from "@/features/post/api";
 
 interface InfinitePostListProps {
   queryParams?: PostQueryParams;
   onEditPost?: (post: PostType) => void;
-  onDeletePost?: (postId: string) => Promise<void>;
 }
 
 const InfinitePostList: React.FC<InfinitePostListProps> = ({
   queryParams = {},
   onEditPost,
-  onDeletePost,
 }) => {
   const navigate = useNavigate();
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -65,17 +62,6 @@ const InfinitePostList: React.FC<InfinitePostListProps> = ({
     };
   }, [handleObserver]);
 
-  // Handle post deletion
-  const handleDelete = async (postId: string) => {
-    if (!onDeletePost) return;
-
-    try {
-      await onDeletePost(postId);
-      toast("Xoá bài viết thành công");
-    } catch  {
-      toast("Có lỗi khi xoá bài viết");
-    }
-  };
 
   // Flatten all posts from all pages
   const allPosts = data?.pages.flatMap((page) => page.posts) || [];
@@ -121,7 +107,6 @@ const InfinitePostList: React.FC<InfinitePostListProps> = ({
           post={post}
           showActions={true}
           onEdit={onEditPost}
-          onDelete={handleDelete}
         />
       ))}
 

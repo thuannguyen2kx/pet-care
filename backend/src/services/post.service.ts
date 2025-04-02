@@ -430,11 +430,10 @@ export const deletePostService = async ({
       try {
         const publicId = mediaItem.publicId;
         if (publicId) {
-          await deleteFile(`pet-care/posts/${publicId}`);
+          await deleteFile(publicId);
         }
       } catch (deleteError) {
         console.error("Error deleting media file:", deleteError);
-        // Continue with deletion even if file removal fails
       }
     }
   }

@@ -13,6 +13,7 @@ export const CUSTOMER_ROUTES = {
   APPOINTMENTS: "/appointments",
   PROFILE: "/profile/:profileId",
   PET_DETAILS: "/pets/:petId",
+  POST_DETAILS: "/posts/:postId",
 };
 export const ADMIN_ROUTES = {
   DASHBOARD: "/admin/dashboard",

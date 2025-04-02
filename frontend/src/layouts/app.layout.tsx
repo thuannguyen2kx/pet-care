@@ -34,7 +34,7 @@ const AppLayout = () => {
         <section className="flex h-full flex-1 flex-col">
           <MobileNavigation />
           <Header />
-          <div className="remove-scrollbar h-full flex-1 overflow-auto bg-white px-5 py-7 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-10">
+          <div className="remove-scrollbar h-full flex-1 overflow-auto bg-white px-5 py-2 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-4">
             <Outlet />
             <CreatePostModal open={open} onOpenChange={onClose} />
           </div>
@@ -47,7 +47,7 @@ export default AppLayout;
 
 function Header() {
   return (
-    <header className="hidden items-center justify-between gap-5 p-5 sm:flex lg:py-7 xl:gap-10">
+    <header className="hidden items-center justify-between gap-5 p-5 sm:flex xl:gap-10">
       <div className="relative w-full md:max-w-[480px]">
         <div className="flex h-[52px] flex-1 items-center gap-3 rounded-full">
           <Search className="size-6" />

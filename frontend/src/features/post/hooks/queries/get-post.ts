@@ -4,7 +4,7 @@ import { postKeys } from "@/features/post/query-key";
 import { getPostByIdQueryFn } from "@/features/post/api";
 
 // Use post detail query
-export const usePostDetailQuery = (
+export const useGetPostDetail = (
   id: string,
   options?: UseQueryOptions<PostResponseType>
 ) => {

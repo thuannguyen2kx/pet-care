@@ -1,5 +1,5 @@
 import API from "@/lib/axios-client";
-import { PostQueryParams, PostResponseType, PostsResponseType, PostType } from "./types/api.types";
+import { PostQueryParams, PostResponseType, PostsResponseType, PostType, ReportPostBodyType } from "./types/api.types";
 
 export const createPostMutationFn = async (postData: FormData): Promise<PostType> => {
   const { data } = await API.post('/posts', postData, {
@@ -33,4 +33,15 @@ export const getUserPosts = async (params?: PostQueryParams): Promise<PostsRespo
 };
 export const deletePostFn = async (postId: string): Promise<void> => {
   await API.delete(`/posts/${postId}`);
+};
+
+export const reportPostMutationFn = async ({
+  id,
+  reportData,
+}: {
+  id: string;
+  reportData: ReportPostBodyType;
+}): Promise<{ message: string; reportCount: number }> => {
+  const { data } = await API.post(`/posts/${id}/report`, reportData);
+  return data;
 };

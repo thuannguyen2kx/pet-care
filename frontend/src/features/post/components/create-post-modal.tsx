@@ -23,7 +23,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl md:max-w-4xl p-0">
+      <DialogContent className="sm:max-w-3xl md:max-w-4xl p-0 border-none">
         <DialogHeader className="px-4 pt-4 pb-0 flex justify-between items-center">
           <DialogTitle>Create Post</DialogTitle>
           <DialogClose className="h-6 w-6 rounded-sm opacity-70 transition-opacity hover:opacity-100" />
