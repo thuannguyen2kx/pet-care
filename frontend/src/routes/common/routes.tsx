@@ -1,5 +1,10 @@
 import SignIn from "@/pages/auth/sign-in";
-import { ADMIN_ROUTES, AUTH_ROUTES, BASE_ROUTES, CUSTOMER_ROUTES } from "./routePaths";
+import {
+  ADMIN_ROUTES,
+  AUTH_ROUTES,
+  BASE_ROUTES,
+  CUSTOMER_ROUTES,
+} from "./routePaths";
 import SignUp from "@/pages/auth/sign-up";
 import GoogleOauth from "@/pages/auth/google-oauth";
 import Landing from "@/pages/base/landing";
@@ -12,6 +17,10 @@ import AppointementPage from "@/pages/admin/appointment";
 import EmployeePage from "@/pages/admin/employee";
 import CustomerPage from "@/pages/admin/customer";
 import ServicesPage from "@/pages/admin/services";
+import ServiceDetailsPage from "@/pages/customer/service-details";
+import ServiceCreationPage from "@/pages/admin/service-creation";
+import ServiceEditionPage from "@/pages/admin/service-edition";
+import ServiceCatalogPage from "@/pages/customer/service-catalog";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -30,22 +39,32 @@ export const protectedCustomerRoutePaths = [
 
   {
     path: CUSTOMER_ROUTES.PET_DETAILS,
-    element: <PetDetail />
+    element: <PetDetail />,
   },
   {
     path: CUSTOMER_ROUTES.POST_DETAILS,
-    element: <PostDetailsPage />
-  }
+    element: <PostDetailsPage />,
+  },
+  {
+    path: CUSTOMER_ROUTES.SERVICES,
+    element: <ServiceCatalogPage />,
+  },
+  {
+    path: CUSTOMER_ROUTES.SERVICES_DETAILS,
+    element: <ServiceDetailsPage />,
+  },
 ];
 
 export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.DASHBOARD, element: <DashboardPage /> },
   { path: ADMIN_ROUTES.APPOINTMENT, element: <AppointementPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeePage /> },
-  { path: ADMIN_ROUTES.CUSTOMER, element: <CustomerPage/> },
-  { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage/> },
+  { path: ADMIN_ROUTES.CUSTOMER, element: <CustomerPage /> },
+  { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage /> },
+  { path: ADMIN_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
+  { path: ADMIN_ROUTES.SERVICE_EDIT, element: <ServiceEditionPage /> },
 ];
 
 export const baseRoutesPaths = [
-  {path: BASE_ROUTES.LANDING, element: <Landing />}
-]
+  { path: BASE_ROUTES.LANDING, element: <Landing /> },
+];

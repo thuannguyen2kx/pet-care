@@ -10,21 +10,24 @@ export const CUSTOMER_ROUTES = {
   HOME: "/home",
   CREATE_POST: "/create-post",
   SERVICES: "/services",
+  SERVICES_DETAILS: "/services/:serviceId",
   APPOINTMENTS: "/appointments",
   PROFILE: "/profile/:profileId",
   PET_DETAILS: "/pets/:petId",
   POST_DETAILS: "/posts/:postId",
 };
 export const ADMIN_ROUTES = {
-  DASHBOARD: "/admin/dashboard",
   EMPLOYEE: "/admin/employees",
+  DASHBOARD: "/admin/dashboard",
   CUSTOMER: "/admin/customers",
   SERVICE: "/admin/services",
+  SERVICE_CREATION: "/admin/services/create",
+  SERVICE_EDIT: "/admin/services/edit/:serviceId",
   APPOINTMENT: "/admin/appointments",
-}
+};
 export const EMPLOYEE_ROUTES = {
   DASHBOARD: "/employee/dashboard",
-}
+};
 export const BASE_ROUTES = {
   LANDING: "/",
 };

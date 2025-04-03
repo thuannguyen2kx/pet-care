@@ -1,7 +1,10 @@
+import ServiceList from "@/features/service/components/admin-service-list"
+
 const ServicesPage = () => {
   return (
-    <div>ServicesPage</div>
+    <div>
+      <ServiceList />
+    </div>
   )
 }
-
-export default ServicesPage;
+export default ServicesPage
