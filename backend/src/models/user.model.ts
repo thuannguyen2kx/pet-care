@@ -16,6 +16,7 @@ interface IEmployeeInfo {
       start: string;
       end: string;
     };
+    vacation?: { start: Date; end: Date }[];
   };
   performance?: {
     rating: number;
@@ -78,12 +79,12 @@ const userSchema = new Schema<UserDocument>(
     profilePicture: {
       url: {
         type: String,
-        default: null
+        default: null,
       },
       publicId: {
         type: String,
-        default: null
-      }
+        default: null,
+      },
     },
     status: {
       type: String,
@@ -98,6 +99,16 @@ const userSchema = new Schema<UserDocument>(
           start: String,
           end: String,
         },
+        vacation: [
+          {
+            start: {
+              type: Date,
+            },
+            end: {
+              type: Date,
+            },
+          },
+        ],
       },
       performance: {
         rating: Number,
