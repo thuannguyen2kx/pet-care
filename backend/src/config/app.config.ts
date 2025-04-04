@@ -21,6 +21,12 @@ const appConfig = () => ({
   CLOUDINARY_CLOUD_NAME: getEnv("CLOUDINARY_CLOUD_NAME"),
   CLOUDINARY_API_KEY: getEnv("CLOUDINARY_API_KEY"),
   CLOUDINARY_API_SECRET: getEnv("CLOUDINARY_API_SECRET"),
+
+  EMAIL_HOST: getEnv("EMAIL_HOST"),
+  EMAIL_PORT: getEnv("EMAIL_PORT"),
+  EMAIL_USER: getEnv("EMAIL_USER"),
+  EMAIL_PASS: getEnv("EMAIL_PASS"),
+  EMAIL_FROM: getEnv("EMAIL_FROM"),
 });
 
 export const config = appConfig();
