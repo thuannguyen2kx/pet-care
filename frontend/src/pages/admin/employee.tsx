@@ -1,7 +1,12 @@
-const EmployeePage = () => {
-  return (
-    <div>EmployeePage</div>
-  )
-}
+import { Suspense } from "react";
+import EmployeeList from "@/features/employee/components/employee-list";
 
-export default EmployeePage;
+const EmployeesPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EmployeeList />
+    </Suspense>
+  );
+};
+
+export default EmployeesPage;

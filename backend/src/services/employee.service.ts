@@ -12,8 +12,8 @@ import { hashValue } from "../utils/bcrypt";
 import mongoose from "mongoose";
 
 // Get all employees with optional filtering
-export const getAllEmployeesService = async (query: {status?: StatusUserType, specialty?: SpecialtyType[]}) => {
-  const { status, specialty } = query;
+export const getAllEmployeesService = async (filters: {status?: StatusUserType, specialty?: string[]}) => {
+  const { status, specialty } = filters;
 
   const filter: any = {
     role: Roles.EMPLOYEE,

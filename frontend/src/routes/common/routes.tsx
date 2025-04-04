@@ -14,13 +14,15 @@ import PetDetail from "@/pages/customer/pet-details";
 import PostDetailsPage from "@/pages/customer/post-details";
 import DashboardPage from "@/pages/admin/dashboard";
 import AppointementPage from "@/pages/admin/appointment";
-import EmployeePage from "@/pages/admin/employee";
 import CustomerPage from "@/pages/admin/customer";
 import ServicesPage from "@/pages/admin/services";
 import ServiceDetailsPage from "@/pages/customer/service-details";
 import ServiceCreationPage from "@/pages/admin/service-creation";
 import ServiceEditionPage from "@/pages/admin/service-edition";
 import ServiceCatalogPage from "@/pages/customer/service-catalog";
+import EmployeeDetailsPage from "@/pages/admin/employee-details";
+import EmployeeCreationPage from "@/pages/admin/employee-new";
+import EmployeesPage from "@/pages/admin/employee";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -58,7 +60,9 @@ export const protectedCustomerRoutePaths = [
 export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.DASHBOARD, element: <DashboardPage /> },
   { path: ADMIN_ROUTES.APPOINTMENT, element: <AppointementPage /> },
-  { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeePage /> },
+  { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeesPage /> },
+  {path: ADMIN_ROUTES.EMPLOYEE_NEW, element: <EmployeeCreationPage /> },
+  {path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage />},
   { path: ADMIN_ROUTES.CUSTOMER, element: <CustomerPage /> },
   { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage /> },
   { path: ADMIN_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },

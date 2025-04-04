@@ -60,23 +60,7 @@ export const getEmployeesSchema = z.object({
   status: z
     .enum([StatusUser.ACTIVE, StatusUser.INACTIVE, StatusUser.BLOCKED])
     .optional(),
-  specialty: z
-    .array(
-      z.enum([
-        Specialty.BATHING,
-        Specialty.HAIRCUT,
-        Specialty.SKINCARE,
-        Specialty.NAIL_TRIMMING,
-        Specialty.MASSAGE,
-        Specialty.AROMATHERAPY,
-        Specialty.HERBAL_BATH,
-        Specialty.SKIN_TREATMENT,
-        Specialty.HEALTH_CHECK,
-        Specialty.VACCINATION,
-        Specialty.POST_VACCINE_CARE,
-        Specialty.NUTRITION_ADVICE,
-      ])
-    )
+  specialty: z.string() 
     .optional(),
 });
 // Create employee schema

@@ -29,7 +29,11 @@ import {
 export const getAllEmployeesController = asyncHandler(
   async (req: Request, res: Response) => {
     const query = getEmployeesSchema.parse(req.query);
-    const { employees } = await getAllEmployeesService(query);
+    const filters = {
+      status: query.status,
+      specialty: query.specialty ? query.specialty.split(",") : undefined,
+    };
+    const { employees } = await getAllEmployeesService(filters);
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy danh sách nhân viên thành công",
