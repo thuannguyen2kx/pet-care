@@ -3,7 +3,7 @@ import { employeeKeys } from "@/features/employee/query-key";
 import { getEmployeeScheduleQueryFn } from "@/features/employee/api";
 
 // Get employee schedule
-export const useEmployeeSchedule = (
+export const useGetEmployeeSchedule = (
   id: string,
   params?: { startDate?: string; endDate?: string }
 ) => {

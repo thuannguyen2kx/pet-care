@@ -1,4 +1,6 @@
-import { useNavigate } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,22 +32,20 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft } from "lucide-react";
-import { useCreateEmployee } from "../hooks/mutations/create-employee";
-import { CreateEmployeeDTO } from "../types/api.types";
-import { Specialty, specialtyTranslations, weekdays } from "@/constants";
+import { ChevronLeft, Loader2 } from "lucide-react";
+import { useGetEmployee } from "../hooks/queries/get-employee";
+import { useUpdateEmployee } from "../hooks/mutations/update-employee";
+import { UpdateEmployeeDTO } from "../types/api.types";
+import { Specialty, specialtyTranslations, statusTranslations, StatusUser, weekdays } from "@/constants";
 
-// Schema biểu mẫu để tạo nhân viên
-const createEmployeeSchema = z.object({
+// Sơ đồ biểu mẫu để cập nhật nhân viên
+const updateEmployeeSchema = z.object({
   email: z.string().email({ message: "Vui lòng nhập địa chỉ email hợp lệ" }),
-  password: z.string().min(6, {
-    message: "Mật khẩu phải có ít nhất 6 ký tự",
-  }),
   fullName: z.string().min(2, {
     message: "Họ tên phải có ít nhất 2 ký tự",
   }),
   phoneNumber: z.string().optional(),
-  specialties: z.array(z.string()).min(1, {
+  specialties: z.array(z.nativeEnum(Specialty)).min(1, {
     message: "Vui lòng chọn ít nhất một chuyên môn",
   }),
   workDays: z.array(z.string()).min(1, {
@@ -53,44 +53,110 @@ const createEmployeeSchema = z.object({
   }),
   workHoursStart: z.string().optional(),
   workHoursEnd: z.string().optional(),
+  status: z.nativeEnum(StatusUser).optional(),
 });
 
-// Tùy chọn giờ làm việc
+
+// Các tùy chọn giờ làm việc
 const workHours = Array.from({ length: 24 }).map((_, i) => {
   const hour = i.toString().padStart(2, "0");
   return { value: `${hour}:00`, label: `${hour}:00` };
 });
 
-export default function EmployeeForm() {
+export default function EmployeeEditForm() {
+  const { employeeId } = useParams();
   const navigate = useNavigate();
-
-  // Hook thêm nhân viên
-  const createEmployee = useCreateEmployee();
-
+  
+  // Kiểm tra xem đây có phải là chế độ chỉnh sửa không
+  const isEditing = Boolean(employeeId);
+  
+  // Lấy dữ liệu nhân viên nếu đang ở chế độ chỉnh sửa
+  const { data: employeeData, isLoading, isError } = useGetEmployee(
+    employeeId as string, 
+  );
+  
+  const updateEmployee = useUpdateEmployee(employeeId as string);
+  
   // Khởi tạo biểu mẫu
-  const form = useForm<z.infer<typeof createEmployeeSchema>>({
-    resolver: zodResolver(createEmployeeSchema),
+  const form = useForm<z.infer<typeof updateEmployeeSchema>>({
+    resolver: zodResolver(updateEmployeeSchema),
     defaultValues: {
       email: "",
-      password: "",
       fullName: "",
       phoneNumber: "",
       specialties: [],
       workDays: [],
       workHoursStart: "09:00",
       workHoursEnd: "17:00",
+      status: StatusUser.ACTIVE
     },
   });
-
+  
+  // Cập nhật giá trị mặc định của biểu mẫu khi dữ liệu nhân viên được tải
+  useEffect(() => {
+    if (employeeData && isEditing) {
+      const employee = employeeData.employee;
+      
+      form.reset({
+        email: employee.email || "",
+        fullName: employee.fullName || "",
+        phoneNumber: employee.phoneNumber || "",
+        specialties: employee.employeeInfo?.specialties || [],
+        workDays: employee.employeeInfo?.schedule?.workDays || [],
+        workHoursStart: employee.employeeInfo?.schedule?.workHours?.start || "09:00",
+        workHoursEnd: employee.employeeInfo?.schedule?.workHours?.end || "17:00",
+        status: employee.status || StatusUser.ACTIVE,
+      });
+    }
+  }, [employeeData, form, isEditing]);
+  
   // Xử lý gửi biểu mẫu
-  const onSubmit = (values: CreateEmployeeDTO) => {
-    createEmployee.mutate(values as CreateEmployeeDTO, {
-      onSuccess: (data) => {
-        navigate(`/admin/employees/${data.employee._id}`);
+  const onSubmit = (values: z.infer<typeof updateEmployeeSchema>) => {
+    // Chuyển đổi dữ liệu để phù hợp với API
+    const formattedValues: UpdateEmployeeDTO = {
+      ...values,
+    };
+    
+    // Xóa các trường không cần thiết
+    delete formattedValues.workDays;
+    delete formattedValues.workHoursStart;
+    delete formattedValues.workHoursEnd;
+    
+    updateEmployee.mutate(formattedValues, {
+      onSuccess: () => {
+        navigate(`/admin/employees/${employeeId}`);
       },
     });
   };
-
+  
+  // Hiển thị thông báo đang tải
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin mr-2" />
+        <p>Đang tải thông tin nhân viên...</p>
+      </div>
+    );
+  }
+  
+  // Hiển thị thông báo lỗi
+  if (isError && isEditing) {
+    return (
+      <div className="text-center p-8">
+        <h2 className="text-xl font-semibold text-red-500">
+          Không thể tải thông tin nhân viên. Vui lòng thử lại sau.
+        </h2>
+        <Button
+          variant="link"
+          onClick={() => navigate("/admin/employees")}
+          className="mt-4"
+        >
+          Quay lại danh sách nhân viên
+        </Button>
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center">
@@ -103,14 +169,21 @@ export default function EmployeeForm() {
           Quay lại
         </Button>
         <h2 className="text-3xl font-bold tracking-tight">
-          Thêm nhân viên mới
+          {isEditing ? "Chỉnh sửa nhân viên" : "Thêm nhân viên mới"}
         </h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Thông tin nhân viên</CardTitle>
-          <CardDescription>Nhập thông tin cho nhân viên mới.</CardDescription>
+          <CardTitle>
+            {isEditing ? "Chỉnh sửa thông tin nhân viên" : "Thêm nhân viên mới"}
+          </CardTitle>
+          <CardDescription>
+            {isEditing 
+              ? "Cập nhật thông tin và cài đặt của nhân viên."
+              : "Nhập thông tin cho nhân viên mới."
+            }
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -158,25 +231,6 @@ export default function EmployeeForm() {
 
                   <FormField
                     control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mật khẩu</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>Tối thiểu 6 ký tự</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
@@ -188,6 +242,38 @@ export default function EmployeeForm() {
                       </FormItem>
                     )}
                   />
+
+                  {isEditing && (
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Trạng thái</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn trạng thái" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                             
+                              {Object.entries(StatusUser).map(([_, value]) => (
+                                <SelectItem key={value} value={value}>
+                                  {statusTranslations[value] || value}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
                 {/* Chuyên môn và lịch làm việc */}
@@ -241,9 +327,8 @@ export default function EmployeeForm() {
                                         }}
                                       />
                                     </FormControl>
-                                    <FormLabel className="font-normal capitalize">
-                                      {specialtyTranslations[specialty] ||
-                                        specialty}
+                                    <FormLabel className="font-normal">
+                                      {specialtyTranslations[specialty] || specialty}
                                     </FormLabel>
                                   </FormItem>
                                 );
@@ -322,6 +407,7 @@ export default function EmployeeForm() {
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
+                            value={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -350,6 +436,7 @@ export default function EmployeeForm() {
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
+                            value={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -380,8 +467,13 @@ export default function EmployeeForm() {
                 >
                   Hủy
                 </Button>
-                <Button type="submit" disabled={createEmployee.isPending}>
-                  {createEmployee.isPending ? "Đang lưu..." : "Tạo nhân viên"}
+                <Button
+                  type="submit"
+                  disabled={updateEmployee.isPending}
+                >
+                  {updateEmployee.isPending
+                    ? "Đang lưu..."
+                    : isEditing ? "Cập nhật nhân viên" : "Thêm nhân viên"}
                 </Button>
               </CardFooter>
             </form>

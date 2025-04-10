@@ -1,4 +1,4 @@
-import { SpecialtyType, StatusUserType } from "@/constants";
+import {Specialty, StatusUserType } from "@/constants";
 
 export type EmployeeType = {
   _id: string;
@@ -12,7 +12,7 @@ export type EmployeeType = {
     publicId: string | null;
   };
   employeeInfo: {
-    specialties: SpecialtyType[];
+    specialties: Specialty[];
     schedule: {
       workDays: string[];
       workHours: {
@@ -46,9 +46,46 @@ export type UpdateEmployeeDTO  = {
   email?: string;
   fullName?: string;
   phoneNumber?: string;
-  specialties?: SpecialtyType[];
+  specialties?: Specialty[];
   workDays?: string[];
   workHoursStart?: string;
   workHoursEnd?: string;
   status?: StatusUserType;
 }
+
+export type GetEmployeePerformanceResponse = {
+  message: string;
+
+  totalAppointments: number;
+  serviceBreakdown: Record<string, number>;
+  monthlyPerformance: {
+    year: number;
+    month: number;
+    count: number;
+  }[];
+  completedServices: number;
+  rating: number;
+};
+export type GetEmployeeScheduleType = {
+  message: string;
+  workDays: string[];
+  workHours: { start: string; end: string };
+  appointments: {
+    _id: string;
+    date: string;
+    timeSlot: {
+      start: string;
+      end: string;
+    };
+    status: string;
+    service: { name: string; duration: string };
+    customer: {
+      fullName: string;
+      phoneNumber: string;
+    };
+    pet: {
+      name: string;
+      species: string
+    };
+  }[];
+};

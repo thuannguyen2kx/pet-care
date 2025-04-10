@@ -52,7 +52,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useDeleteEmployee } from "../hooks/mutations/delete-employee";
 import { useGetEmployees } from "../hooks/queries/get-employees";
-import { Specialty, StatusUser, StatusUserType } from "@/constants";
+import { Specialty, specialtyTranslations, statusTranslations, StatusUser, StatusUserType } from "@/constants";
 import { ADMIN_ROUTES } from "@/routes/common/routePaths";
 
 export default function EmployeeList() {
@@ -67,8 +67,8 @@ export default function EmployeeList() {
 
   // Use the filters in the query
   const { data } = useGetEmployees({
-    status: statusFilter as StatusUserType,
-    specialty: specialtyFilter,
+    status: statusFilter  === "ALL" ? undefined : statusFilter as StatusUserType,
+    specialty: specialtyFilter === "ALL ?" ? undefined : specialtyFilter,
   });
 
   const employees = data?.employees || [];
@@ -101,7 +101,7 @@ export default function EmployeeList() {
       case StatusUser.INACTIVE:
         return <Badge variant="secondary">Không hoạt động</Badge>;
       case StatusUser.BLOCKED:
-        return <Badge variant="destructive">Khoá</Badge>;
+        return <Badge variant="destructive">Bị vô hiệu hoá</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -110,20 +110,20 @@ export default function EmployeeList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Employee Management</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Quản lý nhân viên</h2>
         <Button 
           onClick={() => navigate(ADMIN_ROUTES.EMPLOYEE_NEW)}
           className="flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" /> Add Employee
+          <Plus className="w-4 h-4" /> Thêm nhân viên 
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Employees</CardTitle>
+          <CardTitle>Danh sách nhân viên</CardTitle>
           <CardDescription>
-            Manage your employees, their specialties, and schedules.
+           Quản lý nhân viên, chuyên môn và lịch trình. 
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -132,7 +132,7 @@ export default function EmployeeList() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search employees..."
+                placeholder="Tìm kiếm nhân viên..."
                 className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -143,17 +143,17 @@ export default function EmployeeList() {
                 value={statusFilter}
                 onValueChange={setStatusFilter}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[280px]">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    <span>{statusFilter || "Status"}</span>
+                    <span>{statusTranslations[statusFilter as StatusUserType] || statusFilter || "Trang thái nhân viên"}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value={StatusUser.ACTIVE}>Active</SelectItem>
-                  <SelectItem value={StatusUser.INACTIVE}>Inactive</SelectItem>
-                  <SelectItem value={StatusUser.BLOCKED}>Blocked</SelectItem>
+                  <SelectItem value="ALL">Tất cả</SelectItem>
+                  <SelectItem value={StatusUser.ACTIVE}>Đang hoạt động</SelectItem>
+                  <SelectItem value={StatusUser.INACTIVE}>Không hoạt động</SelectItem>
+                  <SelectItem value={StatusUser.BLOCKED}>Bị vô hiệu hoá</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -164,14 +164,14 @@ export default function EmployeeList() {
                 <SelectTrigger className="w-[180px]">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    <span>{specialtyFilter || "Specialty"}</span>
+                    <span>{specialtyTranslations[specialtyFilter as Specialty] || specialtyFilter || "Chuyên môn"}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Specialties</SelectItem>
+                  <SelectItem value="ALL">Tất cả</SelectItem>
                   {Object.values(Specialty).map((specialty) => (
                     <SelectItem key={specialty} value={specialty}>
-                      {specialty.charAt(0).toUpperCase() + specialty.slice(1)}
+                      {specialtyTranslations[specialty]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -179,23 +179,23 @@ export default function EmployeeList() {
             </div>
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">Profile</TableHead>
-                  <TableHead className="w-[250px]">Name</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead className="w-[250px]">Họ tên</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Specialties</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Chuyên môn</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead className="text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredEmployees.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                      No employees found.
+                     Không tìm thấy nhân viên 
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -233,22 +233,22 @@ export default function EmployeeList() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>Hành động</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => navigate(`/employees/${employee._id}`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/admin/employees/${employee._id}`)}>
                               <Eye className="mr-2 h-4 w-4" />
-                              View Details
+                              Xem chi tiết
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/employees/${employee._id}/edit`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/admin/employees/${employee._id}/edit`)}>
                               <Pencil className="mr-2 h-4 w-4" />
-                              Edit
+                              Chỉnh sửa
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDeleteClick(employee._id)}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash className="mr-2 h-4 w-4" />
-                              Delete
+                              Xoá
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

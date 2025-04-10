@@ -20,6 +20,8 @@ export const ADMIN_ROUTES = {
   EMPLOYEE: "/admin/employees",
   EMPLOYEE_NEW: "/admin/employees/new",
   EMPLOYEE_DETAILS: "/admin/employees/:employeeId",
+  EMPLOYEE_EDIT: "/admin/employees/:employeeId/edit",
+  EMPLOYEE_SCHEDULE: "/admin/employees/:employeeId/schedule",
   DASHBOARD: "/admin/dashboard",
   CUSTOMER: "/admin/customers",
   SERVICE: "/admin/services",

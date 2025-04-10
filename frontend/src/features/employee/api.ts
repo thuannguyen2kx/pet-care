@@ -1,7 +1,7 @@
 import { StatusUserType } from "@/constants";
 import API from "@/lib/axios-client";
 import axios from "axios";
-import { CreateEmployeeDTO, EmployeeType, UpdateEmployeeDTO } from "./types/api.types";
+import { CreateEmployeeDTO, EmployeeType, GetEmployeePerformanceResponse, GetEmployeeScheduleType, UpdateEmployeeDTO } from "./types/api.types";
 
 // Get all employees with optional filters
 export const getAllEmployeesQueryFn = async (filters?: {
@@ -88,7 +88,7 @@ export const resetPasswordMutationFn = async (
 };
 
 // Get employee performance
-export const getEmployeePerformanceQueryFn = async (id: string) => {
+export const getEmployeePerformanceQueryFn = async (id: string): Promise<GetEmployeePerformanceResponse> => {
   const response = await API.get(`/employees/${id}/performance`);
   return response.data;
 };
@@ -97,7 +97,7 @@ export const getEmployeePerformanceQueryFn = async (id: string) => {
 export const getEmployeeScheduleQueryFn = async (
   id: string,
   params?: { startDate?: string; endDate?: string }
-) => {
+): Promise<GetEmployeeScheduleType> => {
   const queryParams = new URLSearchParams();
 
   if (params?.startDate) {

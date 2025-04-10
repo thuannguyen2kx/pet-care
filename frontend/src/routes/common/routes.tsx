@@ -23,6 +23,8 @@ import ServiceCatalogPage from "@/pages/customer/service-catalog";
 import EmployeeDetailsPage from "@/pages/admin/employee-details";
 import EmployeeCreationPage from "@/pages/admin/employee-new";
 import EmployeesPage from "@/pages/admin/employee";
+import EmployeeCalendarPage from "@/pages/admin/employee-calendar";
+import EmployeeEditionPage from "@/pages/admin/employee-edition";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -63,6 +65,8 @@ export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeesPage /> },
   {path: ADMIN_ROUTES.EMPLOYEE_NEW, element: <EmployeeCreationPage /> },
   {path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage />},
+  {path: ADMIN_ROUTES.EMPLOYEE_EDIT, element: <EmployeeEditionPage />},
+  {path: ADMIN_ROUTES.EMPLOYEE_SCHEDULE, element: <EmployeeCalendarPage />},
   { path: ADMIN_ROUTES.CUSTOMER, element: <CustomerPage /> },
   { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage /> },
   { path: ADMIN_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
