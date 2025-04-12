@@ -2,7 +2,7 @@ import { SpecialtyType } from "../enums/employee.enum";
 import { Roles } from "../enums/role.enum";
 import { StatusUser, StatusUserType } from "../enums/status-user.enum";
 import UserModel from "../models/user.model";
-import AppointmentModel from "../models/appointment.model";
+import AppointmentModel, { AppointmentStatus } from "../models/appointment.model";
 import ServiceModel from "../models/service.model";
 import PetModel from "../models/pet.model";
 import { BadRequestException, NotFoundException } from "../utils/app-error";
@@ -629,8 +629,8 @@ export const assignAppointmentToEmployeeService = async ({
   appointment.employeeId = employee._id as mongoose.Types.ObjectId;
 
   // If appointment was pending, update to confirmed
-  if (appointment.status === "pending") {
-    appointment.status = "confirmed";
+  if (appointment.status === AppointmentStatus.PENDING) {
+    appointment.status = AppointmentStatus.CONFIRMED;
   }
 
   await appointment.save();

@@ -13,12 +13,11 @@ import postRoutes from "./routes/post.route"
 
 import "./config/passport.config";
 import { passportAuthenticateJWT } from "./config/passport.config";
-import { authorizeRoles } from "./middlewares/auth.middleware";
-import { Roles } from "./enums/role.enum";
 import commentRoutes from "./routes/comment.route";
 import reactionRoutes from "./routes/reaction.route";
 import serviceRoutes from "./routes/service.route";
 import employeeRoutes from "./routes/employee.route";
+import appointmentRoutes from "./routes/appointment.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -47,6 +46,7 @@ app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
 app.use(`${BASE_PATH}`, passportAuthenticateJWT, reactionRoutes);
 app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes)
 app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
+app.use(`${BASE_PATH}/appointments`, passportAuthenticateJWT, appointmentRoutes)
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {

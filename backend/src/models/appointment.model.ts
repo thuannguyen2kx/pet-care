@@ -1,108 +1,115 @@
-import mongoose, { Document, Schema, Types } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface ITimeSlot {
+export enum AppointmentStatus {
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  IN_PROGRESS = "in-progress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled"
+}
+
+export enum PaymentStatus {
+  PENDING = "pending",
+  PAID = "paid",
+  REFUNDED = "refunded"
+}
+
+export enum ServiceType {
+  SINGLE = "single",
+  PACKAGE = "package"
+}
+
+export interface TimeSlot {
   start: string;
   end: string;
 }
 
-export interface IReminder {
-  sent: boolean;
-  sentAt?: Date;
-}
-
 export interface IAppointment extends Document {
-  customerId: Types.ObjectId;
-  petId: Types.ObjectId;
-  serviceType: 'single' | 'package';
-  serviceId: Types.ObjectId;
-  employeeId?: Types.ObjectId;
+  customerId: mongoose.Types.ObjectId;
+  petId: mongoose.Types.ObjectId;
+  serviceType: ServiceType;
+  serviceId: mongoose.Types.ObjectId;
+  employeeId?: mongoose.Types.ObjectId;
   scheduledDate: Date;
-  scheduledTimeSlot: ITimeSlot;
-  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
+  scheduledTimeSlot: TimeSlot;
   notes?: string;
   serviceNotes?: string;
-  paymentStatus: 'pending' | 'completed';
-  paymentMethod?: 'cash' | 'card';
-  totalAmount?: number;
+  status: AppointmentStatus;
+  paymentStatus: PaymentStatus;
+  totalAmount: number;
+  completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  completedAt?: Date;
-  reminder?: IReminder;
 }
 
-const AppointmentSchema: Schema = new Schema({
-  customerId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  petId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Pet',
-    required: true
-  },
-  serviceType: {
-    type: String,
-    enum: ['single', 'package'],
-    required: true
-  },
-  serviceId: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    refPath: 'serviceType'
-  },
-  employeeId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  scheduledDate: {
-    type: Date,
-    required: true
-  },
-  scheduledTimeSlot: {
-    start: {
-      type: String,
+const AppointmentSchema = new Schema<IAppointment>(
+  {
+    customerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true
     },
-    end: {
-      type: String,
+    petId: {
+      type: Schema.Types.ObjectId,
+      ref: "Pet",
       required: true
+    },
+    serviceType: {
+      type: String,
+      enum: Object.values(ServiceType),
+      required: true
+    },
+    serviceId: {
+      type: Schema.Types.ObjectId,
+      refPath: "serviceType",
+      required: true
+    },
+    employeeId: {
+      type: Schema.Types.ObjectId,
+      ref: "Employee"
+    },
+    scheduledDate: {
+      type: Date,
+      required: true
+    },
+    scheduledTimeSlot: {
+      start: {
+        type: String,
+        required: true
+      },
+      end: {
+        type: String,
+        required: true
+      }
+    },
+    notes: {
+      type: String
+    },
+    serviceNotes: {
+      type: String
+    },
+    status: {
+      type: String,
+      enum: Object.values(AppointmentStatus),
+      default: AppointmentStatus.PENDING
+    },
+    paymentStatus: {
+      type: String,
+      enum: Object.values(PaymentStatus),
+      default: PaymentStatus.PENDING
+    },
+    totalAmount: {
+      type: Number,
+      required: true
+    },
+    completedAt: {
+      type: Date
     }
   },
-  status: {
-    type: String,
-    enum: ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled'],
-    default: 'pending'
-  },
-  notes: String,
-  serviceNotes: String,
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'completed'],
-    default: 'pending'
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['cash', 'card']
-  },
-  totalAmount: Number,
-  completedAt: Date,
-  reminder: {
-    sent: {
-      type: Boolean,
-      default: false
-    },
-    sentAt: Date
+  {
+    timestamps: true
   }
-}, { timestamps: true });
+);
 
-// Indexes
-AppointmentSchema.index({ customerId: 1 });
-AppointmentSchema.index({ petId: 1 });
-AppointmentSchema.index({ employeeId: 1 });
-AppointmentSchema.index({ scheduledDate: 1 });
-AppointmentSchema.index({ status: 1 });
-AppointmentSchema.index({ paymentStatus: 1 });
-
-const AppointmentModel = mongoose.model<IAppointment>('Appointment', AppointmentSchema);
-export default AppointmentModel
+const AppointmentModel = mongoose.model<IAppointment>("Appointment", AppointmentSchema);
+export default AppointmentModel;

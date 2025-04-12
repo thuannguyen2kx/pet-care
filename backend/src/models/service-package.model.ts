@@ -1,18 +1,27 @@
 // src/models/interfaces/servicePackage.interface.ts
-import mongoose, { Document, Schema, Types } from "mongoose";
+import mongoose, {
+  Document,
+  Schema,
+  Types,
+} from "mongoose";
+import { IService } from "./service.model";
+
 export interface IServiceItem {
   serviceId: Types.ObjectId;
   quantity: number;
 }
+
 export interface ISeasonalAvailability {
   isLimited: boolean;
   startDate?: Date;
   endDate?: Date;
 }
+
 export interface IServicePackage extends Document {
   name: string;
   description?: string;
   services: IServiceItem[];
+  specialties: string[];
   totalPrice: number;
   discountedPrice?: number;
   discountPercentage?: number;
@@ -26,7 +35,7 @@ export interface IServicePackage extends Document {
   updatedAt: Date;
 }
 
-const ServicePackageSchema: Schema = new Schema(
+const ServicePackageSchema = new Schema<IServicePackage>(
   {
     name: {
       type: String,
@@ -45,6 +54,7 @@ const ServicePackageSchema: Schema = new Schema(
         },
       },
     ],
+    specialties: [String],
     totalPrice: Number,
     discountedPrice: Number,
     discountPercentage: Number,
@@ -68,8 +78,40 @@ const ServicePackageSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+ServicePackageSchema.pre("save", async function (next) {
+  if (this.isModified("services")) {
+    try {
+      // Lấy tất cả các ID dịch vụ
+      const serviceIds = this.services.map((s) => s.serviceId);
+
+      // Tìm tất cả dịch vụ liên quan
+      const services = await mongoose.model<IService>("Service").find({
+        _id: { $in: serviceIds },
+      });
+
+      // Trích xuất các chuyên môn không trùng lặp
+      const uniqueSpecialties = new Set<string>();
+      services.forEach((service) => {
+        if (service.category) {
+          uniqueSpecialties.add(service.category);
+        }
+      });
+
+      // Cập nhật trường specialties
+      this.specialties = Array.from(uniqueSpecialties);
+
+      next();
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    next();
+  }
+});
+
 const ServicePackageModel = mongoose.model<IServicePackage>(
   "ServicePackage",
   ServicePackageSchema
 );
+
 export default ServicePackageModel;
