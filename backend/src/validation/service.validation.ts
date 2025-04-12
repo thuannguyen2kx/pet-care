@@ -1,5 +1,6 @@
 // src/validation/service.validation.ts
 import { z } from "zod";
+import { Specialty } from "../enums/employee.enum";
 
 // Schema for validating service ID
 export const serviceIdSchema = z
@@ -59,7 +60,7 @@ export const updateServiceSchema = z.object({
     .min(1, "Duration must be at least 1 minute")
     .optional(),
 
-  category: z.string().min(1, "Category cannot be empty").optional(),
+  category: z.nativeEnum(Specialty).optional(),
 
   applicablePetTypes: z.array(z.string()).optional(),
 

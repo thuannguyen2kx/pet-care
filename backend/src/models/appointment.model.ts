@@ -15,8 +15,8 @@ export enum PaymentStatus {
 }
 
 export enum ServiceType {
-  SINGLE = "single",
-  PACKAGE = "package"
+  SINGLE = "Service",
+  PACKAGE = "ServicePackage"
 }
 
 export interface TimeSlot {
@@ -66,7 +66,7 @@ const AppointmentSchema = new Schema<IAppointment>(
     },
     employeeId: {
       type: Schema.Types.ObjectId,
-      ref: "Employee"
+      ref: "User"
     },
     scheduledDate: {
       type: Date,

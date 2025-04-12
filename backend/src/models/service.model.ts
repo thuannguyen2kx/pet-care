@@ -1,10 +1,11 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { SpecialtyType } from '../enums/employee.enum';
 export interface IService extends Document {
   name: string;
   description?: string;
   price: number;
   duration: number;
-  category: string;
+  category: SpecialtyType;
   applicablePetTypes?: string[];
   applicablePetSizes?: string[];
   images?: {url: string, publicId: string}[];

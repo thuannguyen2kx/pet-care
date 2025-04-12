@@ -1,14 +1,25 @@
 import mongoose, { Types } from "mongoose";
-import AppointmentModel, { AppointmentStatus, PaymentStatus, ServiceType } from "../models/appointment.model";
+import AppointmentModel, {
+  AppointmentStatus,
+  PaymentStatus,
+  ServiceType,
+} from "../models/appointment.model";
 import TimeSlotModel from "../models/time-slot.model";
 import PetModel from "../models/pet.model";
 import ServiceModel from "../models/service.model";
 import ServicePackageModel from "../models/service-package.model";
 import EmployeeModel from "../models/user.model";
 import UserModel from "../models/user.model";
-import { BadRequestException, NotFoundException, ForbiddenException } from "../utils/app-error";
+import {
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from "../utils/app-error";
 import emailService from "../utils/send-email";
 import { StatusUser } from "../enums/status-user.enum";
+
+import { dateUtils } from "../utils/date-fns";
+import { Roles } from "../enums/role.enum";
 
 // Lấy tất cả các cuộc hẹn của người dùng đã đăng nhập
 export const getUserAppointmentsService = async (userId: string) => {
@@ -16,10 +27,8 @@ export const getUserAppointmentsService = async (userId: string) => {
     .populate("petId", "name species breed profilePicture")
     .populate({
       path: "employeeId",
-      populate: {
-        path: "userId",
-        select: "fullName profilePicture"
-      }
+      select: "fullName profilePicture",
+      
     })
     .sort({ scheduledDate: -1 });
 
@@ -36,14 +45,11 @@ export const getAppointmentByIdService = async (
     .populate("petId", "name species breed profilePicture")
     .populate({
       path: "employeeId",
-      populate: {
-        path: "userId",
-        select: "fullName profilePicture"
-      }
+      select: "fullName profilePicture",
     })
     .populate({
       path: "serviceId",
-      select: "name description price duration"
+      select: "name description price duration",
     });
 
   if (!appointment) {
@@ -52,7 +58,7 @@ export const getAppointmentByIdService = async (
 
   // Kiểm tra quyền truy cập
   if (
-    appointment.customerId.toString() !== userId &&
+    appointment.customerId.toString() !== userId.toString() &&
     userRole !== "admin" &&
     userRole !== "employee"
   ) {
@@ -80,7 +86,7 @@ export const createAppointmentService = async (
 ) => {
   // Kiểm tra thú cưng thuộc về người dùng
   const pet = await PetModel.findById(data.petId);
-  if (!pet || pet.ownerId.toString() !== userId) {
+  if (!pet || pet.ownerId.toString() !== userId.toString()) {
     throw new BadRequestException("Thú cưng không hợp lệ");
   }
 
@@ -99,7 +105,9 @@ export const createAppointmentService = async (
     specialties.push(service.category);
     totalAmount = service.price;
   } else if (data.serviceType === ServiceType.PACKAGE) {
-    service = await ServicePackageModel.findById(data.serviceId).populate("services");
+    service = await ServicePackageModel.findById(data.serviceId).populate(
+      "services"
+    );
     if (!service || !service.isActive) {
       throw new BadRequestException("Gói dịch vụ không khả dụng");
     }
@@ -116,21 +124,31 @@ export const createAppointmentService = async (
     service.applicablePetTypes.length > 0 &&
     !service.applicablePetTypes.includes(pet.species)
   ) {
-    throw new BadRequestException(`Dịch vụ này không có sẵn cho loài ${pet.species}`);
+    throw new BadRequestException(
+      `Dịch vụ này không có sẵn cho loài ${pet.species}`
+    );
   }
 
-  // Phân tích ngày và thời gian
-  const appointmentDate = new Date(data.scheduledDate);
+  // Phân tích ngày và thời gian sử dụng date-fns
+  const appointmentDate = dateUtils.parseDate(data.scheduledDate);
+  const appointmentStartDay = dateUtils.getStartOfDay(appointmentDate);
+  const appointmentEndDay = dateUtils.getEndOfDay(appointmentDate);
   const startTime = data.scheduledTimeSlot.start;
   const endTime = data.scheduledTimeSlot.end;
 
-  // Kiểm tra khung giờ có sẵn
+  console.log("Tìm kiếm time slot cho ngày:", data.scheduledDate);
+  console.log("Ngày bắt đầu:", appointmentStartDay);
+  console.log("Ngày kết thúc:", appointmentEndDay);
+
+  // Kiểm tra khung giờ có sẵn sử dụng range ngày đầy đủ
   const timeSlotDoc = await TimeSlotModel.findOne({
     date: {
-      $gte: new Date(appointmentDate.setHours(0, 0, 0, 0)),
-      $lt: new Date(appointmentDate.setHours(23, 59, 59, 999))
-    }
+      $gte: appointmentStartDay,
+      $lt: appointmentEndDay,
+    },
   });
+
+  console.log("Tìm thấy time slot:", timeSlotDoc ? "Có" : "Không");
 
   if (!timeSlotDoc) {
     throw new BadRequestException("Không có khung giờ khả dụng cho ngày này");
@@ -138,32 +156,28 @@ export const createAppointmentService = async (
 
   // Tìm khung giờ cụ thể
   const slotIndex = timeSlotDoc.slots.findIndex(
-    (slot) => slot.startTime === startTime && slot.endTime === endTime && slot.isAvailable
+    (slot) =>
+      slot.startTime === startTime &&
+      slot.endTime === endTime &&
+      slot.isAvailable
   );
 
   if (slotIndex === -1) {
     throw new BadRequestException("Khung giờ này không khả dụng");
   }
 
-  // Tìm nhân viên có sẵn với chuyên môn phù hợp
-  // const employees = await EmployeeModel.find({
-  //   status: StatusUser.ACTIVE,
-  //   "employeeInfo.specialties": 
-  //     data.serviceType === ServiceType.SINGLE 
-  //       // ? service.category as ServiceType.SINGLE 
-  //       ? ServiceType.SINGLE
-  //       : { $exists: true }
-  // });
   const employees = await EmployeeModel.find({
-  status: StatusUser.ACTIVE,
-  "employeeInfo.specialties": 
-    data.serviceType === ServiceType.SINGLE 
-      ? specialties[0]
-      : { $in: specialties }
-});
+    status: StatusUser.ACTIVE,
+    "employeeInfo.specialties":
+      data.serviceType === ServiceType.SINGLE
+        ? specialties[0]
+        : { $in: specialties },
+  });
 
   if (employees.length === 0) {
-    throw new BadRequestException("Không có nhân viên khả dụng cho dịch vụ này");
+    throw new BadRequestException(
+      "Không có nhân viên khả dụng cho dịch vụ này"
+    );
   }
 
   // Tìm nhân viên không có cuộc hẹn vào thời điểm này
@@ -173,11 +187,11 @@ export const createAppointmentService = async (
     const conflictingAppointment = await AppointmentModel.findOne({
       employeeId: employee._id,
       scheduledDate: {
-        $gte: new Date(appointmentDate.setHours(0, 0, 0, 0)),
-        $lt: new Date(appointmentDate.setHours(23, 59, 59, 999))
+        $gte: appointmentStartDay,
+        $lt: appointmentEndDay,
       },
       "scheduledTimeSlot.start": startTime,
-      status: { $nin: [AppointmentStatus.CANCELLED] }
+      status: { $nin: [AppointmentStatus.CANCELLED] },
     });
 
     if (!conflictingAppointment) {
@@ -202,27 +216,31 @@ export const createAppointmentService = async (
     scheduledDate: appointmentDate,
     scheduledTimeSlot: {
       start: startTime,
-      end: endTime
+      end: endTime,
     },
     notes: data.notes,
     status: AppointmentStatus.PENDING,
     paymentStatus: PaymentStatus.PENDING,
-    totalAmount
+    totalAmount,
   });
 
   // Cập nhật khung giờ để đánh dấu là đã đặt
   timeSlotDoc.slots[slotIndex].isAvailable = false;
-  timeSlotDoc.slots[slotIndex].appointmentId = appointment._id as mongoose.Types.ObjectId;
+  timeSlotDoc.slots[slotIndex].appointmentId =
+    appointment._id as mongoose.Types.ObjectId;
   timeSlotDoc.slots[slotIndex].employeeId = assignedEmployeeId;
   await timeSlotDoc.save();
 
   // Gửi email xác nhận
   try {
+    // Định dạng ngày để hiển thị theo locale Việt Nam
+    const displayDate = dateUtils.formatDate(appointmentDate);
+
     await emailService.sendAppointmentConfirmation(userEmail, {
-      date: appointmentDate.toLocaleDateString(),
+      date: displayDate,
       time: startTime,
       serviceName: service.name,
-      petName: pet.name
+      petName: pet.name,
     });
   } catch (emailError) {
     console.error("Không thể gửi email xác nhận:", emailError);
@@ -231,7 +249,7 @@ export const createAppointmentService = async (
 
   return {
     appointment,
-    message: "Đặt lịch hẹn thành công! Email xác nhận đã được gửi."
+    message: "Đặt lịch hẹn thành công! Email xác nhận đã được gửi.",
   };
 };
 
@@ -252,16 +270,27 @@ export const updateAppointmentStatusService = async (
 
   // Kiểm tra quyền truy cập
   if (userRole !== "admin" && userRole !== "employee") {
-    throw new ForbiddenException("Bạn không có quyền cập nhật trạng thái cuộc hẹn");
+    throw new ForbiddenException(
+      "Bạn không có quyền cập nhật trạng thái cuộc hẹn"
+    );
   }
 
   // Xác thực chuyển đổi trạng thái
   const validStatusTransitions: Record<string, string[]> = {
-    [AppointmentStatus.PENDING]: [AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED],
-    [AppointmentStatus.CONFIRMED]: [AppointmentStatus.IN_PROGRESS, AppointmentStatus.CANCELLED],
-    [AppointmentStatus.IN_PROGRESS]: [AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED],
+    [AppointmentStatus.PENDING]: [
+      AppointmentStatus.CONFIRMED,
+      AppointmentStatus.CANCELLED,
+    ],
+    [AppointmentStatus.CONFIRMED]: [
+      AppointmentStatus.IN_PROGRESS,
+      AppointmentStatus.CANCELLED,
+    ],
+    [AppointmentStatus.IN_PROGRESS]: [
+      AppointmentStatus.COMPLETED,
+      AppointmentStatus.CANCELLED,
+    ],
     [AppointmentStatus.COMPLETED]: [],
-    [AppointmentStatus.CANCELLED]: []
+    [AppointmentStatus.CANCELLED]: [],
   };
 
   if (!validStatusTransitions[appointment.status].includes(data.status)) {
@@ -299,15 +328,18 @@ export const updateAppointmentStatusService = async (
 
     if (customer && pet) {
       try {
+        // Định dạng ngày để hiển thị
+        const displayDate = dateUtils.formatDate(appointment.scheduledDate);
+
         await emailService.sendEmail({
           to: customer.email,
           subject: "Cuộc hẹn của bạn đã được xác nhận",
           html: `
             <h1>Cuộc hẹn đã được xác nhận</h1>
-            <p>Cuộc hẹn của bạn cho ${pet.name} vào ngày ${appointment.scheduledDate.toLocaleDateString()} 
+            <p>Cuộc hẹn của bạn cho ${pet.name} vào ngày ${displayDate} 
             lúc ${appointment.scheduledTimeSlot.start} đã được xác nhận.</p>
             <p>Vui lòng đến trước thời gian hẹn 10 phút.</p>
-          `
+          `,
         });
       } catch (emailError) {
         console.error("Không thể gửi email xác nhận:", emailError);
@@ -331,15 +363,16 @@ export const cancelAppointmentService = async (
   }
 
   // Kiểm tra đây có phải là cuộc hẹn của người dùng không
-  if (
-    appointment.customerId.toString() !== userId &&
-    userRole !== "admin"
-  ) {
+  if (appointment.customerId.toString() !== userId.toString() && userRole !== Roles.ADMIN) {
     throw new ForbiddenException("Bạn không có quyền hủy cuộc hẹn này");
   }
 
   // Kiểm tra xem cuộc hẹn có thể hủy không
-  if ([AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED].includes(appointment.status)) {
+  if (
+    [AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED].includes(
+      appointment.status
+    )
+  ) {
     throw new BadRequestException(
       `Không thể hủy cuộc hẹn với trạng thái ${appointment.status}`
     );
@@ -348,9 +381,9 @@ export const cancelAppointmentService = async (
   // Kiểm tra nếu cuộc hẹn trong vòng 24 giờ và người dùng không phải là admin
   const now = new Date();
   const appointmentTime = new Date(appointment.scheduledDate);
-  const hoursDifference = (appointmentTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+  const hoursDifference = dateUtils.getHoursBetween(appointmentTime, now);
 
-  if (hoursDifference < 24 && userRole !== "admin") {
+  if (hoursDifference < 24 && userRole !== Roles.ADMIN) {
     throw new BadRequestException(
       "Cuộc hẹn chỉ có thể hủy ít nhất 24 giờ trước"
     );
@@ -361,12 +394,15 @@ export const cancelAppointmentService = async (
   const updatedAppointment = await appointment.save();
 
   // Mở khóa khung giờ
+  const appointmentStartDay = dateUtils.getStartOfDay(appointmentTime);
+  const appointmentEndDay = dateUtils.getEndOfDay(appointmentTime);
+
   const timeSlot = await TimeSlotModel.findOne({
     date: {
-      $gte: new Date(appointmentTime.setHours(0, 0, 0, 0)),
-      $lt: new Date(appointmentTime.setHours(23, 59, 59, 999))
+      $gte: appointmentStartDay,
+      $lt: appointmentEndDay,
     },
-    "slots.appointmentId": appointment._id
+    "slots.appointmentId": appointment._id,
   });
 
   if (timeSlot) {
@@ -388,15 +424,18 @@ export const cancelAppointmentService = async (
 
   if (customer && pet) {
     try {
+      // Định dạng ngày để hiển thị
+      const displayDate = dateUtils.formatDate(appointment.scheduledDate);
+
       await emailService.sendEmail({
         to: customer.email,
         subject: "Cuộc hẹn của bạn đã bị hủy",
         html: `
           <h1>Cuộc hẹn đã bị hủy</h1>
-          <p>Cuộc hẹn của bạn cho ${pet.name} vào ngày ${appointment.scheduledDate.toLocaleDateString()} 
+          <p>Cuộc hẹn của bạn cho ${pet.name} vào ngày ${displayDate} 
           lúc ${appointment.scheduledTimeSlot.start} đã bị hủy.</p>
           <p>Nếu bạn muốn đặt lại lịch, vui lòng truy cập trang web của chúng tôi hoặc liên hệ với chúng tôi.</p>
-        `
+        `,
       });
     } catch (emailError) {
       console.error("Không thể gửi email hủy:", emailError);
@@ -405,7 +444,7 @@ export const cancelAppointmentService = async (
 
   return {
     appointment: updatedAppointment,
-    message: "Hủy cuộc hẹn thành công"
+    message: "Hủy cuộc hẹn thành công",
   };
 };
 
@@ -414,25 +453,38 @@ export const getAvailableTimeSlotsService = async (query: {
   date: string;
   serviceId?: string;
   serviceType?: ServiceType;
+  petId?: string;
 }) => {
   if (!query.date) {
     throw new BadRequestException("Ngày là bắt buộc");
   }
 
-  const selectedDate = new Date(query.date);
+  // Phân tích ngày và kiểm tra tính hợp lệ
+  const selectedDate = dateUtils.parseDate(query.date);
+  const selectedStartDay = dateUtils.getStartOfDay(selectedDate);
+  const selectedEndDay = dateUtils.getEndOfDay(selectedDate);
+
+  console.log("Lấy time slots cho ngày:", query.date);
+  console.log("Ngày đã phân tích:", selectedDate);
+  console.log("Ngày bắt đầu:", selectedStartDay);
+  console.log("Ngày kết thúc:", selectedEndDay);
 
   // Kiểm tra xem ngày đã qua chưa
-  if (selectedDate < new Date()) {
-    throw new BadRequestException("Không thể đặt lịch hẹn cho các ngày trong quá khứ");
+  if (dateUtils.isPastDate(selectedDate)) {
+    throw new BadRequestException(
+      "Không thể đặt lịch hẹn cho các ngày trong quá khứ"
+    );
   }
 
   // Tìm hoặc tạo khung giờ cho ngày
   let timeSlot = await TimeSlotModel.findOne({
     date: {
-      $gte: new Date(selectedDate.setHours(0, 0, 0, 0)),
-      $lt: new Date(selectedDate.setHours(23, 59, 59, 999))
-    }
+      $gte: selectedStartDay,
+      $lt: selectedEndDay,
+    },
   });
+
+  console.log("Tìm thấy time slot:", timeSlot ? "Có" : "Không");
 
   // Nếu không có khung giờ nào tồn tại cho ngày này, tạo chúng
   if (!timeSlot) {
@@ -445,14 +497,16 @@ export const getAvailableTimeSlotsService = async (query: {
       slots.push({
         startTime: `${hour.toString().padStart(2, "0")}:00`,
         endTime: `${(hour + 1).toString().padStart(2, "0")}:00`,
-        isAvailable: true
+        isAvailable: true,
       });
     }
 
     timeSlot = await TimeSlotModel.create({
       date: selectedDate,
-      slots
+      slots,
     });
+
+    console.log("Đã tạo time slots mới cho ngày:", selectedDate);
   }
 
   // Nếu serviceId và serviceType được cung cấp, kiểm tra yêu cầu về thời lượng
@@ -471,7 +525,7 @@ export const getAvailableTimeSlotsService = async (query: {
     }
 
     // Lọc các khung giờ dựa trên thời lượng
-    timeSlot.slots = timeSlot.slots.filter((slot) => {
+    const filteredSlots = timeSlot.slots.filter((slot) => {
       // Phân tích thời gian
       const [startHour, startMinute] = slot.startTime.split(":").map(Number);
       const [endHour, endMinute] = slot.endTime.split(":").map(Number);
@@ -484,6 +538,14 @@ export const getAvailableTimeSlotsService = async (query: {
       // Kiểm tra xem khung giờ có đủ dài cho dịch vụ không
       return slot.isAvailable && slotDuration >= duration;
     });
+
+    // Trả về bản sao của timeSlot với các slots đã lọc
+    return {
+      timeSlot: {
+        ...timeSlot.toObject(),
+        slots: filteredSlots,
+      },
+    };
   }
 
   return { timeSlot };
@@ -491,59 +553,62 @@ export const getAvailableTimeSlotsService = async (query: {
 
 // Lấy tất cả cuộc hẹn (cho quản trị viên)
 export const getAllAppointmentsService = async (query: any) => {
-  const { 
-    status, 
-    startDate, 
-    endDate, 
-    employeeId,
-    customerId,
-    petId 
-  } = query;
-  
+  const { status, startDate, endDate, employeeId, customerId, petId } = query;
+
   const filter: any = {};
-  
+
   if (status) {
     filter.status = status;
   }
-  
+
   if (startDate && endDate) {
+    // Chuyển đổi và sử dụng startOfDay và endOfDay
+    const startDateObj = dateUtils.getStartOfDay(
+      dateUtils.parseDate(startDate)
+    );
+    const endDateObj = dateUtils.getEndOfDay(dateUtils.parseDate(endDate));
+
     filter.scheduledDate = {
-      $gte: new Date(startDate),
-      $lte: new Date(endDate)
+      $gte: startDateObj,
+      $lte: endDateObj,
     };
   } else if (startDate) {
-    filter.scheduledDate = { $gte: new Date(startDate) };
+    filter.scheduledDate = {
+      $gte: dateUtils.getStartOfDay(dateUtils.parseDate(startDate)),
+    };
   } else if (endDate) {
-    filter.scheduledDate = { $lte: new Date(endDate) };
+    filter.scheduledDate = {
+      $lte: dateUtils.getEndOfDay(dateUtils.parseDate(endDate)),
+    };
   }
-  
+
   if (employeeId) {
     filter.employeeId = employeeId;
   }
-  
+
   if (customerId) {
     filter.customerId = customerId;
   }
-  
+
   if (petId) {
     filter.petId = petId;
   }
-  
+
   const appointments = await AppointmentModel.find(filter)
     .populate("petId", "name species breed profilePicture")
     .populate({
       path: "employeeId",
       populate: {
         path: "userId",
-        select: "fullName profilePicture"
-      }
+        select: "fullName profilePicture",
+      },
     })
     .populate("customerId", "fullName email phoneNumber")
     .populate({
       path: "serviceId",
-      select: "name description price duration"
+      select: "name description price duration",
     })
     .sort({ scheduledDate: -1 });
-  
+
   return { appointments };
 };

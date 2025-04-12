@@ -5,6 +5,7 @@ import mongoose, {
   Types,
 } from "mongoose";
 import { IService } from "./service.model";
+import { SpecialtyType } from "../enums/employee.enum";
 
 export interface IServiceItem {
   serviceId: Types.ObjectId;
@@ -21,7 +22,7 @@ export interface IServicePackage extends Document {
   name: string;
   description?: string;
   services: IServiceItem[];
-  specialties: string[];
+  specialties: SpecialtyType[];
   totalPrice: number;
   discountedPrice?: number;
   discountPercentage?: number;
@@ -90,7 +91,7 @@ ServicePackageSchema.pre("save", async function (next) {
       });
 
       // Trích xuất các chuyên môn không trùng lặp
-      const uniqueSpecialties = new Set<string>();
+      const uniqueSpecialties = new Set<SpecialtyType>();
       services.forEach((service) => {
         if (service.category) {
           uniqueSpecialties.add(service.category);

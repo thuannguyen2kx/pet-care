@@ -12,6 +12,8 @@ export const CUSTOMER_ROUTES = {
   SERVICES: "/services",
   SERVICES_DETAILS: "/services/:serviceId",
   APPOINTMENTS: "/appointments",
+  APPOINTMENTS_CREATION: "/appointments/new",
+  APPOINTMENTS_DETAILS: "/appointments/:appointmentId",
   PROFILE: "/profile/:profileId",
   PET_DETAILS: "/pets/:petId",
   POST_DETAILS: "/posts/:postId",

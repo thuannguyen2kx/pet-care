@@ -24,6 +24,29 @@ export const GENDER = {
 } as const;
 export type GenderType = keyof typeof GENDER;
 
+export enum PetCategory {
+  DOG = "DOG",
+  CAT = "CAT",
+  OTHER = "OTHER",
+}
+export const petCategoryTranslations: Record<PetCategory, string> = {
+  [PetCategory.DOG]: "Chó",
+  [PetCategory.CAT]: "Mèo",
+  [PetCategory.OTHER]: "Khác"
+}
+export enum PetSize {
+  SMALL = "small",
+  MEDIUM = "medium",
+  LARGE = "large",
+  EXTRA_LARGE = "extraLarge",
+}
+export const petSizeTranslations: Record<PetSize, string> = {
+  [PetSize.SMALL]: "Nhỏ",
+  [PetSize.MEDIUM]: "Trung bình",
+  [PetSize.LARGE]: "Lớn",
+  [PetSize.EXTRA_LARGE]: "Rất lớn",
+}
+
 export enum Specialty {
   // Dịch vụ Grooming
   BATHING = "BATHING",          // Tắm gội
@@ -71,3 +94,15 @@ export const weekdays = [
   { id: "saturday", label: "Thứ Bảy" },
   { id: "sunday", label: "Chủ Nhật" },
 ];
+
+export enum AppointmentStatus {
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  IN_PROGRESS = "in-progress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled"
+}
+export enum ServiceType {
+  SINGLE = "Service",
+  PACKAGE = "ServicePackage"
+}

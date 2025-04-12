@@ -20,6 +20,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useGetService } from "../hooks/queries/get-service";
+import { formatVND } from "@/lib/helper";
+import { ServiceType } from "@/constants";
 
 const ServiceDetails: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -275,13 +277,25 @@ const ServiceDetails: React.FC = () => {
               <Separator className="my-6" />
 
               <div className="flex justify-between items-center mb-6">
-                <span className="text-gray-500">Price</span>
+                <span className="text-gray-500">Giá</span>
                 <span className="text-2xl font-bold">
-                  ${service.price.toFixed(2)}
+                  {formatVND(service.price)}
                 </span>
               </div>
 
-              <Button className="w-full">Đặt lịch</Button>
+              <Button
+                onClick={() =>
+                  navigate(`/appointments/new`, {
+                    state: {
+                      serviceId: service._id,
+                      serviceType: ServiceType.SINGLE,
+                    },
+                  })
+                }
+                className="w-full"
+              >
+                Đặt lịch
+              </Button>
 
               <div className="mt-6 text-sm text-gray-500">
                 <p>✓ Chuyên gia chăm sóc thú cưng chuyên nghiệp</p>

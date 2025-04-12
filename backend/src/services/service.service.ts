@@ -2,6 +2,7 @@ import ServiceModel from "../models/service.model";
 import ServicePackage from "../models/service-package.model";
 import { BadRequestException, NotFoundException } from "../utils/app-error";
 import { deleteFile } from "../utils/file-uploade";
+import { SpecialtyType } from "../enums/employee.enum";
 
 interface ServiceFilters {
   category?: string;
@@ -25,7 +26,7 @@ interface UpdateServiceData {
   description?: string;
   price?: number;
   duration?: number;
-  category?: string;
+  category?: SpecialtyType;
   applicablePetTypes?: string[];
   applicablePetSizes?: string[];
   images?: { url: string; publicId: string }[];

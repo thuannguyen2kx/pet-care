@@ -25,23 +25,13 @@ import { toast } from "sonner";
 import { useUpdatePet } from "../hooks/mutations/update-pet";
 import { usePetCreation } from "../hooks/mutations/use-pet-creation";
 import { PetType } from "../types/api.types";
+import { PetCategory, petCategoryTranslations } from "@/constants";
 
 // Loại giới tính
 const genderOptions = [
   { value: "Đực", label: "Đực" },
   { value: "Cái", label: "Cái" },
   { value: "Không xác định", label: "Không xác định" },
-];
-
-// Các loài phổ biến
-const speciesOptions = [
-  { value: "Chó", label: "Chó" },
-  { value: "Mèo", label: "Mèo" },
-  { value: "Chim", label: "Chim" },
-  { value: "Chuột", label: "Chuột" },
-  { value: "Thỏ", label: "Thỏ" },
-  { value: "Cá", label: "Cá" },
-  { value: "Khác", label: "Khác" },
 ];
 
 // Schema validation
@@ -323,9 +313,9 @@ const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess, onCancel }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {speciesOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
+                        {Object.values(PetCategory).map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {petCategoryTranslations[option] || option}
                           </SelectItem>
                         ))}
                       </SelectContent>
