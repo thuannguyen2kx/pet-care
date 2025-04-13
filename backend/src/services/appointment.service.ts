@@ -360,7 +360,7 @@ export const updateAppointmentStatusService = async (
   }
 
   // Kiểm tra quyền truy cập
-  if (userRole !== "admin" && userRole !== "employee") {
+  if (userRole !== Roles.ADMIN && userRole !== Roles.EMPLOYEE) {
     throw new ForbiddenException(
       "Bạn không có quyền cập nhật trạng thái cuộc hẹn"
     );
@@ -868,10 +868,7 @@ export const getAllAppointmentsService = async (query: any) => {
     .populate("petId", "name species breed profilePicture")
     .populate({
       path: "employeeId",
-      populate: {
-        path: "userId",
-        select: "fullName profilePicture",
-      },
+      select: "fullName profilePicture",
     })
     .populate("customerId", "fullName email phoneNumber")
     .populate({

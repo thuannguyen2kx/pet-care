@@ -30,6 +30,8 @@ export const ADMIN_ROUTES = {
   SERVICE_CREATION: "/admin/services/create",
   SERVICE_EDIT: "/admin/services/edit/:serviceId",
   APPOINTMENT: "/admin/appointments",
+  APPOINTMENT_CALENDAR: "/admin/appointments/calendar",
+  APPOINTMENT_DETAILS: "/admin/appointments/:appointmentId",
 };
 export const EMPLOYEE_ROUTES = {
   DASHBOARD: "/employee/dashboard",

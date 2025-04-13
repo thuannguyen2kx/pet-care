@@ -87,7 +87,7 @@ export const getAllAppointmentsQueryFn = async (params?: {
     queryParams.append("petId", params.petId);
   }
 
-  const response = await API.get(`/admin/all?${queryParams.toString()}`);
+  const response = await API.get(`/appointments/all?${queryParams.toString()}`);
   return response.data;
 };
 export const createAppointmentMutationFn = async (appointmentData: {

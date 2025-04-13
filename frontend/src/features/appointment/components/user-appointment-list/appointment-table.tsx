@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import StatusBadge from "./status-badge";
+import StatusBadge from "../status-badge";
 import { formatVND } from "@/lib/helper";
 import { formatDuration } from "@/features/appointment/utils/appointment-form-config";
 

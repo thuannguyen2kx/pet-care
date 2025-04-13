@@ -4,7 +4,7 @@ import { vi } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { Clock, Calendar, User, ChevronRight } from "lucide-react";
 import { UserAppointmentType } from "@/features/appointment/types/api.types";
-import StatusBadge from "./status-badge";
+import StatusBadge from "../status-badge";
 import { Button } from "@/components/ui/button";
 import { formatVND } from "@/lib/helper";
 import { formatDuration } from "@/features/appointment/utils/appointment-form-config";

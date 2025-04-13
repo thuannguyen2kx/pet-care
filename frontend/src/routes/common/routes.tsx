@@ -28,6 +28,8 @@ import EmployeeEditionPage from "@/pages/admin/employee-edition";
 import AppointmentCreationPage from "@/pages/customer/appointment-creation";
 import AppointmentDetailPage from "@/pages/customer/appointment-details";
 import AppointmentListPage from "@/pages/customer/appointment-list";
+import AppointmentCalendarPage from "@/pages/admin/appointment-calendar";
+import AdminAppointmentDetailsPage from "@/pages/admin/appointment-details";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -77,6 +79,8 @@ export const protectedCustomerRoutePaths = [
 export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.DASHBOARD, element: <DashboardPage /> },
   { path: ADMIN_ROUTES.APPOINTMENT, element: <AppointementPage /> },
+  { path: ADMIN_ROUTES.APPOINTMENT_CALENDAR, element: <AppointmentCalendarPage />},
+  { path: ADMIN_ROUTES.APPOINTMENT_DETAILS, element: <AdminAppointmentDetailsPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeesPage /> },
   {path: ADMIN_ROUTES.EMPLOYEE_NEW, element: <EmployeeCreationPage /> },
   {path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage />},
