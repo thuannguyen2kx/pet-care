@@ -1,15 +1,21 @@
 import { StatusUserType } from "@/constants";
 import API from "@/lib/axios-client";
 import axios from "axios";
-import { CreateEmployeeDTO, EmployeeType, GetEmployeePerformanceResponse, GetEmployeeScheduleType, UpdateEmployeeDTO } from "./types/api.types";
+import {
+  CreateEmployeeDTO,
+  EmployeeType,
+  GetEmployeePerformanceResponse,
+  GetEmployeeScheduleType,
+  UpdateEmployeeDTO,
+} from "./types/api.types";
 
 // Get all employees with optional filters
 export const getAllEmployeesQueryFn = async (filters?: {
   status?: StatusUserType;
   specialty?: string;
 }): Promise<{
-  message: string,
-  employees: EmployeeType[]
+  message: string;
+  employees: EmployeeType[];
 }> => {
   const queryParams = new URLSearchParams();
 
@@ -26,10 +32,39 @@ export const getAllEmployeesQueryFn = async (filters?: {
   return response.data;
 };
 
+export const getAvailableEmployeeForServiceQueryFn = async (queries: {
+  serviceId: string;
+  serviceType: string;
+  date?: string;
+  timeSlot?: string;
+}): Promise<{
+  message: string;
+  employees: EmployeeType[];
+}> => {
+  const queryParams = new URLSearchParams();
+  if (queries.serviceId) {
+    queryParams.append("serviceId", queries.serviceId);
+  }
+  if (queries.serviceType) {
+    queryParams.append("serviceType", queries.serviceType);
+  }
+  if (queries.date) {
+    queryParams.append("date", queries.date);
+  }
+  if (queries.timeSlot) {
+    queryParams.append("timeSlot", queries.timeSlot);
+  }
+  const query = queryParams.toString() ? `?${queryParams.toString()}` : "";
+  const response = await API.get(`/employees/available${query}`);
+  return response.data
+};
+
 // Get employee by ID
-export const getEmployeeByIdQueryFn = async (id: string): Promise<{
-  message: string,
-  employee: EmployeeType
+export const getEmployeeByIdQueryFn = async (
+  id: string
+): Promise<{
+  message: string;
+  employee: EmployeeType;
 }> => {
   const response = await API.get(`/employees/${id}`);
 
@@ -88,7 +123,9 @@ export const resetPasswordMutationFn = async (
 };
 
 // Get employee performance
-export const getEmployeePerformanceQueryFn = async (id: string): Promise<GetEmployeePerformanceResponse> => {
+export const getEmployeePerformanceQueryFn = async (
+  id: string
+): Promise<GetEmployeePerformanceResponse> => {
   const response = await API.get(`/employees/${id}/performance`);
   return response.data;
 };

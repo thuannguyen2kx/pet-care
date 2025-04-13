@@ -1,4 +1,4 @@
-import AppointmentList from "@/features/appointment/components/appointment-list";
+import AppointmentList from "@/features/appointment/components/user-appointment-list";
 
 const AppointmentListPage: React.FC = () => {
   return (

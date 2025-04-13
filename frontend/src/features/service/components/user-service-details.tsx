@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useGetService } from "../hooks/queries/get-service";
 import { formatVND } from "@/lib/helper";
-import { ServiceType } from "@/constants";
+import { ServiceAppointmentType } from "@/constants";
 
 const ServiceDetails: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -288,7 +288,7 @@ const ServiceDetails: React.FC = () => {
                   navigate(`/appointments/new`, {
                     state: {
                       serviceId: service._id,
-                      serviceType: ServiceType.SINGLE,
+                      serviceType: ServiceAppointmentType.SINGLE,
                     },
                   })
                 }

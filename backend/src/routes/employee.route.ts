@@ -11,6 +11,7 @@ import {
   getEmployeeScheduleController,
   updateEmployeeAvailabilityController,
   assignAppointmentToEmployeeController,
+  getAvailableEmployeesController,
 } from "../controllers/employee.controller";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
@@ -23,7 +24,8 @@ employeeRoutes.get(
   "/",
   authorizeRoles([Roles.ADMIN]),
   getAllEmployeesController
-);
+)
+employeeRoutes.get("/available", authorizeRoles([Roles.CUSTOMER, Roles.ADMIN]), getAvailableEmployeesController);
 
 // Create a new employee
 employeeRoutes.post(

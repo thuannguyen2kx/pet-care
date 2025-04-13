@@ -10,11 +10,10 @@ import PetAvatar from "./pet-avatar";
 import { Badge } from "@/components/ui/badge";
 import PetCard from "./pet-card";
 import { Plus } from "lucide-react";
-import { useState } from "react";
-import { AddPetSheet } from "./add-pet-sheet";
+import useCreatePetSheet from "../hooks/use-create-pet-sheet";
 
 export const PetList = () => {
-  const [create, setCreate] = useState(false);
+  const {onOpen} = useCreatePetSheet() 
   const { data, isLoading } = useUserPets();
 
   const pets = data?.pets || [];
@@ -45,7 +44,7 @@ export const PetList = () => {
           ))}
 
           <button
-            onClick={() => setCreate(true)}
+            onClick={onOpen}
             className="flex flex-col items-center gap-1"
           >
             <div className="h-16 w-16 rounded-full border-2 border-dashed border-orange-400 flex items-center justify-center bg-orange-50">
@@ -55,7 +54,7 @@ export const PetList = () => {
           </button>
         </div>
       </div>
-      <AddPetSheet open={create} onOpenChange={setCreate} />
+      
     </>
   );
 };

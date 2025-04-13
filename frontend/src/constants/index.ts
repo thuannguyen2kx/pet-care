@@ -102,7 +102,15 @@ export enum AppointmentStatus {
   COMPLETED = "completed",
   CANCELLED = "cancelled"
 }
-export enum ServiceType {
+export const appointmentStatusTranslations: Record<AppointmentStatus | "all", string> = {
+  [AppointmentStatus.PENDING]: "Chờ xử lý",
+  [AppointmentStatus.CONFIRMED]: "Đã xác nhận",
+  [AppointmentStatus.IN_PROGRESS]: "Đang thực hiện",
+  [AppointmentStatus.COMPLETED]: "Hoàn thành",
+  [AppointmentStatus.CANCELLED]: "Đã hủy",
+  all: "Tất cả",
+};
+export enum ServiceAppointmentType {
   SINGLE = "Service",
   PACKAGE = "ServicePackage"
 }

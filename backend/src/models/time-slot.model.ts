@@ -1,11 +1,20 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+// Định nghĩa interface cho trạng thái khả dụng của nhân viên
+export interface EmployeeAvailability {
+  employeeId: mongoose.Types.ObjectId;
+  isAvailable: boolean;
+  appointmentId?: mongoose.Types.ObjectId;
+}
+
 export interface Slot {
   startTime: string;
   endTime: string;
   isAvailable: boolean;
   appointmentId?: mongoose.Types.ObjectId;
-  employeeId?: mongoose.Types.ObjectId;
+  // Thay thế employeeId đơn lẻ bằng mảng trạng thái nhân viên
+  employeeAvailability: EmployeeAvailability[];
+  originalSlotIndexes?: number[];
 }
 
 export interface ITimeSlot extends Document {
@@ -37,9 +46,25 @@ const TimeSlotSchema = new Schema<ITimeSlot>(
           type: Schema.Types.ObjectId,
           ref: "Appointment"
         },
-        employeeId: {
-          type: Schema.Types.ObjectId,
-          ref: "Employee"
+        employeeAvailability: [
+          {
+            employeeId: {
+              type: Schema.Types.ObjectId,
+              ref: "User"
+            },
+            isAvailable: {
+              type: Boolean,
+              default: true
+            },
+            appointmentId: {
+              type: Schema.Types.ObjectId,
+              ref: "Appointment"
+            }
+          }
+        ],
+        originalSlotIndexes: {
+          type: [Number],
+          required: false
         }
       }
     ]
@@ -48,6 +73,9 @@ const TimeSlotSchema = new Schema<ITimeSlot>(
     timestamps: true
   }
 );
+
+// Thêm index để tăng tốc độ truy vấn
+TimeSlotSchema.index({ date: 1 });
 
 const TimeSlotModel = mongoose.model<ITimeSlot>("TimeSlot", TimeSlotSchema);
 export default TimeSlotModel;

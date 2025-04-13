@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Specialty  } from "../enums/employee.enum";
 import { StatusUser } from "../enums/status-user.enum";
+import { ServiceType } from "../models/appointment.model";
 
 // Employee ID validation
 export const employeeIdSchema = z.string().min(1, {
@@ -146,3 +147,12 @@ export const availabilitySchema = z.object({
     path: ["vacationEnd"],
   }
 );
+// Schema for getting available employees for a service and timeslot
+export const getAvailableEmployeesSchema = z.object({
+  serviceId: z.string().min(1, { message: "ID dịch vụ là bắt buộc" }),
+  serviceType: z.nativeEnum(ServiceType, {
+    errorMap: () => ({ message: "Loại dịch vụ không hợp lệ" }),
+  }),
+  timeSlot: z.string().optional(),
+  date: z.string().optional(),
+});

@@ -24,9 +24,12 @@ import {
 import { Separator } from "@/components/ui/separator";
 import CreatePostModal from "@/features/post/components/create-post-modal";
 import useCreatePostModal from "@/features/post/hooks/use-create-post-modal";
+import useCreatePetSheet from "@/features/pet/hooks/use-create-pet-sheet";
+import { AddPetSheet } from "@/features/pet/components/add-pet-sheet";
 
 const AppLayout = () => {
-  const {open, onClose} = useCreatePostModal()
+  const {open: openCreatePost, onClose: closeCreatePost} = useCreatePostModal()
+  const {open: openCreatePet, onClose: closeCreatePet} = useCreatePetSheet()
   return (
     <AuthProvider>
       <div className="flex h-screen">
@@ -36,7 +39,8 @@ const AppLayout = () => {
           <Header />
           <div className="remove-scrollbar h-full flex-1 overflow-auto bg-white px-5 py-2 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-4">
             <Outlet />
-            <CreatePostModal open={open} onOpenChange={onClose} />
+            <CreatePostModal open={openCreatePost} onOpenChange={closeCreatePost} />
+            <AddPetSheet open={openCreatePet} onOpenChange={closeCreatePet} />
           </div>
         </section>
       </div>

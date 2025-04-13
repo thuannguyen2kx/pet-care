@@ -2,7 +2,10 @@ import { SpecialtyType } from "../enums/employee.enum";
 import { Roles } from "../enums/role.enum";
 import { StatusUser, StatusUserType } from "../enums/status-user.enum";
 import UserModel from "../models/user.model";
-import AppointmentModel, { AppointmentStatus } from "../models/appointment.model";
+import AppointmentModel, {
+  AppointmentStatus,
+  ServiceType,
+} from "../models/appointment.model";
 import ServiceModel from "../models/service.model";
 import PetModel from "../models/pet.model";
 import { BadRequestException, NotFoundException } from "../utils/app-error";
@@ -10,9 +13,15 @@ import emailService from "../utils/send-email";
 import { deleteFile } from "../utils/file-uploade";
 import { hashValue } from "../utils/bcrypt";
 import mongoose from "mongoose";
+import ServicePackageModel from "../models/service-package.model";
+import { dateUtils } from "../utils/date-fns";
+import TimeSlotModel from "../models/time-slot.model";
 
 // Get all employees with optional filtering
-export const getAllEmployeesService = async (filters: {status?: StatusUserType, specialty?: string[]}) => {
+export const getAllEmployeesService = async (filters: {
+  status?: StatusUserType;
+  specialty?: string[];
+}) => {
   const { status, specialty } = filters;
 
   const filter: any = {
@@ -46,6 +55,212 @@ export const getEmployeeByIdService = async (employeeId: string) => {
   }
 
   return { employee };
+};
+interface AvailableEmployeesParams {
+  serviceId: string;
+  serviceType: ServiceType;
+  timeSlot?: string;
+  date?: string;
+}
+
+export const getAvailableEmployeesForServiceService = async ({
+  serviceId,
+  serviceType,
+  timeSlot,
+  date,
+}: AvailableEmployeesParams) => {
+  // Biến để lưu trữ các specialties cần thiết cho dịch vụ
+  let requiredSpecialties: string[] = [];
+
+  // Lấy thông tin dịch vụ và các specialties cần thiết
+  if (serviceType === ServiceType.SINGLE) {
+    const service = await ServiceModel.findById(serviceId);
+    if (!service) {
+      throw new NotFoundException("Không tìm thấy dịch vụ");
+    }
+
+    if (service.category) {
+      requiredSpecialties.push(service.category);
+    }
+  } else if (serviceType === ServiceType.PACKAGE) {
+    const servicePackage = await ServicePackageModel.findById(serviceId);
+    if (!servicePackage) {
+      throw new NotFoundException("Không tìm thấy gói dịch vụ");
+    }
+
+    if (servicePackage.specialties && servicePackage.specialties.length > 0) {
+      requiredSpecialties = servicePackage.specialties;
+    }
+  } else {
+    throw new BadRequestException("Loại dịch vụ không hợp lệ");
+  }
+
+  // Truy vấn cơ bản để lấy nhân viên có chuyên môn phù hợp và đang hoạt động
+  let query: any = {
+    role: Roles.EMPLOYEE,
+    status: StatusUser.ACTIVE,
+  };
+
+  // Chỉ lọc theo chuyên môn nếu có yêu cầu chuyên môn
+  if (requiredSpecialties.length > 0) {
+    query = {
+      ...query,
+      "employeeInfo.specialties": { $in: requiredSpecialties },
+    };
+  }
+
+  // Mảng chứa id của các nhân viên khả dụng (khi lọc theo timeSlot)
+  let availableEmployeeIds: string[] = [];
+
+  // Nếu có tham số timeSlot và date, kiểm tra nhân viên có rảnh trong khung giờ đó không
+  if (timeSlot && date) {
+    const [startTime, endTime] = timeSlot.split("-");
+
+    if (!startTime || !endTime) {
+      throw new BadRequestException(
+        'Định dạng timeSlot không hợp lệ, phải là "HH:MM-HH:MM"'
+      );
+    }
+
+    // Lấy ngày bắt đầu và kết thúc
+    const selectedDate = dateUtils.parseDate(date);
+    const selectedStartDay = dateUtils.getStartOfDay(selectedDate);
+    const selectedEndDay = dateUtils.getEndOfDay(selectedDate);
+
+    // Tìm timeSlot document cho ngày đã chọn
+    const timeSlotDoc = await TimeSlotModel.findOne({
+      date: {
+        $gte: selectedStartDay,
+        $lt: selectedEndDay,
+      },
+    });
+
+    if (timeSlotDoc) {
+      // Tìm tất cả slot phù hợp với khung giờ đã chọn
+      const matchingSlots = timeSlotDoc.slots.filter(
+        (slot) =>
+          slot.startTime === startTime &&
+          slot.endTime === endTime &&
+          slot.isAvailable
+      );
+
+      // Lấy danh sách id của các nhân viên có thể thực hiện dịch vụ trong khung giờ này
+      if (matchingSlots.length > 0) {
+        matchingSlots.forEach((slot) => {
+          if (slot.employeeAvailability) {
+            // Lọc danh sách nhân viên khả dụng
+            const availableEmps = slot.employeeAvailability
+              .filter((emp) => emp.isAvailable)
+              .map((emp) => emp.employeeId.toString());
+
+            availableEmployeeIds = [...availableEmployeeIds, ...availableEmps];
+          }
+        });
+
+        // Loại bỏ các id trùng lặp
+        availableEmployeeIds = [...new Set(availableEmployeeIds)];
+
+        if (availableEmployeeIds.length > 0) {
+          // Thêm điều kiện lọc theo employeeId
+          query = {
+            ...query,
+            _id: { $in: availableEmployeeIds },
+          };
+        }
+      }
+
+      // Nếu không tìm thấy slot phù hợp hoặc không có nhân viên khả dụng
+      if (matchingSlots.length === 0 || availableEmployeeIds.length === 0) {
+        // Kiểm tra xem ngày đã chọn có phải là ngày làm việc của nhân viên không
+        const dayOfWeek = selectedDate
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toLowerCase();
+
+        // Thêm điều kiện lọc theo ngày làm việc
+        query = {
+          ...query,
+          "employeeInfo.schedule.workDays": dayOfWeek,
+        };
+
+        // Kiểm tra xem nhân viên có trạng thái nghỉ phép trong ngày đã chọn không
+        query = {
+          ...query,
+          $or: [
+            { "employeeInfo.schedule.vacation": { $exists: false } },
+            { "employeeInfo.schedule.vacation": { $size: 0 } },
+            {
+              "employeeInfo.schedule.vacation": {
+                $not: {
+                  $elemMatch: {
+                    start: { $lte: selectedEndDay },
+                    end: { $gte: selectedStartDay },
+                  },
+                },
+              },
+            },
+          ],
+        };
+
+        // Kiểm tra xem nhân viên có cuộc hẹn khác vào thời gian này không
+        const conflictingEmployeeIds = await AppointmentModel.distinct(
+          "employeeId",
+          {
+            scheduledDate: {
+              $gte: selectedStartDay,
+              $lt: selectedEndDay,
+            },
+            "scheduledTimeSlot.start": startTime,
+            status: { $nin: [AppointmentStatus.CANCELLED] },
+          }
+        );
+
+        if (conflictingEmployeeIds.length > 0) {
+          // Loại trừ nhân viên có lịch trùng
+          query = {
+            ...query,
+            _id: { $nin: conflictingEmployeeIds },
+          };
+        }
+      }
+    } else {
+      // Nếu không tìm thấy timeSlot cho ngày đã chọn, kiểm tra theo lịch làm việc thông thường
+      const dayOfWeek = selectedDate
+        .toLocaleDateString("en-US", { weekday: "long" })
+        .toLowerCase();
+
+      // Thêm điều kiện lọc theo ngày làm việc
+      query = {
+        ...query,
+        "employeeInfo.schedule.workDays": dayOfWeek,
+      };
+
+      // Kiểm tra xem nhân viên có trạng thái nghỉ phép trong ngày đã chọn không
+      query = {
+        ...query,
+        $or: [
+          { "employeeInfo.schedule.vacation": { $exists: false } },
+          { "employeeInfo.schedule.vacation": { $size: 0 } },
+          {
+            "employeeInfo.schedule.vacation": {
+              $not: {
+                $elemMatch: {
+                  start: { $lte: selectedEndDay },
+                  end: { $gte: selectedStartDay },
+                },
+              },
+            },
+          },
+        ],
+      };
+    }
+  }
+
+  // Lấy danh sách nhân viên theo các điều kiện đã xác định
+  const employees = await UserModel.find(query)
+    .select("_id fullName profilePicture employeeInfo")
+    .sort({ "employeeInfo.performance.rating": -1 }); // Sắp xếp theo đánh giá cao nhất
+
+  return { employees };
 };
 
 // Create a new employee
@@ -589,14 +804,18 @@ export const assignAppointmentToEmployeeService = async ({
   }
 
   // Check if appointment can be assigned
-  if (!["pending", "confirmed"].includes(appointment.status)) {
+  if (
+    ![AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED].includes(
+      appointment.status
+    )
+  ) {
     throw new BadRequestException(
       `Không thể gán lịch hẹn có trạng thái ${appointment.status}`
     );
   }
 
   // Check if employee has necessary specialties for the service
-  if (appointment.serviceType === "single") {
+  if (appointment.serviceType === ServiceType.SINGLE) {
     const service = await ServiceModel.findById(appointment.serviceId);
     if (
       service &&

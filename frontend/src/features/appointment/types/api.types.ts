@@ -41,7 +41,12 @@ export type UserAppointmentType = {
     };
   };
   serviceType: string;
-  serviceId: string;
+  serviceId: {
+    _id: string;
+    name: string;
+    price: number;
+    duration: number;
+  };
   scheduledDate: Date;
   scheduledTimeSlot: {
     start: string;
@@ -142,13 +147,24 @@ export type AdminAppointmentType = {
   createdAt: Date;
   updatedAt: Date;
 }
-export type TimeSlotType= {
-  date: Date,
-  slots: {
-    startTime: string;
-    endTime: string;
-    isAvailable: boolean;
-    appointmentId?: string;
-    employeeId?: string;
-  }[]
+export interface EmployeeAvailabilityType {
+  employeeId: string;
+  isAvailable: boolean;
+}
+
+export interface TimeSlotType {
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+  employeeAvailability?: EmployeeAvailabilityType[];
+  originalSlotIndexes?: number[];
+}
+
+export type GetAvailableTimeSlotResponseType = {
+  message: string;
+  timeSlot: {
+    _id: string;
+    date: Date;
+    slots: TimeSlotType[]
+  }
 }

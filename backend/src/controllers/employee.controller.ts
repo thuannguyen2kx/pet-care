@@ -12,6 +12,7 @@ import {
   getEmployeeScheduleService,
   updateEmployeeAvailabilityService,
   assignAppointmentToEmployeeService,
+  getAvailableEmployeesForServiceService,
 } from "../services/employee.service";
 import { HTTPSTATUS } from "../config/http.config";
 import { uploadProfilePicture } from "../utils/file-uploade";
@@ -23,6 +24,7 @@ import {
   availabilitySchema,
   appointmentIdSchema,
   getEmployeesSchema,
+  getAvailableEmployeesSchema,
 } from "../validation/employee.validation";
 
 // Get all employees with optional filtering
@@ -41,7 +43,23 @@ export const getAllEmployeesController = asyncHandler(
     });
   }
 );
+export const getAvailableEmployeesController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const query = getAvailableEmployeesSchema.parse(req.query);
+    
+    const { employees } = await getAvailableEmployeesForServiceService({
+      serviceId: query.serviceId,
+      serviceType: query.serviceType,
+      timeSlot: query.timeSlot,
+      date: query.date,
+    });
 
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Lấy danh sách nhân viên khả dụng thành công",
+      employees,
+    });
+  }
+);
 // Get employee by ID
 export const getEmployeeByIdController = asyncHandler(
   async (req: Request, res: Response) => {

@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import {
   AdminAppointmentType,
   AppointmentDetailsType,
-  TimeSlotType,
+  GetAvailableTimeSlotResponseType,
   UserAppointmentType,
 } from "./types/api.types";
 
@@ -32,7 +32,7 @@ export const getAvailableTimeSlotsQueryFn = async ({
   date?: Date;
   serviceId?: string;
   serviceType?: string;
-}): Promise<{ message: string; timeSlot: TimeSlotType }> => {
+}): Promise<GetAvailableTimeSlotResponseType> => {
   const params = new URLSearchParams();
 
   if (date) {
@@ -92,6 +92,7 @@ export const getAllAppointmentsQueryFn = async (params?: {
 };
 export const createAppointmentMutationFn = async (appointmentData: {
   petId: string;
+  employeeId?: string;
   serviceType: string;
   serviceId: string;
   scheduledDate: string;
