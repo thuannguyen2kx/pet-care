@@ -4,6 +4,7 @@ import { vi } from "date-fns/locale";
 import { AdminAppointmentType } from "@/features/appointment/types/api.types";
 import { TimeSlot } from "./time-slot";
 import { AppointmentCard } from "./appointment-card";
+import { AppointmentOverlapBadge } from "./appointment-overlap-badge";
 
 interface WeekViewProps {
   startDate: Date;
@@ -12,6 +13,7 @@ interface WeekViewProps {
   workingHoursStart: string;
   workingHoursEnd: string;
   onAppointmentClick: (appointment: AdminAppointmentType) => void;
+  onDateClick?: (date: Date) => void;
 }
 
 export const WeekView: React.FC<WeekViewProps> = ({
@@ -20,22 +22,15 @@ export const WeekView: React.FC<WeekViewProps> = ({
   appointments,
   workingHoursStart,
   workingHoursEnd,
-  onAppointmentClick
+  onAppointmentClick,
+  onDateClick
 }) => {
   const now = new Date();
   
   // Generate days of the week based on workDays
   const weekDays = useMemo(() => {
     const days = [];
-    const daysMap: { [key: string]: number } = {
-      "Sunday": 0,
-      "Monday": 1,
-      "Tuesday": 2,
-      "Wednesday": 3,
-      "Thursday": 4,
-      "Friday": 5,
-      "Saturday": 6
-    };
+
     
     // Start from Monday of the week
     const start = new Date(startDate);
@@ -73,22 +68,57 @@ export const WeekView: React.FC<WeekViewProps> = ({
     const hour = parseInt(time.split(':')[0]);
     
     return appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.start);
-      return (
-        isSameDay(appointmentDate, day) && 
-        appointmentDate.getHours() === hour
-      );
+      try {
+        // Parse the scheduledDate from the appointment
+        const appointmentDate = new Date(appointment.scheduledDate);
+        if (!isSameDay(appointmentDate, day)) return false;
+        
+        // Get the hour from the scheduledTimeSlot.start
+        const timeStart = appointment.scheduledTimeSlot.start;
+        const appointmentHour = parseInt(timeStart.split(':')[0]);
+        
+        return appointmentHour === hour;
+      } catch (error) {
+        console.error("Error filtering appointments:", error);
+        return false;
+      }
     });
+  };
+
+  // Group appointments that occur in the same time slot
+  const groupAppointmentsByTimeSlot = (appointments: AdminAppointmentType[]) => {
+    if (!appointments.length) return [];
+    
+    const groups: { [key: string]: AdminAppointmentType[] } = {};
+    
+    appointments.forEach(appointment => {
+      const slot = appointment.scheduledTimeSlot.start;
+      if (!groups[slot]) {
+        groups[slot] = [];
+      }
+      groups[slot].push(appointment);
+    });
+    
+    return Object.values(groups);
+  };
+
+  // Handle day column click
+  const handleDayClick = (day: Date, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDateClick) {
+      onDateClick(day);
+    }
   };
 
   return (
     <div className="h-full overflow-auto bg-white">
-      <div className="sticky top-0 bg-white z-10 flex border-b">
+      <div className="sticky top-0 bg-slate-100 z-10 flex">
         <div className="w-16" /> {/* Time column spacer */}
         {weekDays.map((day) => (
           <div 
             key={day.toString()} 
-            className="flex-1 p-2 text-center border-l border-gray-200"
+            className={`flex-1 p-2 text-center border-l border-gray-200 cursor-pointer hover:bg-gray-50 ${isSameDay(day, startDate) ? 'bg-blue-50' : ''}`}
+            onClick={(e) => handleDayClick(day, e)}
           >
             <div className={`font-medium ${isSameDay(day, now) ? 'text-blue-600' : ''}`}>
               {format(day, "EEE", { locale: vi })}
@@ -112,27 +142,49 @@ export const WeekView: React.FC<WeekViewProps> = ({
               <div className="flex h-full">
                 {weekDays.map((day) => {
                   const timeAppointments = getAppointmentsForTimeSlotAndDay(time, day);
+                  const appointmentGroups = groupAppointmentsByTimeSlot(timeAppointments);
                   
                   return (
                     <div 
                       key={day.toString()} 
-                      className="flex-1 border-l border-gray-200 p-1"
+                      className={`flex-1 border-l border-gray-200 relative min-h-14 ${
+                        isSameDay(day, startDate) ? 'bg-blue-50' : ''
+                      }`}
+                      onClick={(e) => handleDayClick(day, e)}
                     >
-                      <div className="space-y-1">
-                        {timeAppointments.map((appointment) => (
-                          <AppointmentCard
-                            key={appointment._id}
-                            id={appointment._id}
-                            time={`${format(new Date(appointment.scheduledTimeSlot.start), "HH:mm")} - ${format(new Date(appointment.scheduledTimeSlot.end), "HH:mm")}`}
-                            customer={appointment.customerId}
-                            pet={appointment.petId}
-                            status={appointment.status}
-                            employee={appointment.employeeId}
-                            onClick={() => onAppointmentClick(appointment)}
-                            isInWeekView={true}
-                          />
-                        ))}
-                      </div>
+                      {appointmentGroups.map((group, groupIndex) => (
+                        <div key={`group-${groupIndex}`} className="w-full h-full relative px-1 pt-1">
+                          {group.map((appointment, index) => (
+                            <AppointmentCard
+                              key={appointment._id}
+                              id={appointment._id}
+                              title={appointment.serviceId?.name}
+                              time={`${appointment.scheduledTimeSlot.start} - ${appointment.scheduledTimeSlot.end}`}
+                              customer={appointment.customerId}
+                              pet={appointment.petId}
+                              status={appointment.status}
+                              employee={appointment.employeeId}
+                              onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                onAppointmentClick(appointment);
+                              }}
+                              isInWeekView={true}
+                              isOverlapping={group.length > 1}
+                              overlapIndex={index}
+                              totalOverlapping={group.length}
+                            />
+                          ))}
+                          
+                          {group.length > 1 && (
+                            <div className="absolute top-0 right-1 z-50">
+                              <AppointmentOverlapBadge 
+                                count={group.length} 
+                                className="scale-75 origin-top-right"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   );
                 })}

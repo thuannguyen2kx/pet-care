@@ -65,8 +65,18 @@ export type UserAppointmentType = {
 
 export type AppointmentDetailsType = {
   _id: string;
-  customerId: string;
+  customerId: {
+    _id: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    profilePicture: {
+      url: string | null;
+      publicId: string | null;
+    };
+  };
   petId: {
+    _id: string;
     name: string;
     species: string;
     breed: string;
@@ -88,15 +98,19 @@ export type AppointmentDetailsType = {
     description: string;
     price: number;
     duration: number;
+    images: {
+      url: string | null;
+      publicId: string | null;
+    }[]
   };
-  scheduledDate: Date;
+  scheduledDate: string;
   scheduledTimeSlot: {
     start: string;
     end: string;
   };
   notes?: string;
   serviceNotes?: string;
-  status: string;
+  status: AppointmentStatus;
   paymentStatus: string;
   totalAmount: number;
   completedAt?: Date;
@@ -133,7 +147,7 @@ export type AdminAppointmentType = {
     price: number;
     duration: number;
   };
-  scheduledDate: Date;
+  scheduledDate: string;
   scheduledTimeSlot: {
     start: string;
     end: string;

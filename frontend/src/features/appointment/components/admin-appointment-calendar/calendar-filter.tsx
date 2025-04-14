@@ -100,7 +100,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
           value={calendarView} 
           onValueChange={(value) => setCalendarView(value as "day" | "week" | "month")}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[180px]">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Hiển thị" />
           </SelectTrigger>
@@ -133,7 +133,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
           value={selectedEmployeeId} 
           onValueChange={setSelectedEmployeeId}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[220px]">
             <Filter className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Nhân viên" />
           </SelectTrigger>

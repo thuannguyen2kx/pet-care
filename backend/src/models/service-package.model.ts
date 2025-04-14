@@ -23,7 +23,7 @@ export interface IServicePackage extends Document {
   description?: string;
   services: IServiceItem[];
   specialties: SpecialtyType[];
-  totalPrice: number;
+  price: number;
   discountedPrice?: number;
   discountPercentage?: number;
   duration: number;
@@ -56,7 +56,7 @@ const ServicePackageSchema = new Schema<IServicePackage>(
       },
     ],
     specialties: [String],
-    totalPrice: Number,
+    price: Number,
     discountedPrice: Number,
     discountPercentage: Number,
     duration: Number,

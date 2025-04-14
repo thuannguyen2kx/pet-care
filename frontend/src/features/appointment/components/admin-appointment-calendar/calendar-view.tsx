@@ -1,4 +1,3 @@
-// src/features/appointment/components/calendar/CalendarView.tsx
 import React from "react";
 import { addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { DayView } from "./day-view";
@@ -14,6 +13,7 @@ interface CalendarViewProps {
   appointments: AdminAppointmentType[];
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  onDateClick: (date: Date) => void; // New prop for handling day clicks from month view
   viewType: CalendarViewType;
   onViewTypeChange: (viewType: CalendarViewType) => void;
   workingHoursStart: string;
@@ -26,6 +26,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   appointments,
   selectedDate,
   onDateChange,
+  onDateClick,
   viewType,
   onViewTypeChange,
   workingHoursStart,
@@ -58,16 +59,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     onDateChange(new Date());
   };
 
-  const handleDateClick = (date: Date) => {
-    onDateChange(date);
-    if (viewType === "month") {
-      onViewTypeChange("day");
-    }
-  };
-
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b p-4 flex items-center justify-between">
+      <div className="border-b border-slate-300 p-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -141,6 +135,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             workingHoursStart={workingHoursStart}
             workingHoursEnd={workingHoursEnd}
             onAppointmentClick={onAppointmentClick}
+            onDateClick={onDateClick} // Pass through the date click handler
           />
         )}
         
@@ -148,7 +143,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <MonthView
             date={selectedDate}
             appointments={appointments}
-            onDateClick={handleDateClick}
+            onDateClick={onDateClick} // Use the specific handler
             onAppointmentClick={onAppointmentClick}
           />
         )}

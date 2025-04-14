@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { X, User, PawPrint, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { User, PawPrint, Clock, Calendar as CalendarIcon, AlertCircle } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -9,7 +9,6 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "./status-indicator";
@@ -24,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { AdminAppointmentType } from "@/features/appointment/types/api.types";
 import { Link } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface AppointmentDetailsProps {
   open: boolean;
@@ -31,6 +31,7 @@ interface AppointmentDetailsProps {
   appointment: AdminAppointmentType | null;
   onUpdateStatus: (appointmentId: string, status: string, notes: string) => void;
   isUpdating: boolean;
+  sameTimeSlotCount?: number;
 }
 
 export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
@@ -38,13 +39,15 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
   onOpenChange,
   appointment,
   onUpdateStatus,
-  isUpdating
+  isUpdating,
+  sameTimeSlotCount = 0
 }) => {
   const [newStatus, setNewStatus] = useState<string>("");
   const [serviceNotes, setServiceNotes] = useState<string>("");
   
   useEffect(() => {
     if (appointment) {
+      setNewStatus("");
       setServiceNotes(appointment.serviceNotes || "");
     } else {
       setNewStatus("");
@@ -117,15 +120,22 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
            "Chưa thanh toán";
   };
   
+  // Format appointment date
+  const formatAppointmentDate = () => {
+    try {
+      return format(new Date(appointment.scheduledDate), "EEEE, dd/MM/yyyy", { locale: vi });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return appointment.scheduledDate;
+    }
+  };
+  
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader className="space-y-2 pb-4 border-b">
+      <SheetContent className="w-full sm:max-w-lg py-4 px-6 overflow-y-auto">
+        <SheetHeader className="space-y-2 pb-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl">Chi tiết cuộc hẹn</SheetTitle>
-            <SheetClose className="rounded-full p-2 hover:bg-gray-100">
-              <X className="h-4 w-4" />
-            </SheetClose>
+            <SheetTitle className="text-xl">Chi tiết cuộc hẹn</SheetTitle> 
           </div>
           <SheetDescription>
             Xem và quản lý thông tin cuộc hẹn
@@ -133,6 +143,17 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
         </SheetHeader>
         
         <div className="py-4 space-y-6">
+          {/* Multiple Appointments Warning */}
+          {sameTimeSlotCount > 0 && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertTitle className="text-blue-800">Thông tin khung giờ</AlertTitle>
+              <AlertDescription className="text-blue-700">
+                Có {sameTimeSlotCount} cuộc hẹn khác trong cùng khung giờ này.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Service and Date Info */}
           <div>
             <h3 className="text-lg font-medium">{appointment.serviceId?.name}</h3>
@@ -154,7 +175,7 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
             <CalendarIcon className="h-5 w-5 text-gray-400 mt-0.5" />
             <div>
               <div className="font-medium">
-                {format(new Date(appointment.scheduledDate), "EEEE, dd/MM/yyyy", { locale: vi })}
+                {formatAppointmentDate()}
               </div>
               <div className="text-gray-500">
                 {appointment.scheduledTimeSlot.start} - {appointment.scheduledTimeSlot.end}
@@ -211,7 +232,7 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
           
           {/* Status Update */}
           {appointment.status !== "completed" && appointment.status !== "cancelled" && (
-            <div className="space-y-4 pt-4 border-t">
+            <div className="space-y-4 pt-4 border-t border-slate-200">
               <h4 className="font-medium">Cập nhật trạng thái</h4>
               
               <div className="space-y-2">
@@ -220,7 +241,7 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
                   value={newStatus} 
                   onValueChange={setNewStatus}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn trạng thái mới" />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,11 +267,11 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
           )}
         </div>
         
-        <SheetFooter className="flex-col sm:flex-row gap-2 pt-2 border-t">
+        <SheetFooter className="flex-col sm:flex-row gap-2 pt-4 border-t border-slate-300">
           <Button
             variant="outline"
             asChild
-            className="sm:ml-auto"
+            className="sm:ml-auto border-primary text-primary"
           >
             <Link to={`/admin/appointments/${appointment._id}`}>
               Xem chi tiết đầy đủ

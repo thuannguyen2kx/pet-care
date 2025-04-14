@@ -3,6 +3,7 @@ import { format, startOfMonth, endOfMonth, addDays, isSameMonth, isSameDay, each
 import { vi } from "date-fns/locale";
 import { StatusIndicator } from "./status-indicator"; 
 import { AdminAppointmentType } from "../../types/api.types";
+import { AppointmentOverlapBadge } from "./appointment-overlap-badge";
 
 interface MonthViewProps {
   date: Date;
@@ -48,23 +49,58 @@ export const MonthView: React.FC<MonthViewProps> = ({
     return [...prevMonthDays, ...daysInMonth, ...nextMonthDays];
   }, [date]);
 
+
   // Get appointments for a specific day
   const getAppointmentsForDay = (day: Date) => {
     return appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.scheduledTimeSlot.start);
-      return isSameDay(appointmentDate, day);
+      try {
+        const appointmentDate = new Date(appointment.scheduledDate);
+        return isSameDay(appointmentDate, day);
+      } catch (error) {
+        console.error("Error checking appointment day:", error);
+        return false;
+      }
     });
+  };
+
+  // Count appointments in same time slot
+  const countAppointmentsInSameTimeSlot = (dayAppointments: AdminAppointmentType[]) => {
+    if (dayAppointments.length <= 1) return 0;
+    
+    // Group appointments by time slot
+    const timeSlotCounts: Record<string, number> = {};
+    
+    dayAppointments.forEach(appointment => {
+      const slot = appointment.scheduledTimeSlot.start;
+      timeSlotCounts[slot] = (timeSlotCounts[slot] || 0) + 1;
+    });
+    
+    // Count slots with multiple appointments
+    let multipleAppointmentsCount = 0;
+    Object.values(timeSlotCounts).forEach(count => {
+      if (count > 1) {
+        multipleAppointmentsCount += count;
+      }
+    });
+    
+    return multipleAppointmentsCount;
+  };
+
+  // Handle date click with explicit event parameter
+  const handleDateClick = (day: Date, e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event propagation
+    onDateClick(day);
   };
 
   return (
     <div className="h-full overflow-auto bg-white">
-      <div className="sticky top-0 bg-white z-10 p-4 border-b">
-        <h2 className="text-xl font-semibold">
+      <div className="sticky top-0 bg-white z-10 p-4">
+        <h2 className="text-xl font-semibold capitalize">
           {format(date, "MMMM yyyy", { locale: vi })}
         </h2>
       </div>
       
-      <div className="grid grid-cols-7 border-b">
+      <div className="grid grid-cols-7 bg-gray-100">
         {["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"].map((day) => (
           <div key={day} className="p-2 text-center font-medium text-sm">
             {day}
@@ -72,19 +108,20 @@ export const MonthView: React.FC<MonthViewProps> = ({
         ))}
       </div>
       
-      <div className="grid grid-cols-7 border-b">
+      <div className="grid grid-cols-7 border-l border-slate-200">
         {monthDays.map((day) => {
           const isToday = isSameDay(day, now);
           const isCurrentMonth = isSameMonth(day, date);
           const dayAppointments = getAppointmentsForDay(day);
+          const sameTimeSlotCount = countAppointmentsInSameTimeSlot(dayAppointments);
           
           return (
             <div 
               key={day.toString()}
-              className={`min-h-24 border-r border-b p-1 cursor-pointer ${
+              className={`min-h-24 border-r border-b border-slate-200 p-1 cursor-pointer ${
                 isCurrentMonth ? "bg-white" : "bg-gray-50"
-              }`}
-              onClick={() => onDateClick(day)}
+              } ${isSameDay(day, date) ? "bg-blue-50" : ""}`}
+              onClick={(e) => handleDateClick(day, e)}
             >
               <div className="flex justify-between">
                 <div 
@@ -93,27 +130,50 @@ export const MonthView: React.FC<MonthViewProps> = ({
                   {format(day, "d")}
                 </div>
                 
-                {dayAppointments.length > 0 && (
-                  <div className="text-xs text-gray-500 font-medium">
-                    {dayAppointments.length}
-                  </div>
-                )}
+                <div className="flex items-center space-x-1">
+                  {sameTimeSlotCount > 0 && (
+                    <AppointmentOverlapBadge 
+                      count={sameTimeSlotCount}
+                      className="scale-75 origin-top-right"
+                    />
+                  )}
+                  
+                  {dayAppointments.length > 0 && (
+                    <div className="text-xs text-gray-500 font-medium">
+                      {dayAppointments.length}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="mt-1 space-y-1 max-h-20 overflow-y-auto">
-                {dayAppointments.slice(0, 3).map((appointment) => (
-                  <div 
-                    key={appointment._id}
-                    className="flex items-center text-xs p-1 rounded truncate cursor-pointer hover:bg-gray-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAppointmentClick(appointment);
-                    }}
-                  >
-                    <StatusIndicator status={appointment.status} size="sm" />
-                    <span className="ml-1 truncate">{format(new Date(appointment.scheduledTimeSlot.start), "HH:mm")}</span>
-                  </div>
-                ))}
+                {dayAppointments.slice(0, 3).map((appointment) => {
+                  // Safely format the time, with fallback
+                  let formattedTime = "";
+                  try {
+                    formattedTime = format(
+                      new Date(`${appointment.scheduledDate}T${appointment.scheduledTimeSlot.start}`), 
+                      "HH:mm"
+                    );
+                  } catch {
+                    formattedTime = appointment.scheduledTimeSlot.start;
+                  }
+                  
+                  return (
+                    <div 
+                      key={appointment._id}
+                      className="flex items-center text-xs p-1 rounded truncate cursor-pointer hover:bg-gray-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAppointmentClick(appointment);
+                      }}
+                    >
+                      <StatusIndicator status={appointment.status} size="sm" />
+                      <span className="ml-1 truncate">{formattedTime}</span>
+                      <span className="ml-1 truncate text-gray-500">{appointment.serviceId?.name || 'Cuộc hẹn'}</span>
+                    </div>
+                  );
+                })}
                 
                 {dayAppointments.length > 3 && (
                   <div className="text-xs text-gray-500 font-medium pl-1">

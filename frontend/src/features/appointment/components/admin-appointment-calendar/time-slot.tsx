@@ -13,7 +13,7 @@ export const TimeSlot: React.FC<TimeSlotProps> = ({
   children 
 }) => {
   return (
-    <div className="flex h-14 border-t border-gray-200">
+    <div className="flex min-h-14 border-t border-gray-200">
       <div className="w-16 -mt-3.5 pr-2 text-right text-xs text-gray-500">
         {time}
       </div>

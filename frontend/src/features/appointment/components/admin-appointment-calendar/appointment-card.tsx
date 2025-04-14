@@ -1,19 +1,18 @@
-// src/features/appointment/components/calendar/appointment-card.tsx
 import React from "react";
-import { cn } from "@/lib/utils"; // Assuming you have a util function for class names
+import { cn } from "@/lib/utils";
+import { AppointmentOverlapBadge } from "./appointment-overlap-badge";
+import { PetCategory, petCategoryTranslations } from "@/constants";
 
 export interface AppointmentCardProps {
   id: string;
   title?: string;
   time: string;
   customer: {
-    _id: string;
     fullName: string;
     email: string;
     phoneNumber: string;
   };
   pet: {
-    _id: string;
     name: string;
     species?: string;
     breed?: string;
@@ -24,15 +23,17 @@ export interface AppointmentCardProps {
   };
   status: string;
   employee?: {
-    _id: string;
     fullName: string;
     profilePicture?: {
       url: string | null;
       publicId: string | null;
     };
   };
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   isInWeekView?: boolean;
+  isOverlapping?: boolean;
+  overlapIndex?: number;
+  totalOverlapping?: number;
 }
 
 export const AppointmentCard: React.FC<AppointmentCardProps> = ({
@@ -43,7 +44,10 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
   status,
   employee,
   onClick,
-  isInWeekView = false
+  isInWeekView = false,
+  isOverlapping = false,
+  overlapIndex = 0,
+  totalOverlapping = 1
 }) => {
   const getStatusColor = (status: string): string => {
     switch (status) {
@@ -62,47 +66,65 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
     }
   };
 
-  // Render a compact card for week view
+  // Render a compact card for week view with overlapping support
   if (isInWeekView) {
+    const width = isOverlapping ? `calc(100% / ${totalOverlapping})` : '100%';
+    const marginLeft = isOverlapping ? `calc(${width} * ${overlapIndex})` : '0';
+    
     return (
       <div 
         className={cn(
-          "p-1.5 rounded-sm border-l-4 text-xs cursor-pointer hover:shadow-md transition-shadow",
+          "absolute p-1.5 rounded-sm border-l-4 text-xs cursor-pointer hover:shadow-md transition-shadow",
           getStatusColor(status)
         )}
+        style={{ 
+          width, 
+          left: marginLeft,
+          zIndex: overlapIndex + 1 
+        }}
         onClick={onClick}
       >
-        <div className="font-medium truncate">{title}</div>
+        <div className="font-medium truncate">{title || 'Cuộc hẹn'}</div>
         <div className="truncate">{customer?.fullName}</div>
       </div>
     );
   }
 
-  // Render a detailed card for other views
+  // Render a detailed card for day view
   return (
     <div 
       className={cn(
         "p-3 rounded border-l-4 cursor-pointer hover:shadow-md transition-shadow",
-        getStatusColor(status)
+        getStatusColor(status),
+        isOverlapping && "mb-1" // Add margin between overlapping appointments
       )}
+      style={{
+        opacity: isOverlapping ? 0.9 - (overlapIndex * 0.1) : 1,
+        zIndex: isOverlapping ? 10 - overlapIndex : 1
+      }}
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
-        <span className="font-medium">{title}</span>
-        <div className={`w-2 h-2 rounded-full ${
-          status === 'pending' ? 'bg-yellow-500' :
-          status === 'confirmed' ? 'bg-green-500' :
-          status === 'in-progress' ? 'bg-blue-500' :
-          status === 'completed' ? 'bg-gray-500' :
-          'bg-red-500'
-        }`} />
+        <span className="font-medium">{title || 'Cuộc hẹn'}</span>
+        <div className="flex items-center space-x-1">
+          {isOverlapping && totalOverlapping > 1 && overlapIndex === 0 && (
+            <AppointmentOverlapBadge count={totalOverlapping - 1} />
+          )}
+          <div className={`w-2 h-2 rounded-full ${
+            status === 'pending' ? 'bg-yellow-500' :
+            status === 'confirmed' ? 'bg-green-500' :
+            status === 'in-progress' ? 'bg-blue-500' :
+            status === 'completed' ? 'bg-gray-500' :
+            'bg-red-500'
+          }`} />
+        </div>
       </div>
       
       <div className="text-sm mt-1">{time}</div>
       
       <div className="mt-2 text-sm">
         <div><span className="font-medium">Khách hàng:</span> {customer?.fullName}</div>
-        <div><span className="font-medium">Thú cưng:</span> {pet?.name} {pet?.species && `(${pet.species})`}</div>
+        <div><span className="font-medium">Thú cưng:</span> {pet?.name} {pet?.species && petCategoryTranslations[pet.species as PetCategory]}</div>
         {employee && <div><span className="font-medium">Nhân viên:</span> {employee.fullName}</div>}
       </div>
     </div>

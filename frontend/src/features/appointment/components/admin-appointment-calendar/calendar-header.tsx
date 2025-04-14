@@ -1,4 +1,3 @@
-// src/features/appointment/components/calendar/CalendarHeader.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import { PlusCircle, ListFilter } from "lucide-react";
+import { ListFilter } from "lucide-react";
 
 interface CalendarHeaderProps {
   selectedEmployeeId: string;
@@ -34,13 +33,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             <ListFilter className="mr-2 h-4 w-4" />
             Xem danh sách
           </Link>
-        </Button>
-        <Button asChild>
-          <Link to="/admin/appointments/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Tạo lịch hẹn
-          </Link>
-        </Button>
+        </Button> 
       </div>
     </div>
   );

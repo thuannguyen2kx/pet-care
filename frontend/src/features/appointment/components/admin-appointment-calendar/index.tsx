@@ -1,6 +1,5 @@
-// src/pages/admin/AdminAppointmentsCalendarPage.tsx
-import React, { useState, useMemo } from "react";
-import { format, addDays, subDays } from "date-fns";
+import { useState, useMemo } from "react";
+import { format, addDays, subDays, startOfMonth, endOfMonth, isSameDay } from "date-fns";
 import {
   Card,
   CardContent,
@@ -14,8 +13,6 @@ import { AppointmentDetails } from "./appointment-detatils";
 import { CalendarView } from "./calendar-view";
 import { CalendarFilters } from "./calendar-filter";
 import { CalendarHeader } from "./calendar-header";
-
-
 
 type DateRange = {
   from: Date | undefined;
@@ -88,37 +85,23 @@ const AdminAppointmentsCalendar = () => {
       );
     });
     
-    return filteredAppointments.map((apt) => ({
-      ...apt
-      // id: apt._id,
-      // title: apt.serviceId?.name || "Dịch vụ không xác định",
-      // start: new Date(apt.scheduledDate + "T" + apt.scheduledTimeSlot.start),
-      // end: new Date(new Date(apt.scheduledDate + "T" + apt.scheduledTimeSlot.start).getTime() + (apt.serviceId.duration || 60) * 60000),
-      // status: apt.status,
-      // customer: {
-      //   fullName: apt.customerId?.fullName || "Khách hàng",
-      //   phoneNumber: apt.customerId?.phoneNumber
-      // },
-      // pet: {
-      //   name: apt.petId?.name || "Thú cưng",
-      //   species: apt.petId?.species
-      // },
-      // employeeId: apt.employeeId
-    }));
+    return filteredAppointments;
   }, [appointmentsData?.appointments, searchTerm]);
- 
-  console.log("Formatted Appointments: ", formattedAppointments);
+  
   // Handle date range change from calendar
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
-    
-    // Adjust date range based on view
-    if (calendarView === "day") {
+    updateDateRange(date, calendarView);
+  };
+  
+  // Update date range based on selected date and view
+  const updateDateRange = (date: Date, view: "day" | "week" | "month") => {
+    if (view === "day") {
       setDateRange({
         from: date,
         to: date
       });
-    } else if (calendarView === "week") {
+    } else if (view === "week") {
       const startOfWeek = new Date(date);
       startOfWeek.setDate(date.getDate() - date.getDay() + 1); // Start from Monday
       
@@ -129,15 +112,22 @@ const AdminAppointmentsCalendar = () => {
         from: startOfWeek,
         to: endOfWeek
       });
-    } else if (calendarView === "month") {
-      const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-      const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    } else if (view === "month") {
+      const firstDay = startOfMonth(date);
+      const lastDay = endOfMonth(date);
       
       setDateRange({
-        from: startOfMonth,
-        to: endOfMonth
+        from: firstDay,
+        to: lastDay
       });
     }
+  };
+  
+  // Handle day click from month view
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date);
+    setCalendarView("day"); // Switch to day view
+    updateDateRange(date, "day"); // Update date range for the selected day
   };
   
   // Handle appointment click
@@ -155,33 +145,7 @@ const AdminAppointmentsCalendar = () => {
   // Handle view type change
   const handleViewTypeChange = (viewType: "day" | "week" | "month") => {
     setCalendarView(viewType);
-    
-    // Adjust date range based on new view
-    if (viewType === "day") {
-      setDateRange({
-        from: selectedDate,
-        to: selectedDate
-      });
-    } else if (viewType === "week") {
-      const startOfWeek = new Date(selectedDate);
-      startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay() + 1); // Start from Monday
-      
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
-      
-      setDateRange({
-        from: startOfWeek,
-        to: endOfWeek
-      });
-    } else if (viewType === "month") {
-      const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
-      
-      setDateRange({
-        from: startOfMonth,
-        to: endOfMonth
-      });
-    }
+    updateDateRange(selectedDate, viewType);
   };
   
   // Handle status update
@@ -197,6 +161,28 @@ const AdminAppointmentsCalendar = () => {
         refetchAppointments();
       }
     });
+  };
+  
+  // Find appointments for the selected date
+  const selectedDateAppointments = useMemo(() => {
+    return formattedAppointments.filter((appointment) => {
+      try {
+        const appointmentDate = new Date(appointment.scheduledDate);
+        return isSameDay(appointmentDate, selectedDate);
+      } catch (error) {
+        console.error("Error comparing dates:", error);
+        return false;
+      }
+    });
+  }, [formattedAppointments, selectedDate]);
+  
+  // Count appointments in the same time slot
+  const countAppointmentsInSameTimeSlot = (appointment: AdminAppointmentType) => {
+    if (!appointment) return 0;
+    
+    return selectedDateAppointments.filter(apt => 
+      apt.scheduledTimeSlot.start === appointment.scheduledTimeSlot.start
+    ).length;
   };
   
   // Get selected employee name
@@ -241,6 +227,7 @@ const AdminAppointmentsCalendar = () => {
             appointments={formattedAppointments}
             selectedDate={selectedDate}
             onDateChange={handleDateChange}
+            onDateClick={handleDateClick}
             viewType={calendarView}
             onViewTypeChange={handleViewTypeChange}
             workingHoursStart={workHours.start}
@@ -258,6 +245,7 @@ const AdminAppointmentsCalendar = () => {
         appointment={selectedAppointment}
         onUpdateStatus={handleUpdateStatus}
         isUpdating={updateStatusMutation.isPending}
+        sameTimeSlotCount={selectedAppointment ? countAppointmentsInSameTimeSlot(selectedAppointment) - 1 : 0}
       />
     </div>
   );

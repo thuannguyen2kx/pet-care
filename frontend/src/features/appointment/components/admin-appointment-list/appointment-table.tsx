@@ -1,4 +1,3 @@
-// src/features/appointment/components/AppointmentsTable.tsx
 import React from "react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -41,10 +40,10 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
   }
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="rounded-md overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-slate-200">
             <TableHead>Khách hàng</TableHead>
             <TableHead>Thú cưng</TableHead>
             <TableHead>Dịch vụ</TableHead>
@@ -58,7 +57,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
         </TableHeader>
         <TableBody>
           {appointments.map((appointment) => (
-            <TableRow key={appointment._id}>
+            <TableRow key={appointment._id} className="border-slate-100">
               <TableCell>
                 <div className="font-medium">{appointment.customerId?.fullName}</div>
                 <div className="text-sm text-gray-500">{appointment.customerId?.email}</div>

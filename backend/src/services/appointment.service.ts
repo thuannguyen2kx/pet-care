@@ -46,14 +46,18 @@ export const getAppointmentByIdService = async (
   userRole: string
 ) => {
   const appointment = await AppointmentModel.findById(appointmentId)
-    .populate("petId", "name species breed profilePicture")
+    .populate("petId", "_id name species breed profilePicture")
     .populate({
       path: "employeeId",
-      select: "fullName profilePicture",
+      select: "_id fullName profilePicture",
+    })
+    .populate({
+      path: "customerId",
+      select: "_id fullName profilePicture email phoneNumber",
     })
     .populate({
       path: "serviceId",
-      select: "name description price duration",
+      select: "_id name description price duration images",
     });
 
   if (!appointment) {
@@ -63,8 +67,8 @@ export const getAppointmentByIdService = async (
   // Kiểm tra quyền truy cập
   if (
     appointment.customerId.toString() !== userId.toString() &&
-    userRole !== "admin" &&
-    userRole !== "employee"
+    userRole !== Roles.ADMIN &&
+    userRole !== Roles.EMPLOYEE
   ) {
     throw new ForbiddenException("Bạn không có quyền truy cập cuộc hẹn này");
   }
@@ -118,7 +122,7 @@ export const createAppointmentService = async (
       throw new BadRequestException("Gói dịch vụ không khả dụng");
     }
     duration = service.duration;
-    totalAmount = service.discountedPrice || service.totalPrice;
+    totalAmount = service.discountedPrice || service.price;
     specialties.push(...service.specialties);
   } else {
     throw new BadRequestException("Loại dịch vụ không hợp lệ");
