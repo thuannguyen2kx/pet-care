@@ -17,6 +17,8 @@ export const CUSTOMER_ROUTES = {
   PROFILE: "/profile/:profileId",
   PET_DETAILS: "/pets/:petId",
   POST_DETAILS: "/posts/:postId",
+  PAYMENT_SUCCESS: "/payments/success",
+  PAYMENT_CANCEL: "/payments/cancel",
 };
 export const ADMIN_ROUTES = {
   EMPLOYEE: "/admin/employees",

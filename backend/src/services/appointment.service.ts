@@ -63,10 +63,8 @@ export const getAppointmentByIdService = async (
   if (!appointment) {
     throw new NotFoundException("Không tìm thấy cuộc hẹn");
   }
-
-  // Kiểm tra quyền truy cập
   if (
-    appointment.customerId.toString() !== userId.toString() &&
+    appointment.customerId._id.toString() !== userId.toString() &&
     userRole !== Roles.ADMIN &&
     userRole !== Roles.EMPLOYEE
   ) {

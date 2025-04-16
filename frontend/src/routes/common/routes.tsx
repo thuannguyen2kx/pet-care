@@ -30,6 +30,8 @@ import AppointmentDetailPage from "@/pages/customer/appointment-details";
 import AppointmentListPage from "@/pages/customer/appointment-list";
 import AppointmentCalendarPage from "@/pages/admin/appointment-calendar";
 import AdminAppointmentDetailsPage from "@/pages/admin/appointment-details";
+import PaymentSuccessPage from "@/pages/customer/payment-success";
+import PaymentCancelPage from "@/pages/customer/payment-cancel";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -73,6 +75,14 @@ export const protectedCustomerRoutePaths = [
   {
     path: CUSTOMER_ROUTES.APPOINTMENTS_DETAILS,
     element: <AppointmentDetailPage />
+  },
+  {
+    path: CUSTOMER_ROUTES.PAYMENT_SUCCESS,
+    element: <PaymentSuccessPage />
+  },
+  {
+    path: CUSTOMER_ROUTES.PAYMENT_CANCEL,
+    element: <PaymentCancelPage />
   }
 ];
 

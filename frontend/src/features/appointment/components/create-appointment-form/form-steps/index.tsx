@@ -6,3 +6,4 @@ export { default as NotesStep } from './note-step';
 export { default as ReviewStep } from './review-step';
 export { default as StepIndicator } from './step-indicator';
 export { default as ServiceDetailsCard } from './service-details-card';
+export { default as PaymentStep} from './payment-step'

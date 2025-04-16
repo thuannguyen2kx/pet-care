@@ -1,4 +1,3 @@
-// src/components/appointments/AppointmentDetail.tsx
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -6,7 +5,6 @@ import { vi } from "date-fns/locale";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -41,22 +39,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft,
-  Calendar,
   Clock,
-  DollarSign,
   FileEdit,
   User,
   PawPrint,
-  ClipboardCheck,
   XCircle,
-  CheckCircle2,
-  PlayCircle,
+  CreditCard,
+  Scissors,
+  UserCheck,
+  CheckCircle,
+  FileText,
+  CalendarClock,
 } from "lucide-react";
 import { useGetAppointmentById } from "../hooks/queries/get-appointment";
 import { useCancelAppointment } from "../hooks/mutations/cancel-appointment";
 import { useUpdateAppointmentStatus } from "../hooks/mutations/update-appointment";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatusIndicator } from "./admin-appointment-calendar/status-indicator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuthContext } from "@/context/auth-provider";
+import { Roles } from "@/constants";
 
 const AppointmentDetail: React.FC = () => {
+  const {user} = useAuthContext()
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const navigate = useNavigate();
 
@@ -159,25 +164,75 @@ const AppointmentDetail: React.FC = () => {
 
     return <Badge>{label}</Badge>;
   };
-
-  // Helper function to get status icon
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <ClipboardCheck className="h-5 w-5 text-yellow-500" />;
-      case "confirmed":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "in-progress":
-        return <PlayCircle className="h-5 w-5 text-blue-500" />;
-      case "completed":
-        return <CheckCircle2 className="h-5 w-5 text-gray-500" />;
-      case "cancelled":
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <ClipboardCheck className="h-5 w-5" />;
+const formatDate = (dateString?: string) => {
+    try {
+      if (!dateString) return 'N/A';
+      return format(new Date(dateString), 'EEEE, dd/MM/yyyy', { locale: vi });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString || 'N/A';
     }
   };
 
+  // Get status label
+  const getStatusLabel = (status?: string) => {
+    if (!status) return 'Không xác định';
+    
+    const statusMap: Record<string, string> = {
+      'pending': 'Chờ xử lý',
+      'confirmed': 'Đã xác nhận',
+      'in-progress': 'Đang thực hiện',
+      'completed': 'Hoàn thành',
+      'cancelled': 'Đã hủy'
+    };
+    
+    return statusMap[status] || status;
+  };
+
+  // Get payment status label
+  const getPaymentStatusLabel = (status?: string) => {
+    if (!status) return 'Không xác định';
+    
+    return status === 'paid' ? 'Đã thanh toán' :
+           status === 'refunded' ? 'Đã hoàn tiền' :
+           'Chưa thanh toán';
+  };
+
+  // Get status color for badge
+  const getStatusColor = (status?: string) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'confirmed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'completed':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+    }
+  };
+
+  // Get payment status color
+  const getPaymentStatusColor = (status?: string) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'unpaid':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'refunded':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
   // Loading state
   if (isLoading)
     return <div className="flex justify-center p-8">Đang tải...</div>;
@@ -191,23 +246,19 @@ const AppointmentDetail: React.FC = () => {
     );
 
   const appointment = data?.appointment;
-  const service = appointment?.serviceId;
-  const pet = appointment?.petId;
-  const employee = appointment?.employeeId;
-  const userRole = localStorage.getItem("userRole") || "customer"; // Simulated user role
 
   // Calculate if the appointment can be cancelled (24h before)
   const canCancel =
     appointment &&
     (appointment.status === "pending" || appointment.status === "confirmed") &&
-    (userRole === "admin" ||
+    (user?.role === Roles.ADMIN ||
       new Date(appointment.scheduledDate).getTime() - new Date().getTime() >
         24 * 60 * 60 * 1000);
 
   // Calculate if status can be updated
   const canUpdateStatus =
     appointment &&
-    userRole !== "customer" &&
+    user?.role !== Roles.CUSTOMER &&
     appointment.status !== "completed" &&
     appointment.status !== "cancelled";
 
@@ -218,7 +269,7 @@ const AppointmentDetail: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại
         </Button>
@@ -243,184 +294,320 @@ const AppointmentDetail: React.FC = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">Chi tiết lịch hẹn</CardTitle>
-              <CardDescription>
-                Thông tin chi tiết về lịch hẹn của bạn
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              {getStatusIcon(appointment.status)}
-              {getStatusBadge(appointment.status)}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          {/* Service Info */}
-          <div className="rounded-lg border p-4">
-            <h3 className="mb-4 font-medium text-lg">Thông tin dịch vụ</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-sm text-gray-500">Tên dịch vụ</p>
-                <p className="font-medium">{service?.name}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Loại dịch vụ</p>
-                <p className="font-medium">
-                  {appointment.serviceType === "single"
-                    ? "Dịch vụ đơn lẻ"
-                    : "Gói dịch vụ"}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Thời gian dự kiến</p>
-                <p className="font-medium">{service?.duration} phút</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Giá dịch vụ</p>
-                <p className="font-medium flex items-center">
-                  <DollarSign className="h-4 w-4 mr-1" />
-                  {appointment.totalAmount.toLocaleString()} VND
-                </p>
-              </div>
-            </div>
-
-            {service?.description && (
-              <>
-                <Separator className="my-4" />
+      <div className="flex-1">
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Mô tả dịch vụ</p>
-                  <p>{service.description}</p>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Appointment Info */}
-          <div className="rounded-lg border p-4">
-            <h3 className="mb-4 font-medium text-lg">Thông tin lịch hẹn</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm text-gray-500">Ngày hẹn</p>
-                  <p className="font-medium">
-                    {format(
-                      new Date(appointment.scheduledDate),
-                      "EEEE, dd/MM/yyyy",
-                      { locale: vi }
+                  <CardTitle className="text-2xl">
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-64" />
+                    ) : (
+                      appointment?.serviceId.name || 'Chi tiết lịch hẹn'
                     )}
-                  </p>
+                  </CardTitle>
                 </div>
+                
               </div>
-
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm text-gray-500">Thời gian</p>
-                  <p className="font-medium">
-                    {appointment.scheduledTimeSlot.start} -{" "}
-                    {appointment.scheduledTimeSlot.end}
-                  </p>
-                </div>
+              <div className="flex flex-wrap gap-3 mt-2">
+                {isLoading ? (
+                  <>
+                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-6 w-24" />
+                  </>
+                ) : (
+                  <>
+                    <Badge 
+                      variant="outline" 
+                      className={getStatusColor(appointment?.status)}
+                    >
+                      <StatusIndicator status={appointment?.status || ''} size="sm" />
+                      {getStatusLabel(appointment?.status)}
+                    </Badge>
+                    <Badge 
+                      variant="outline"
+                      className={getPaymentStatusColor(appointment?.paymentStatus)}
+                    >
+                      <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                      {getPaymentStatusLabel(appointment?.paymentStatus)}
+                    </Badge>
+                  </>
+                )}
               </div>
+            </CardHeader>
 
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm text-gray-500">Nhân viên</p>
-                  <p className="font-medium">
-                    {employee?.fullName || "Chưa phân công"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <PawPrint className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="text-sm text-gray-500">Thú cưng</p>
-                  <p className="font-medium">
-                    {pet?.name} ({pet?.species} - {pet?.breed})
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {appointment.notes && (
-              <>
-                <Separator className="my-4" />
-                <div>
-                  <p className="text-sm text-gray-500">Ghi chú của bạn</p>
-                  <p>{appointment.notes}</p>
-                </div>
-              </>
-            )}
-
-            {appointment.serviceNotes && (
-              <>
-                <Separator className="my-4" />
-                <div>
-                  <p className="text-sm text-gray-500">Ghi chú của nhân viên</p>
-                  <p>{appointment.serviceNotes}</p>
-                </div>
-              </>
-            )}
-
-            {appointment.status === "completed" && appointment.completedAt && (
-              <>
-                <Separator className="my-4" />
-                <div>
-                  <p className="text-sm text-gray-500">Hoàn thành lúc</p>
-                  <p className="font-medium">
-                    {format(
-                      new Date(appointment.completedAt),
-                      "dd/MM/yyyy HH:mm"
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Date and Time */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center text-gray-500 mb-1">
+                      <CalendarClock className="h-4 w-4 mr-1.5" />
+                      Thời gian
+                    </h3>
+                    {isLoading ? (
+                      <Skeleton className="h-6 w-full" />
+                    ) : (
+                      <div className="font-medium">
+                        {formatDate(appointment?.scheduledDate)}
+                      </div>
                     )}
-                  </p>
+                    {isLoading ? (
+                      <Skeleton className="h-5 w-32 mt-1" />
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        {appointment?.scheduledTimeSlot.start} - {appointment?.scheduledTimeSlot.end}
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Service Info */}
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center text-gray-500 mb-1">
+                      <Scissors className="h-4 w-4 mr-1.5" />
+                      Dịch vụ
+                    </h3>
+                    {isLoading ? (
+                      <>
+                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-5 w-32 mt-1" />
+                      </>
+                    ) : (
+                      <>
+                        <div className="font-medium">
+                          {appointment?.serviceId?.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <Clock className="h-3.5 w-3.5 inline mr-1" />
+                          {appointment?.serviceId?.duration || 0} phút
+                        </div>
+                        <div className="text-sm text-gray-500 mt-0.5">
+                          <CreditCard className="h-3.5 w-3.5 inline mr-1" />
+                          {appointment?.serviceId?.price?.toLocaleString() || 0} VNĐ
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Employee Info */}
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center text-gray-500 mb-1">
+                      <UserCheck className="h-4 w-4 mr-1.5" />
+                      Nhân viên phụ trách
+                    </h3>
+                    {isLoading ? (
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <Skeleton className="h-6 w-40" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage 
+                            src={appointment?.employeeId?.profilePicture?.url || ''} 
+                            alt={appointment?.employeeId?.fullName || 'Employee'} 
+                          />
+                          <AvatarFallback>
+                            {appointment?.employeeId?.fullName?.charAt(0) || 'E'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {appointment?.employeeId?.fullName || 'Chưa phân công'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </>
-            )}
-          </div>
 
-          {/* Payment Info */}
-          <div className="rounded-lg border p-4">
-            <h3 className="mb-4 font-medium text-lg">Thông tin thanh toán</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-sm text-gray-500">Trạng thái thanh toán</p>
-                <Badge
-                // variant={
-                //   appointment.paymentStatus === "paid" ? "success" :
-                //   appointment.paymentStatus === "refunded" ? "warning" :
-                //   "default"
-                // }
-                >
-                  {appointment.paymentStatus === "paid"
-                    ? "Đã thanh toán"
-                    : appointment.paymentStatus === "refunded"
-                    ? "Đã hoàn tiền"
-                    : "Chưa thanh toán"}
-                </Badge>
+                {/* Customer and Pet Info */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center text-gray-500 mb-1">
+                      <User className="h-4 w-4 mr-1.5" />
+                      Khách hàng
+                    </h3>
+                    {isLoading ? (
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-1.5">
+                          <Skeleton className="h-6 w-40" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage 
+                            src={appointment?.customerId?.profilePicture?.url || ''} 
+                            alt={appointment?.customerId?.fullName || 'Customer'} 
+                          />
+                          <AvatarFallback>
+                            {appointment?.customerId?.fullName?.charAt(0) || 'C'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {appointment?.customerId?.fullName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {appointment?.customerId?.email} • {appointment?.customerId?.phoneNumber}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center text-gray-500 mb-1">
+                      <PawPrint className="h-4 w-4 mr-1.5" />
+                      Thú cưng
+                    </h3>
+                    {isLoading ? (
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-1.5">
+                          <Skeleton className="h-6 w-40" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage 
+                            src={appointment?.petId?.profilePicture?.url || ''} 
+                            alt={appointment?.petId?.name || 'Pet'} 
+                          />
+                          <AvatarFallback>
+                            {appointment?.petId?.name?.charAt(0) || 'P'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {appointment?.petId?.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {appointment?.petId?.species} • {appointment?.petId?.breed}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Status and Payment */}
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center text-gray-500 mb-1">
+                      <CheckCircle className="h-4 w-4 mr-1.5" />
+                      Thanh toán
+                    </h3>
+                    {isLoading ? (
+                      <>
+                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-4 w-32 mt-1" />
+                      </>
+                    ) : (
+                      <>
+                        <div className="font-medium">
+                          {appointment?.totalAmount?.toLocaleString() || 0} VNĐ
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {getPaymentStatusLabel(appointment?.paymentStatus)}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <p className="text-sm text-gray-500">Tổng tiền</p>
-                <p className="font-medium text-lg flex items-center">
-                  <DollarSign className="h-4 w-4 mr-1" />
-                  {appointment.totalAmount.toLocaleString()} VND
-                </p>
+              {/* Notes */}
+              <div className="mt-6 space-y-4">
+                <Separator />
+                <div>
+                  <h3 className="text-sm font-medium flex items-center text-gray-500 mb-2">
+                    <FileText className="h-4 w-4 mr-1.5" />
+                    Ghi chú
+                  </h3>
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3 mt-2" />
+                    </>
+                  ) : (
+                    <div className="text-sm">
+                      {appointment?.notes || 'Không có ghi chú'}
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="text-sm font-medium flex items-center text-gray-500 mb-2">
+                    <FileText className="h-4 w-4 mr-1.5" />
+                    Ghi chú dịch vụ
+                  </h3>
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3 mt-2" />
+                    </>
+                  ) : (
+                    <div className="text-sm">
+                      {appointment?.serviceNotes || 'Không có ghi chú dịch vụ'}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          {/* Service Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Chi tiết dịch vụ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-gray-600">
+                    {appointment?.serviceId?.description || 'Không có mô tả chi tiết dịch vụ.'}
+                  </p>
+                  
+                  {appointment?.serviceId?.images && appointment.serviceId.images.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {appointment.serviceId.images
+                        .filter(img => img.url)
+                        .map((image, index) => (
+                          <div key={index} className="rounded-md overflow-hidden">
+                            <img 
+                              src={image.url || ''} 
+                              alt={`Service ${index + 1}`} 
+                              className="h-24 w-full object-cover"
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
       {/* Status Update Dialog */}
       <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
@@ -495,7 +682,7 @@ const AppointmentDetail: React.FC = () => {
             <AlertDialogDescription>
               Bạn có chắc chắn muốn hủy lịch hẹn này không? Hành động này không
               thể hoàn tác.
-              {userRole !== "admin" && (
+              {user?.role !== Roles.ADMIN && (
                 <p className="mt-2 font-medium">
                   Lưu ý: Bạn chỉ có thể hủy lịch hẹn ít nhất 24 giờ trước thời
                   gian đã đặt.

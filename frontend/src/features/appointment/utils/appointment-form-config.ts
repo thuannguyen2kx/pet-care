@@ -7,7 +7,8 @@ export const STEPS = {
   TIME: 2,
   EMPLOYEE: 3,
   NOTES: 4,
-  REVIEW: 5,
+  PAYMENT: 5,
+  REVIEW: 6,
 };
 
 // Form schema
@@ -28,6 +29,7 @@ export const formSchema = z.object({
   ),
   employeeId: z.string().optional(),
   notes: z.string().optional(),
+  paymentMethod: z.enum(["card", "cash", "bank_transfer"])
 });
 
 export type FormValues = z.infer<typeof formSchema>;

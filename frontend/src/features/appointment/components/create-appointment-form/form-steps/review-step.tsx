@@ -8,6 +8,7 @@ import { PetType } from "@/features/pet/types/api.types";
 import { FormValues, formatDuration } from "@/features/appointment/utils/appointment-form-config";
 import { useGetAvailableEmployeesForService } from "@/features/employee/hooks/queries/get-available-employee-for-service";
 import { EmployeeType } from "@/features/employee/types/api.types";
+import { CreditCard, Building, Banknote } from "lucide-react";
 
 interface ReviewStepProps {
   form: UseFormReturn<FormValues>;
@@ -15,6 +16,7 @@ interface ReviewStepProps {
   serviceType: string; 
   service: ServiceType | undefined;
   selectedDate: Date | undefined;
+  paymentMethod: string;
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({
@@ -23,6 +25,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   serviceType,
   service,
   selectedDate,
+  paymentMethod,
 }) => {
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeType | null>(null);
   const selectedPet = petsData?.pets.find(
@@ -54,6 +57,34 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       }
     }
   }, [employeeId, fetchedEmployeesData]);
+
+  // Get payment method icon
+  const getPaymentMethodIcon = () => {
+    switch (paymentMethod) {
+      case "card":
+        return <CreditCard className="h-5 w-5 text-blue-500" />;
+      case "cash":
+        return <Banknote className="h-5 w-5 text-green-500" />;
+      case "bank_transfer":
+        return <Building className="h-5 w-5 text-purple-500" />;
+      default:
+        return null;
+    }
+  };
+
+  // Get payment method name in Vietnamese
+  const getPaymentMethodName = () => {
+    switch (paymentMethod) {
+      case "card":
+        return "Thanh toán thẻ";
+      case "cash":
+        return "Thanh toán tại cửa hàng";
+      case "bank_transfer":
+        return "Chuyển khoản ngân hàng";
+      default:
+        return "";
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -142,6 +173,38 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <p className="whitespace-pre-wrap">{form.watch("notes")}</p>
           </div>
         )}
+
+        {/* Payment Information Section */}
+        <div className="mt-2 pt-2 border-t">
+          <p className="text-sm text-muted-foreground">Phương thức thanh toán</p>
+          <div className="flex items-center space-x-2 mt-1">
+            {getPaymentMethodIcon()}
+            <span className="font-medium">{getPaymentMethodName()}</span>
+          </div>
+          
+          {paymentMethod === "card" && (
+            <div className="mt-1 text-sm">
+              <p className="text-muted-foreground">Bạn sẽ được chuyển đến trang thanh toán an toàn của Stripe để hoàn tất thanh toán</p>
+            </div>
+          )}
+          
+          {paymentMethod === "bank_transfer" && (
+            <div className="mt-1 text-sm">
+              <p className="text-muted-foreground">Vui lòng chuyển khoản trước khi đến cửa hàng và mang theo bằng chứng chuyển khoản</p>
+            </div>
+          )}
+          
+          {paymentMethod === "cash" && (
+            <div className="mt-1 text-sm">
+              <p className="text-muted-foreground">Vui lòng thanh toán tại cửa hàng khi đến</p>
+            </div>
+          )}
+          
+          <div className="mt-4 bg-primary/10 p-3 rounded-md flex justify-between items-center">
+            <span className="font-medium">Tổng thanh toán:</span>
+            <span className="text-lg font-bold">{service?.price.toLocaleString()} VND</span>
+          </div>
+        </div>
       </div>
     </div>
   );

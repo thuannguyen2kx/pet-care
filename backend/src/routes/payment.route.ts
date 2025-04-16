@@ -7,12 +7,18 @@ import {
   getAdminPayments,
   getPaymentsSummary,
   refundPayment,
+  createCheckoutSession,
+  stripeWebhook,
+  handleSuccessfulPayment,
 } from "../controllers/payment.controller";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
 
 const paymentRoutes = express.Router();
 
+// Stripe checkout routes
+paymentRoutes.post("/create-checkout-session/:appointmentId", createCheckoutSession);
+paymentRoutes.get("/success", handleSuccessfulPayment);
 // Customer payment routes
 paymentRoutes.post("/process/:appointmentId", processPayment);
 paymentRoutes.get("/", getUserPayments);

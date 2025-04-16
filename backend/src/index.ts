@@ -19,11 +19,13 @@ import serviceRoutes from "./routes/service.route";
 import employeeRoutes from "./routes/employee.route";
 import appointmentRoutes from "./routes/appointment.route";
 import paymentRoutes from "./routes/payment.route";
-import { handleStripeWebhook } from "./controllers/stripe-webhook.controller";
+import webhookRoutes from "./routes/webhook.route";
+import { rawBodyMiddleware } from "./middlewares/rawBody.middleware";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
 
+app.use(`${BASE_PATH}/webhook`, webhookRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,7 +52,6 @@ app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes)
 app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
 app.use(`${BASE_PATH}/appointments`, passportAuthenticateJWT, appointmentRoutes)
 app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes)
-app.use(`${BASE_PATH}/webhook/stripe`, handleStripeWebhook);
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
