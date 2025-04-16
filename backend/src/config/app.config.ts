@@ -27,6 +27,9 @@ const appConfig = () => ({
   EMAIL_USER: getEnv("EMAIL_USER"),
   EMAIL_PASS: getEnv("EMAIL_PASS"),
   EMAIL_FROM: getEnv("EMAIL_FROM"),
+
+  STRIPE_SECRET_KEY: getEnv("STRIPE_SECRET_KEY"),
+  STRIPE_WEBHOOK_SECRET: getEnv("STRIPE_WEBHOOK_SECRET"),
 });
 
 export const config = appConfig();

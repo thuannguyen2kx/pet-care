@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppointmentStatus, PaymentStatus, ServiceType } from "../models/appointment.model";
+import { AppointmentStatus, ServiceType } from "../models/appointment.model";
 
 export const appointmentIdSchema = z.string().min(1, "ID cuộc hẹn không được để trống");
 

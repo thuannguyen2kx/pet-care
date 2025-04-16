@@ -1,7 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import AppointmentModel, {
   AppointmentStatus,
-  PaymentStatus,
   ServiceType,
 } from "../models/appointment.model";
 import TimeSlotModel from "../models/time-slot.model";
@@ -21,6 +20,7 @@ import { StatusUser } from "../enums/status-user.enum";
 import { dateUtils } from "../utils/date-fns";
 import { Roles } from "../enums/role.enum";
 import { SpecialtyType } from "../enums/employee.enum";
+import { PaymentStatusEnum } from "../enums/payment.enum";
 
 // Lấy tất cả các cuộc hẹn của người dùng đã đăng nhập
 export const getUserAppointmentsService = async (userId: string) => {
@@ -293,7 +293,7 @@ export const createAppointmentService = async (
     },
     notes: data.notes,
     status: AppointmentStatus.PENDING,
-    paymentStatus: PaymentStatus.PENDING,
+    paymentStatus: PaymentStatusEnum.PENDING,
     totalAmount,
   });
 

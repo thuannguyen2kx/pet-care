@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { PaymentStatusEnum, PaymentStatusType } from "../enums/payment.enum";
 
 export enum AppointmentStatus {
   PENDING = "pending",
@@ -7,13 +8,6 @@ export enum AppointmentStatus {
   COMPLETED = "completed",
   CANCELLED = "cancelled"
 }
-
-export enum PaymentStatus {
-  PENDING = "pending",
-  PAID = "paid",
-  REFUNDED = "refunded"
-}
-
 export enum ServiceType {
   SINGLE = "Service",
   PACKAGE = "ServicePackage"
@@ -35,7 +29,7 @@ export interface IAppointment extends Document {
   notes?: string;
   serviceNotes?: string;
   status: AppointmentStatus;
-  paymentStatus: PaymentStatus;
+  paymentStatus: PaymentStatusType;
   totalAmount: number;
   completedAt?: Date;
   createdAt: Date;
@@ -95,8 +89,8 @@ const AppointmentSchema = new Schema<IAppointment>(
     },
     paymentStatus: {
       type: String,
-      enum: Object.values(PaymentStatus),
-      default: PaymentStatus.PENDING
+      enum: Object.values(PaymentStatusEnum),
+      default: PaymentStatusEnum.PENDING
     },
     totalAmount: {
       type: Number,
