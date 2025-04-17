@@ -32,6 +32,7 @@ import AppointmentCalendarPage from "@/pages/admin/appointment-calendar";
 import AdminAppointmentDetailsPage from "@/pages/admin/appointment-details";
 import PaymentSuccessPage from "@/pages/customer/payment-success";
 import PaymentCancelPage from "@/pages/customer/payment-cancel";
+import AdminPaymentManagement from "@/pages/admin/payment-management";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -100,6 +101,7 @@ export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage /> },
   { path: ADMIN_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
   { path: ADMIN_ROUTES.SERVICE_EDIT, element: <ServiceEditionPage /> },
+  {path: ADMIN_ROUTES.PAYMENT, element: <AdminPaymentManagement />}
 ];
 
 export const baseRoutesPaths = [

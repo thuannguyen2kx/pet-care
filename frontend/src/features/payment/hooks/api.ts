@@ -1,6 +1,7 @@
 import API from "@/lib/axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { GetPaymentSummaryData, PaymentDetailType, PaymentType, RefundPaymentParams } from "../types/api.types";
 
 /**
  * Hook for creating a Stripe checkout session
@@ -91,3 +92,57 @@ export const useCheckPaymentStatus = () => {
     },
   });
 };
+export const refundPaymentMutationFn = async ({
+  paymentId,
+  amount,
+  reason,
+}: RefundPaymentParams) => {
+  const { data } = await API.post(`/payments/${paymentId}/refund`, {
+    amount,
+    reason,
+  });
+  return data;
+};
+export const maskPaymentAsPaidMutationFn = async (paymentId: string) => {
+  const { data } = await API.put(`/payments/${paymentId}/mark-as-paid`);
+  return data;
+};
+
+export const processPaymentMutationFn = async ({ appointmentId, paymentMethod }: { appointmentId: string, paymentMethod: string }) => {
+  const { data } = await API.post(`/payments/process/${appointmentId}`, {
+    paymentMethod,
+  });
+  return data;
+}
+
+export const createCheckoutSessionMutationFn = async (
+  appointmentId: string
+) => {
+  const { data } = await API.post(
+    `/payments/create-checkout-session/${appointmentId}`
+  );
+  return data;
+};
+
+export const getPaymentByIdQueryFn = async (paymentId: string): Promise<{payment: PaymentDetailType}> => {
+  const { data } = await API.get(`/payments/${paymentId}`);
+  return data;
+};
+
+export const getUserPaymentsQueryFn = async (): Promise<{payments: PaymentDetailType[]}> => {
+  const { data } = await API.get(`/payments`);
+  return data;
+};
+
+export const getAdminPaymentsQueryFn = async (queryString: string): Promise<{payments: PaymentDetailType[]}> => {
+  const { data } = await API.get(`payments/admin/all${queryString}`);
+  return data;
+};
+export const getPaymentSummaryQueryFn = async (): Promise<GetPaymentSummaryData> => {
+  const {data} = await API.get(`/payments/admin/summary`);
+  return data;
+}
+export const getPaymentByAppointmentQueryFn = async (appointmentId: string): Promise<{payment: PaymentType}> => {
+  const { data } = await API.get(`/payments/by-appointment/${appointmentId}`);
+  return data;
+}

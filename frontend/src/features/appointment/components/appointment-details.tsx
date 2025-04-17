@@ -190,13 +190,35 @@ const formatDate = (dateString?: string) => {
   };
 
   // Get payment status label
-  const getPaymentStatusLabel = (status?: string) => {
-    if (!status) return 'Không xác định';
-    
-    return status === 'paid' ? 'Đã thanh toán' :
-           status === 'refunded' ? 'Đã hoàn tiền' :
-           'Chưa thanh toán';
-  };
+const getPaymentStatusLabel = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return 'Đã thanh toán';
+    case 'pending':
+      return 'Chờ thanh toán';
+    case 'failed':
+      return 'Thanh toán thất bại';
+    case 'refunded':
+      return 'Đã hoàn tiền';
+    default:
+      return 'Không xác định';
+  }
+};
+
+const getPaymentStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'failed':
+      return 'bg-red-100 text-red-800 border-red-200';
+    case 'refunded':
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
 
   // Get status color for badge
   const getStatusColor = (status?: string) => {
@@ -218,21 +240,6 @@ const formatDate = (dateString?: string) => {
     }
   };
 
-  // Get payment status color
-  const getPaymentStatusColor = (status?: string) => {
-    if (!status) return 'bg-gray-100 text-gray-800';
-    
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'unpaid':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'refunded':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
   // Loading state
   if (isLoading)
     return <div className="flex justify-center p-8">Đang tải...</div>;

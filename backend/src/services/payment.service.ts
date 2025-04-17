@@ -12,6 +12,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "../utils/app-error";
+import { Roles, RoleType } from "../enums/role.enum";
 import {
   PaymentMethodEnum,
   PaymentMethodType,
@@ -26,10 +27,9 @@ const stripe = new Stripe(config.STRIPE_SECRET_KEY);
 // Types
 interface ProcessPaymentInput {
   appointmentId: string;
+  role?: RoleType;
   userId: string;
   paymentMethod: PaymentMethodType;
-  stripeToken?: string;
-  saveCard?: boolean;
 }
 
 interface MarkPaymentInput {
@@ -49,10 +49,9 @@ interface RefundPaymentInput {
  */
 export const processPaymentService = async ({
   appointmentId,
+  role,
   userId,
   paymentMethod,
-  stripeToken,
-  saveCard,
 }: ProcessPaymentInput) => {
   // Fetch appointment
   const appointment = await AppointmentModel.findById(appointmentId);
@@ -62,7 +61,9 @@ export const processPaymentService = async ({
   }
 
   // Check if appointment belongs to the user
-  if (appointment.customerId.toString() !== userId) {
+  const isAdmin = role === Roles.ADMIN || role === Roles.EMPLOYEE;
+  console.log("isAdmin", isAdmin)
+  if (!isAdmin && appointment.customerId.toString() !== userId.toString()) {
     throw new UnauthorizedException(
       "Not authorized to process payment for this appointment"
     );
@@ -104,89 +105,6 @@ export const processPaymentService = async ({
   if (!user || !pet) {
     throw new NotFoundException("User or pet not found");
   }
-
-  // Process payment
-  let paymentResult;
-
-  if (paymentMethod === PaymentMethodEnum.CARD) {
-    if (!stripeToken) {
-      throw new BadRequestException(
-        "Stripe token is required for card payments"
-      );
-    }
-
-    try {
-      // Calculate amount in cents
-      const amount = Math.round(servicePrice * 100);
-
-      // Create customer in Stripe if needed and save card
-      // let stripeCustomerId = user.stripeCustomerId;
-
-      // if (saveCard && !stripeCustomerId) {
-      //   const customer = await stripe.customers.create({
-      //     email: user.email,
-      //     name: user.fullName,
-      //     source: stripeToken
-      //   });
-
-      //   stripeCustomerId = customer.id;
-
-      //   // Update user with Stripe customer ID
-      //   await User.findByIdAndUpdate(user._id, { stripeCustomerId });
-      // }
-
-      // Process payment
-      let paymentIntent;
-
-      // if (saveCard && stripeCustomerId) {
-      //   paymentIntent = await stripe.paymentIntents.create({
-      //     amount,
-      //     currency: 'vnd',
-      //     customer: stripeCustomerId,
-      //     description: `Payment for ${serviceName} service for ${pet.name}`,
-      //     metadata: {
-      //       appointmentId: appointment._id.toString(),
-      //       petId: pet._id.toString(),
-      //       userId: user._id.toString()
-      //     }
-      //   });
-      // }
-
-      paymentIntent = await stripe.paymentIntents.create({
-        amount,
-        currency: "vnd",
-        payment_method: stripeToken,
-        confirm: true,
-        description: `Thanh toán  dịch vụ ${serviceName} cho ${pet.name}`,
-        metadata: {
-          appointmentId: (appointment._id as Types.ObjectId).toString(),
-          petId: (pet._id as Types.ObjectId).toString(),
-          userId: (user._id as Types.ObjectId).toString(),
-        },
-      });
-
-      paymentResult = paymentIntent;
-    } catch (stripeError: any) {
-      throw new BadRequestException(
-        `Payment processing failed: ${stripeError.message}`
-      );
-    }
-  } else if (paymentMethod === "cash") {
-    // For cash payments, we just mark it as pending
-    paymentResult = {
-      id: "cash_payment_" + Date.now(),
-      status: "pending",
-    };
-  } else if (paymentMethod === "bank_transfer") {
-    // For bank transfers, we mark it as pending
-    paymentResult = {
-      id: "bank_transfer_" + Date.now(),
-      status: "pending",
-    };
-  } else {
-    throw new BadRequestException("Invalid payment method");
-  }
-
   // Create payment record
   const payment = await PaymentModel.create({
     appointmentId: appointment._id,
@@ -198,44 +116,19 @@ export const processPaymentService = async ({
       paymentMethod === PaymentMethodEnum.CARD
         ? PaymentStatusEnum.COMPLETED
         : PaymentStatusEnum.PENDING,
-    transactionId: paymentResult.id,
     paymentProcessor:
       paymentMethod === PaymentMethodEnum.CARD
         ? PaymentProcessorEnum.STRIPE
         : PaymentProcessorEnum.OFFLINE,
   });
 
-  // Update appointment payment status
-  appointment.paymentStatus =
-    paymentMethod === "card" ? "completed" : "pending";
   await appointment.save();
-
-  // If card payment was successful, send receipt
-  if (paymentMethod === "card") {
-    try {
-      await emailService.sendEmail({
-        to: user.email,
-        subject: "Your Payment Receipt",
-        html: `
-          <h1>Payment Receipt</h1>
-          <p>Thank you for your payment!</p>
-          <p><strong>Service:</strong> ${serviceName}</p>
-          <p><strong>Pet:</strong> ${pet.name}</p>
-          <p><strong>Amount:</strong> ${servicePrice.toLocaleString()} VND</p>
-          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-          <p><strong>Transaction ID:</strong> ${paymentResult.id}</p>
-        `,
-      });
-    } catch (emailError) {
-      console.error("Failed to send receipt email:", emailError);
-    }
-  }
 
   return {
     success: true,
     payment,
     message:
-      paymentMethod === "card"
+      paymentMethod === PaymentMethodEnum.CARD
         ? "Payment processed successfully"
         : "Appointment confirmed. Please pay at the store.",
   };
@@ -255,19 +148,22 @@ export const markPaymentAsPaidService = async ({
   }
 
   // Only cash or bank transfer payments can be marked as completed manually
-  if (payment.method !== "cash" && payment.method !== "bank_transfer") {
+  if (
+    payment.method !== PaymentMethodEnum.CASH &&
+    payment.method !== PaymentMethodEnum.BANK_TRANSFER
+  ) {
     throw new BadRequestException(
       "Only cash or bank transfer payments can be marked as paid manually"
     );
   }
 
   // Update payment status
-  payment.status = "completed";
+  payment.status = PaymentStatusEnum.COMPLETED;
   await payment.save();
 
   // Update appointment payment status
   await AppointmentModel.findByIdAndUpdate(payment.appointmentId, {
-    paymentStatus: "completed",
+    paymentStatus: PaymentStatusEnum.COMPLETED,
   });
 
   // Send payment confirmation to customer
@@ -329,6 +225,56 @@ export const getUserPaymentsService = async (userId: string) => {
     .sort({ createdAt: -1 });
 
   return payments;
+};
+/**
+ *
+ * @param appointmentId
+ * @param userId
+ * @param role
+ * @returns
+ */
+export const getPaymentByAppointmentService = async (
+  appointmentId: string,
+  userId: boolean,
+  role?: RoleType
+) => {
+  if (!appointmentId) {
+    throw new BadRequestException("Appointment ID is required");
+  }
+
+  // Find payment for the appointment
+  const payment = await PaymentModel.findOne({ appointmentId })
+    .populate({
+      path: "appointmentId",
+      select:
+        "scheduledDate scheduledTimeSlot serviceType serviceId petId customerId",
+      populate: [
+        {
+          path: "serviceId",
+          select: "name price",
+        },
+        {
+          path: "petId",
+          select: "name type breed",
+        },
+      ],
+    })
+    .populate({
+      path: "customerId",
+      select: "fullName email phoneNumber",
+    });
+
+  if (!payment) {
+    return null;
+  }
+
+  // Check if the payment belongs to the logged-in user or if user is admin/employee
+  const isAdmin = role === Roles.ADMIN || role === Roles.EMPLOYEE;
+
+  if (!isAdmin && payment.customerId._id.toString() !== userId.toString()) {
+    throw new UnauthorizedException("Not authorized to access this payment");
+  }
+  return payment;
 };
 
 /**
@@ -420,7 +366,7 @@ export const getAdminPaymentsService = async (query: any) => {
   let paymentsQuery = PaymentModel.find(filter)
     .populate({
       path: "appointmentId",
-      select: "scheduledDate scheduledTimeSlot serviceType serviceId",
+      select: "_id scheduledDate scheduledTimeSlot serviceType serviceId",
       populate: {
         path: "serviceId",
         select: "name",
@@ -768,19 +714,23 @@ export const refundPaymentService = async ({
           try {
             await emailService.sendEmail({
               to: user.email,
-              subject: "Your Refund Has Been Processed",
+              subject: "Việc hoàn tiền của bạn đã được xử lý.",
               html: `
-                <h1>Refund Confirmation</h1>
-                <p>Dear ${user.fullName},</p>
-                <p>We've processed a refund for your recent payment:</p>
-                <p><strong>Amount:</strong> ${amount.toLocaleString()} ${
+                <h1>Xác Nhận Hoàn Tiền</h1>
+                <p>Kính gửi anh/chị ${user.fullName},</p>
+                <p>Chúng tôi xin thông báo rằng yêu cầu hoàn tiền cho giao dịch gần đây của anh/chị đã được xử lý thành công:</p>
+                <p><strong>Số tiền hoàn:</strong> ${amount.toLocaleString()} ${
                 payment.currency
               }</p>
-                <p><strong>Reason:</strong> ${reason || "Customer request"}</p>
-                <p><strong>Transaction ID:</strong> ${refund.id}</p>
-                <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-                <p>The refund should appear in your account within 5-10 business days, depending on your bank.</p>
-                <p>If you have any questions, please contact our support team.</p>
+                <p><strong>Lý do hoàn tiền:</strong> ${
+                  reason || "Theo yêu cầu của khách hàng"
+                }</p>
+                <p><strong>Mã giao dịch hoàn tiền:</strong> ${refund.id}</p>
+                <p><strong>Ngày xử lý:</strong> ${new Date().toLocaleDateString()}</p>
+                <p>Số tiền hoàn lại dự kiến sẽ được chuyển vào tài khoản của anh/chị trong vòng 5–10 ngày làm việc, tùy theo quy định của ngân hàng.</p>
+                <p>Nếu anh/chị có bất kỳ câu hỏi hay cần hỗ trợ thêm, vui lòng liên hệ với đội ngũ chăm sóc khách hàng của chúng tôi.</p>
+                <p>Trân trọng,</p>
+                <p>Đội ngũ hỗ trợ khách hàng</p>
               `,
             });
           } catch (emailError) {

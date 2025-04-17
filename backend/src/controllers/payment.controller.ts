@@ -14,6 +14,7 @@ import { PaymentMethodEnum, PaymentStatusEnum } from "../enums/payment.enum";
 import { Types } from "mongoose";
 import Stripe from "stripe";
 import { config } from "../config/app.config";
+import { appointmentIdSchema } from "../validation/employee.validation";
 
 const stripe = new Stripe(config.STRIPE_SECRET_KEY);
 /**
@@ -142,7 +143,7 @@ export const stripeWebhook = asyncHandler(
 export const processPayment = asyncHandler(
   async (req: Request, res: Response) => {
     const { appointmentId } = req.params;
-    const { paymentMethod, stripeToken, saveCard } = req.body;
+    const { paymentMethod } = req.body;
 
     if (!appointmentId) {
       throw new BadRequestException("Appointment ID is required");
@@ -163,10 +164,9 @@ export const processPayment = asyncHandler(
     // For other payment methods, use the existing service
     const result = await paymentService.processPaymentService({
       appointmentId,
+      role: req.user?.role,
       userId: req.user?._id,
-      paymentMethod,
-      stripeToken,
-      saveCard,
+      paymentMethod
     });
 
     res.status(200).json(result);
@@ -181,7 +181,24 @@ export const processPayment = asyncHandler(
 export const getUserPayments = asyncHandler(
   async (req: Request, res: Response) => {
     const payments = await paymentService.getUserPaymentsService(req.user?._id);
-    res.status(200).json(payments);
+    res.status(200).json({ payments });
+  }
+);
+/**
+ * @desc    Get payment by appointment ID
+ * @route   GET /api/payments/by-appointment/:appointmentId
+ * @access  Private
+ */
+export const getPaymentByAppointment = asyncHandler(
+  async (req: Request, res: Response) => {
+    const appointmentId = appointmentIdSchema.parse(req.params.appointmentId);
+    const payment = await paymentService.getPaymentByAppointmentService(
+      appointmentId,
+      req.user?._id,
+      req.user?.role
+    );
+
+    res.status(200).json({ payment });
   }
 );
 
@@ -207,7 +224,7 @@ export const getPaymentById = asyncHandler(
       isAdmin
     );
 
-    res.status(200).json(payment);
+    res.status(200).json({payment});
   }
 );
 

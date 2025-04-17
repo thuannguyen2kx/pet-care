@@ -8,8 +8,8 @@ import {
   getPaymentsSummary,
   refundPayment,
   createCheckoutSession,
-  stripeWebhook,
   handleSuccessfulPayment,
+  getPaymentByAppointment,
 } from "../controllers/payment.controller";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
@@ -22,6 +22,7 @@ paymentRoutes.get("/success", handleSuccessfulPayment);
 // Customer payment routes
 paymentRoutes.post("/process/:appointmentId", processPayment);
 paymentRoutes.get("/", getUserPayments);
+paymentRoutes.get("/by-appointment/:appointmentId", getPaymentByAppointment); 
 paymentRoutes.get("/:id", getPaymentById);
 
 // Admin/Employee payment routes
