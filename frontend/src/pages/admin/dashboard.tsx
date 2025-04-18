@@ -1,7 +1,11 @@
+import ReportDashboard from "@/features/report/components/report-dashboard";
+
 const DashboardPage = () => {
   return (
-    <div>Dashboard</div>
-  ) 
-}
+    <div>
+      <ReportDashboard />
+    </div>
+  );
+};
 
 export default DashboardPage;
