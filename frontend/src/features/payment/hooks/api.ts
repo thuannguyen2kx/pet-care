@@ -1,7 +1,7 @@
 import API from "@/lib/axios-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { GetPaymentSummaryData, PaymentDetailType, PaymentType, RefundPaymentParams } from "../types/api.types";
+import { GetAdminPaymentsType, GetPaymentSummaryData, PaymentDetailType, PaymentType, RefundPaymentParams } from "../types/api.types";
 
 /**
  * Hook for creating a Stripe checkout session
@@ -134,7 +134,7 @@ export const getUserPaymentsQueryFn = async (): Promise<{payments: PaymentDetail
   return data;
 };
 
-export const getAdminPaymentsQueryFn = async (queryString: string): Promise<{payments: PaymentDetailType[]}> => {
+export const getAdminPaymentsQueryFn = async (queryString: string): Promise<GetAdminPaymentsType> => {
   const { data } = await API.get(`payments/admin/all${queryString}`);
   return data;
 };

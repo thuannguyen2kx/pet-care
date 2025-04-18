@@ -551,7 +551,7 @@ export const getPaymentsSummaryService = async () => {
   ]);
 
   // Transform weekly data for frontend
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
   const formattedWeeklyRevenue = daysOfWeek.map((day, index) => {
     const dayData = weeklyRevenue.find((item) => item._id === index + 1);
     return {
@@ -584,7 +584,7 @@ export const getPaymentsSummaryService = async () => {
   // Format payment methods
   const formattedPaymentsByMethod = paymentsByMethod.map((item) => ({
     name: item._id,
-    value: item.count,
+    value: Math.round((item.count / (paymentsByMethod.reduce((sum, method) => sum + method.count, 0) || 1)) * 100),
     amount: item.amount,
   }));
 
@@ -599,7 +599,7 @@ export const getPaymentsSummaryService = async () => {
   ]);
 
   // Format status counts
-  const statusCounts: Record<string, number> = {
+  const statusCounts = {
     pending: 0,
     completed: 0,
     failed: 0,
@@ -607,8 +607,8 @@ export const getPaymentsSummaryService = async () => {
   };
 
   paymentCounts.forEach((item) => {
-    if (statusCounts.hasOwnProperty(item._id)) {
-      statusCounts[item._id] = item.count;
+    if (Object.prototype.hasOwnProperty.call(statusCounts, item._id)) {
+      statusCounts[item._id as keyof typeof statusCounts] = item.count;
     }
   });
 
@@ -637,6 +637,8 @@ export const getPaymentsSummaryService = async () => {
     paymentsByMethod: formattedPaymentsByMethod,
     statusCounts,
     todayPayments,
+    pendingPayments: statusCounts.pending || 0,
+    completedPayments: statusCounts.completed || 0,
   };
 };
 

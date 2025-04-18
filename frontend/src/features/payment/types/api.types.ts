@@ -81,3 +81,12 @@ export type GetPaymentSummaryData = {
   statusCounts: StatusCounts;
   todayPayments: number;
 };
+export type GetAdminPaymentsType = {
+  payments: PaymentDetailType[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+};
