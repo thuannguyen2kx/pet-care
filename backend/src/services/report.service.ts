@@ -382,6 +382,180 @@ export const generateYearlyReportService = async (startDate: Date) => {
   return { report };
 };
 
+export const getWeeklyDataService = async (startDate?: Date, endDate?: Date) => {
+  const today = new Date();
+  const weekStart = startDate || startOfWeek(today, { locale: vi });
+  const weekEnd = endDate || endOfWeek(today, { locale: vi });
+  
+  // Lấy dữ liệu lịch hẹn và doanh thu theo ngày trong tuần
+  const [weeklyAppointments, weeklyRevenue] = await Promise.all([
+    // Lịch hẹn theo ngày trong tuần
+    AppointmentModel.aggregate([
+      {
+        $match: {
+          scheduledDate: { 
+            $gte: weekStart, 
+            $lte: weekEnd 
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: '$scheduledDate' }, // 1 = Chủ nhật, 2 = Thứ 2, ..., 7 = Thứ 7
+          count: { $sum: 1 },
+          amount: { 
+            $sum: '$totalAmount'
+          }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]),
+    
+    // Doanh thu theo ngày trong tuần
+    PaymentModel.aggregate([
+      {
+        $match: {
+          createdAt: { 
+            $gte: weekStart, 
+            $lte: weekEnd 
+          },
+          status: PaymentStatusEnum.COMPLETED
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: '$scheduledDate' },
+          amount: { $sum: '$amount' }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ])
+  ]);
+
+  // Ánh xạ từ số thứ tự ngày trong tuần sang tên ngày
+  const dayMapping = {
+    1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 7: 'CN'
+  };
+  
+  // Tạo mảng kết quả chứa dữ liệu cho tất cả các ngày trong tuần
+  const weeklyData = Array.from({ length: 7 }, (_, i) => ({
+    day: dayMapping[i + 1 as keyof typeof dayMapping],
+    count: 0,
+    amount: 0
+  }));
+  
+  // Điền dữ liệu từ kết quả truy vấn
+  weeklyAppointments.forEach(day => {
+    const index = day._id - 1;
+    if (index >= 0 && index < 7) {
+      weeklyData[index].count = day.count;
+      // Nếu amount từ appointment không có trong query, giữ nguyên giá trị 0
+      if (day.amount) {
+        weeklyData[index].amount = day.amount;
+      }
+    }
+  });
+
+  // Cập nhật doanh thu từ payments (ưu tiên data này vì chính xác hơn)
+  weeklyRevenue.forEach(day => {
+    const index = day._id - 1;
+    if (index >= 0 && index < 7) {
+      weeklyData[index].amount = day.amount;
+    }
+  });
+  
+  return { weeklyData };
+};
+
+/**
+ * Lấy dữ liệu doanh thu và lịch hẹn theo tháng trong năm
+ */
+export const getMonthlyTrendService = async (year?: number) => {
+  const currentYear = year || new Date().getFullYear();
+  const startOfYear = new Date(currentYear, 0, 1); // Tháng 1
+  const endOfYear = new Date(currentYear, 11, 31); // Tháng 12
+  
+  // Lấy dữ liệu lịch hẹn và doanh thu theo tháng
+  const [monthlyAppointments, monthlyRevenue] = await Promise.all([
+    // Lịch hẹn theo tháng
+    AppointmentModel.aggregate([
+      {
+        $match: {
+          scheduledDate: { 
+            $gte: startOfYear, 
+            $lte: endOfYear 
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $month: '$scheduledDate' }, // 1 = Tháng 1, 2 = Tháng 2, ...
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]),
+    
+    // Doanh thu theo tháng
+    PaymentModel.aggregate([
+      {
+        $match: {
+          createdAt: { 
+            $gte: startOfYear, 
+            $lte: endOfYear 
+          },
+          status: PaymentStatusEnum.COMPLETED
+        }
+      },
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          revenue: { $sum: '$amount' }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ])
+  ]);
+
+  // Tạo mảng kết quả chứa dữ liệu cho tất cả các tháng
+  const monthlyTrendData = Array.from({ length: 12 }, (_, i) => {
+    // Tạo tên tháng hiển thị (locale vi)
+    const date = new Date(currentYear, i, 1);
+    const month = date.toLocaleDateString('vi-VN', { month: 'short' });
+    
+    return {
+      month,
+      revenue: 0,
+      appointments: 0
+    };
+  });
+  
+  // Điền dữ liệu từ kết quả truy vấn
+  monthlyAppointments.forEach(month => {
+    const index = month._id - 1; // Chuyển từ 1-12 sang 0-11 cho index mảng
+    if (index >= 0 && index < 12) {
+      monthlyTrendData[index].appointments = month.count;
+    }
+  });
+  
+  monthlyRevenue.forEach(month => {
+    const index = month._id - 1;
+    if (index >= 0 && index < 12) {
+      monthlyTrendData[index].revenue = month.revenue;
+    }
+  });
+  
+  return { monthlyTrendData };
+};
+
 // Lấy thống kê tổng quan cho dashboard
 export const getDashboardStatisticsService = async () => {
   const today = new Date();
@@ -389,7 +563,19 @@ export const getDashboardStatisticsService = async () => {
   const lastMonth = startOfMonth(new Date(today.getFullYear(), today.getMonth() - 1));
   
   // Thống kê tháng hiện tại
-  const currentMonthStats = await Promise.all([
+  const [
+    totalAppointments,
+    completedAppointments,
+    revenueAggregate,
+    // Thêm các truy vấn mới
+    serviceBreakdown,
+    employeePerformance,
+    appointmentStatusCounts,
+    customerStats,
+    // Lấy dữ liệu weekly và monthly từ các service riêng
+    weeklyData,
+    monthlyTrendData
+  ] = await Promise.all([
     // Tổng số lịch hẹn tháng này
     AppointmentModel.countDocuments({
       scheduledDate: { $gte: thisMonth, $lte: today }
@@ -415,7 +601,173 @@ export const getDashboardStatisticsService = async () => {
           total: { $sum: "$amount" }
         }
       }
-    ])
+    ]),
+    
+    // Phân tích dịch vụ
+    AppointmentModel.aggregate([
+      {
+        $match: {
+          scheduledDate: { $gte: thisMonth, $lte: today }
+        }
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'serviceId',
+          foreignField: '_id',
+          as: 'service'
+        }
+      },
+      {
+        $unwind: '$service'
+      },
+      {
+        $group: {
+          _id: '$serviceId',
+          serviceName: { $first: '$service.name' },
+          count: { $sum: 1 },
+          revenue: { $sum: '$totalAmount' },
+          completedCount: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.COMPLETED] }, 1, 0]
+            }
+          },
+          cancelledCount: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.CANCELLED] }, 1, 0]
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          serviceId: '$_id',
+          serviceName: 1,
+          count: 1,
+          revenue: 1,
+          completedCount: 1,
+          cancelledCount: 1
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]),
+    
+    // Hiệu suất nhân viên
+    AppointmentModel.aggregate([
+      {
+        $match: {
+          scheduledDate: { $gte: thisMonth, $lte: today },
+          employeeId: { $exists: true, $ne: null }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'employeeId',
+          foreignField: '_id',
+          as: 'employee'
+        }
+      },
+      {
+        $unwind: '$employee'
+      },
+      {
+        $group: {
+          _id: '$employeeId',
+          employeeName: { $first: '$employee.fullName' },
+          totalAppointments: { $sum: 1 },
+          completedAppointments: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.COMPLETED] }, 1, 0]
+            }
+          },
+          cancelledAppointments: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.CANCELLED] }, 1, 0]
+            }
+          },
+          revenue: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.COMPLETED] }, '$totalAmount', 0]
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          employeeId: '$_id',
+          employeeName: 1,
+          totalAppointments: 1,
+          completedAppointments: 1,
+          cancelledAppointments: 1,
+          revenue: 1
+        }
+      },
+      {
+        $sort: { totalAppointments: -1 }
+      }
+    ]),
+    
+    // Số lượng theo trạng thái lịch hẹn
+    AppointmentModel.aggregate([
+      {
+        $match: {
+          scheduledDate: { $gte: thisMonth, $lte: today }
+        }
+      },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]),
+    
+    // Thống kê khách hàng
+    Promise.all([
+      // Tổng số khách hàng
+      UserModel.countDocuments({
+        role: Roles.CUSTOMER,
+        createdAt: { $lte: today }
+      }),
+      // Khách hàng mới
+      UserModel.countDocuments({
+        role: Roles.CUSTOMER,
+        createdAt: { $gte: thisMonth, $lte: today }
+      }),
+      // Khách hàng quay lại (có nhiều hơn 1 lịch hẹn)
+      AppointmentModel.aggregate([
+        {
+          $match: {
+            scheduledDate: { $gte: thisMonth, $lte: today }
+          }
+        },
+        {
+          $group: {
+            _id: '$customerId',
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $match: {
+            count: { $gt: 1 }
+          }
+        },
+        {
+          $count: 'recurring'
+        }
+      ])
+    ]),
+    
+    // Dữ liệu theo tuần - sử dụng service mới
+    getWeeklyDataService().then(result => result.weeklyData),
+    
+    // Dữ liệu xu hướng theo tháng - sử dụng service mới
+    getMonthlyTrendService().then(result => result.monthlyTrendData)
   ]);
   
   // Thống kê tháng trước để so sánh
@@ -448,12 +800,46 @@ export const getDashboardStatisticsService = async () => {
     ])
   ]);
   
+  // Xử lý dữ liệu lịch hẹn theo trạng thái
+  const statusCounts = {
+    total: totalAppointments,
+    completed: completedAppointments,
+    cancelled: 0,
+    pending: 0,
+    confirmed: 0,
+    inProgress: 0
+  };
+  
+  appointmentStatusCounts.forEach(statusCount => {
+    const status = statusCount._id.toLowerCase();
+    if (statusCounts.hasOwnProperty(status)) {
+      statusCounts[status as keyof typeof statusCounts] = statusCount.count;
+    }
+  });
+  
+  // Xử lý dữ liệu khách hàng
+  const customers = {
+    total: customerStats[0],
+    new: customerStats[1],
+    recurring: customerStats[2].length > 0 ? customerStats[2][0].recurring : 0
+  };
+  
   // Tạo đối tượng phản hồi
   return {
     currentMonth: {
-      totalAppointments: currentMonthStats[0],
-      completedAppointments: currentMonthStats[1],
-      revenue: currentMonthStats[2].length > 0 ? currentMonthStats[2][0].total : 0
+      totalAppointments,
+      completedAppointments,
+      revenue: revenueAggregate.length > 0 ? revenueAggregate[0].total : 0,
+      appointments: statusCounts,
+      serviceBreakdown,
+      employeePerformance,
+      customers,
+      weeklyData, 
+      monthlyTrendData,
+      period: {
+        start: thisMonth,
+        end: today
+      }
     },
     previousMonth: {
       totalAppointments: previousMonthStats[0],
@@ -463,15 +849,15 @@ export const getDashboardStatisticsService = async () => {
     changes: {
       appointmentsGrowth: calculatePercentChange(
         previousMonthStats[0],
-        currentMonthStats[0]
+        totalAppointments
       ),
       completionRateChange: calculatePercentChange(
         previousMonthStats[1] / (previousMonthStats[0] || 1),
-        currentMonthStats[1] / (currentMonthStats[0] || 1)
+        completedAppointments / (totalAppointments || 1)
       ),
       revenueGrowth: calculatePercentChange(
         previousMonthStats[2].length > 0 ? previousMonthStats[2][0].total : 0,
-        currentMonthStats[2].length > 0 ? currentMonthStats[2][0].total : 0
+        revenueAggregate.length > 0 ? revenueAggregate[0].total : 0
       )
     }
   };

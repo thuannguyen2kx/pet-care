@@ -26,80 +26,57 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { CalendarIcon, FileText, Loader2 } from 'lucide-react';
-import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
-type ReportData = {
-  success: boolean;
-  reportId: string;
-};
-
-type ReportType = 'daily' | 'weekly' | 'monthly' | 'yearly';
+import { 
+  useGenerateDailyReport, 
+  useGenerateWeeklyReport, 
+  useGenerateMonthlyReport, 
+  useGenerateYearlyReport 
+} from '@/features/report/hooks/queries';
+import { ReportData, ReportType } from '@/features/report/types/api.types';
 
 interface GenerateReportModalProps {
   onSuccess?: (data: ReportData) => void;
 }
-
-// Fake API calls
-const generateDailyReport = async (date: Date): Promise<ReportData> => {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ success: true, reportId: 'daily-' + Date.now() }), 1500)
-  );
-};
-
-const generateWeeklyReport = async (date: Date): Promise<ReportData> => {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ success: true, reportId: 'weekly-' + Date.now() }), 1500)
-  );
-};
-
-const generateMonthlyReport = async (date: Date): Promise<ReportData> => {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ success: true, reportId: 'monthly-' + Date.now() }), 1500)
-  );
-};
-
-const generateYearlyReport = async (date: Date): Promise<ReportData> => {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ success: true, reportId: 'yearly-' + Date.now() }), 1500)
-  );
-};
 
 const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const [reportType, setReportType] = useState<ReportType>('daily');
   const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const handleSuccess = (data: ReportData, reportName: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSuccess = (data: any, reportName: string) => {
+    const reportData: ReportData = {
+      success: true,
+      reportId: data.report._id,
+    };
+    
     toast.success(`${reportName} đã được tạo thành công!`);
     setOpen(false);
-    onSuccess?.(data);
+    onSuccess?.(reportData);
   };
 
-  const handleError = (error: any) => {
+  const handleError = (error: Error) => {
     toast.error('Không thể tạo báo cáo: ' + (error.message || 'Đã xảy ra lỗi'));
   };
 
-  const dailyMutation = useMutation({
-    mutationFn: generateDailyReport,
+  // Use the mutation hooks
+  const dailyMutation = useGenerateDailyReport({
     onSuccess: (data) => handleSuccess(data, 'Báo cáo ngày'),
     onError: handleError,
   });
 
-  const weeklyMutation = useMutation({
-    mutationFn: generateWeeklyReport,
+  const weeklyMutation = useGenerateWeeklyReport({
     onSuccess: (data) => handleSuccess(data, 'Báo cáo tuần'),
     onError: handleError,
   });
 
-  const monthlyMutation = useMutation({
-    mutationFn: generateMonthlyReport,
+  const monthlyMutation = useGenerateMonthlyReport({
     onSuccess: (data) => handleSuccess(data, 'Báo cáo tháng'),
     onError: handleError,
   });
 
-  const yearlyMutation = useMutation({
-    mutationFn: generateYearlyReport,
+  const yearlyMutation = useGenerateYearlyReport({
     onSuccess: (data) => handleSuccess(data, 'Báo cáo năm'),
     onError: handleError,
   });
@@ -169,12 +146,12 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onSuccess }) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white shadow-sm gap-2">
+        <Button variant="outline" className="border-primary text-primary hover:bg-primary/10 shadow-sm gap-2">
           <FileText className="h-4 w-4" />
           Tạo báo cáo mới
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{getReportTitle()}</DialogTitle>
           <DialogDescription>
@@ -192,7 +169,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onSuccess }) 
                 onValueChange={(value: ReportType) => setReportType(value)}
                 disabled={isLoading}
               >
-                <SelectTrigger id="report-type" className="col-span-3">
+                <SelectTrigger id="report-type" className="col-span-3 w-full">
                   <SelectValue placeholder="Chọn loại báo cáo" />
                 </SelectTrigger>
                 <SelectContent>
