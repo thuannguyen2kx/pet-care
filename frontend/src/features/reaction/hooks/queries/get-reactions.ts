@@ -6,7 +6,7 @@ import { getReactionsQueryFn } from "@/features/reaction/api";
 export const useReactions = (contentType: ContentType, contentId: string) => {
   return useQuery({
     queryKey: ["reactions", contentType, contentId],
-    queryFn: () => getReactionsQueryFn({ contentType, contentId }),
+    queryFn: () => getReactionsQueryFn(contentType, contentId),
     enabled: !!contentId,
   });
 };

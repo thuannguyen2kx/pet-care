@@ -3,29 +3,19 @@ import {
   addReactionController,
   removeReactionController,
   getReactionsController,
-  getUserReactionController
+  getUserReactionController,
+  getReactorsController
 } from "../controllers/reaction.controller";
 
 const reactionRoutes = Router();
 
-// Reaction routes
-reactionRoutes.post(
-  "/:contentType/:id/react", 
-  addReactionController
-);
+// Public routes
+reactionRoutes.get("/:contentType/:id", getReactionsController);
+reactionRoutes.get("/:contentType/:id/users", getReactorsController);
 
-reactionRoutes.delete(
-  "/:contentType/:id/react", 
-  removeReactionController
-);
+// Protected routes - require authentication
+reactionRoutes.post("/:contentType/:id", addReactionController);
+reactionRoutes.delete("/:contentType/:id", removeReactionController);
+reactionRoutes.get("/user/:contentType/:id", getUserReactionController);
 
-reactionRoutes.get(
-  "/:contentType/:id/reactions", 
-  getReactionsController
-);
-
-reactionRoutes.get(
-  "/:contentType/:id/reactions/me", 
-  getUserReactionController
-);
-export default reactionRoutes
+export default reactionRoutes;

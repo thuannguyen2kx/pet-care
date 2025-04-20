@@ -1,7 +1,7 @@
 import API from "@/lib/axios-client";
 import { CommentsResponseType, GetCommentParamsType } from "./types/api.types";
 
-export const getCommentQueryFn = async ({
+export const getCommentsQueryFn = async ({
   page,
   postId,
   parentId,

@@ -1,26 +1,41 @@
-import React from "react";
-import { format } from "date-fns";
+import React, { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
-  Heart,
   MessageSquare,
-  Send,
+  Share2,
   Bookmark,
   MoreHorizontal,
+  Trash2,
+  Edit,
+  AlertTriangle,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { PostType } from "../types/api.types";
 import { useAuthContext } from "@/context/auth-provider";
 import { Roles } from "@/constants";
 import { useDeletePost } from "../hooks/mutations/use-delete-post";
 import { useConfirm } from "@/hooks/use-confirm";
+import { toast } from "sonner";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
+import ReportPostDialog from "./report-dialog";
+import { ReactionButton } from "@/features/reaction/components/reaction-button";
+import { ReactionsDialog } from "@/features/reaction/components/reaction-dialog";
 
 interface PostCardProps {
   post: PostType;
@@ -36,48 +51,77 @@ export const PostCard: React.FC<PostCardProps> = ({
   const { user } = useAuthContext();
   const [DeleteDialog, confirmDelete] = useConfirm(
     "Xoá bài viết",
-    "Bạn có chắc chắn muốn xoá bài viết này"
+    "Bạn có chắc chắn muốn xoá bài viết này? Hành động này không thể hoàn tác."
   );
-
-  const { mutate } = useDeletePost();
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const { mutate: deletePost } = useDeletePost();
 
   const isAuthor = user && post.authorId._id === user._id;
   const isAdmin = user && user?.role === Roles.ADMIN;
   const canModify = isAuthor || isAdmin;
 
-  // Format the post date
-  const formattedDate = format(new Date(post.createdAt), "d MMMM");
+  // Handle post deletion
   const handleDelete = async () => {
-    const ok = await confirmDelete();
-    if (!ok) return;
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
 
-    mutate(post._id);
+    deletePost(post._id, {
+      onSuccess: () => {
+        toast.success("Bài viết đã được xóa thành công");
+      },
+      onError: () => {
+        toast.error("Không thể xóa bài viết. Vui lòng thử lại sau.");
+      },
+    });
   };
+
+  // Handle share post
+  const handleShare = () => {
+    const postUrl = `${window.location.origin}/posts/${post._id}`;
+    navigator.clipboard
+      .writeText(postUrl)
+      .then(() => toast.success("Đã sao chép liên kết bài viết"))
+      .catch(() => toast.error("Không thể sao chép liên kết"));
+  };
+
+  // Format the post date
+  const timeAgo = formatDistanceToNow(new Date(post.createdAt), {
+    addSuffix: true,
+    locale: vi,
+  });
+
   return (
     <>
       <DeleteDialog />
-      <div className="border-b border-gray-100 pb-2 mb-4 md:border md:rounded-md md:mb-6 md:pb-0">
+      {showReportDialog && (
+        <ReportPostDialog
+          postId={post._id}
+          open={showReportDialog}
+          onOpenChange={setShowReportDialog}
+        />
+      )}
+
+      <div className="bg-white border border-gray-100 rounded-md overflow-hidden mb-6">
         {/* Header with avatar and username */}
-        <div className="flex items-center justify-between px-3 py-2">
-          <div className="flex items-center gap-2.5">
-            <Link to={`/profile/${post.authorId._id}`}>
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src={post.authorId.profilePicture?.url}
-                  alt={post.authorId.fullName}
-                />
-                <AvatarFallback>
-                  {post.authorId.fullName?.slice(0, 2).toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-            <Link
-              to={`/profile/${post.authorId._id}`}
-              className="font-semibold text-sm"
-            >
-              {post.authorId.fullName}
-            </Link>
-          </div>
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link
+            to={`/profile/${post.authorId._id}`}
+            className="flex items-center gap-3"
+          >
+            <Avatar className="h-9 w-9">
+              <AvatarImage
+                src={post.authorId.profilePicture?.url}
+                alt={post.authorId.fullName}
+              />
+              <AvatarFallback className="bg-primary text-white text-xs">
+                {post.authorId.fullName?.slice(0, 2).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-sm">{post.authorId.fullName}</p>
+              <p className="text-xs text-gray-500">{timeAgo}</p>
+            </div>
+          </Link>
 
           {showActions && (
             <DropdownMenu>
@@ -86,99 +130,169 @@ export const PostCard: React.FC<PostCardProps> = ({
                   <MoreHorizontal size={16} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="border-none">
+              <DropdownMenuContent align="end">
                 {canModify && (
                   <>
                     {onEdit && (
-                      <DropdownMenuItem onClick={() => onEdit(post)}>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => onEdit(post)}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
                         Chỉnh sửa
                       </DropdownMenuItem>
                     )}
 
                     <DropdownMenuItem
-                      className="text-red-500"
+                      className="text-red-500 cursor-pointer"
                       onClick={handleDelete}
                     >
+                      <Trash2 className="h-4 w-4 mr-2" />
                       Xoá
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                   </>
                 )}
                 <DropdownMenuItem
-                  onClick={() =>
-                    window.navigator.clipboard.writeText(
-                      `${window.location.origin}/posts/${post._id}`
-                    )
-                  }
+                  className="cursor-pointer"
+                  onClick={handleShare}
                 >
+                  <Share2 className="h-4 w-4 mr-2" />
                   Sao chép liên kết
                 </DropdownMenuItem>
-                <DropdownMenuItem>Báo cáo</DropdownMenuItem>
+                {!canModify && (
+                  <DropdownMenuItem
+                    className="cursor-pointer text-orange-600"
+                    onClick={() => setShowReportDialog(true)}
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Báo cáo bài viết
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
         </div>
 
+        {/* Title (if available) */}
+        {post.title && (
+          <div className="px-4 py-1">
+            <h3 className="font-medium text-base">{post.title}</h3>
+          </div>
+        )}
+
         {/* Media content */}
         {post.media && post.media.length > 0 && (
-          <div className="aspect-square bg-gray-50">
-            {post.media[0].type === "image" ? (
-              <img
-                src={post.media[0].url}
-                alt="Post image"
-                className="w-full h-full object-cover"
-              />
+          <div className="aspect-square bg-gray-50 relative">
+            {post.media.length === 1 ? (
+              // Single media
+              <>
+                {post.media[0].type === "image" ? (
+                  <img
+                    src={post.media[0].url}
+                    alt="Post image"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <video
+                    src={post.media[0].url}
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </>
             ) : (
-              <video
-                src={post.media[0].url}
-                controls
-                className="w-full h-full object-cover"
-              />
+              // Multiple media
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {post.media.map((media, index) => (
+                    <CarouselItem key={index}>
+                      {media.type === "image" ? (
+                        <img
+                          src={media.url}
+                          alt={`Post image ${index + 1}`}
+                          className="w-full h-full object-cover aspect-square"
+                        />
+                      ) : (
+                        <video
+                          src={media.url}
+                          controls
+                          className="w-full h-full object-cover aspect-square"
+                        />
+                      )}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+              </Carousel>
             )}
           </div>
         )}
 
         {/* Action buttons */}
-        <div className="flex justify-between px-4 pt-2.5 pb-1">
+        <div className="flex justify-between px-4 pt-3 pb-1">
           <div className="flex space-x-4">
-            <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-              <Heart size={24} />
-            </Button>
+            {/* Advanced reaction button */}
+            <ReactionButton
+              contentType="post"
+              contentId={post._id}
+              currentUser={user}
+            />
+
             <Link to={`/posts/${post._id}`}>
-              <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                <MessageSquare size={24} />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                <MessageSquare size={22} />
+                <span>Bình luận</span>
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-              <Send size={24} />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center space-x-2"
+              onClick={handleShare}
+            >
+              <Share2 size={22} />
+              <span>Chia sẻ</span>
             </Button>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-            <Bookmark size={24} />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center space-x-2"
+          >
+            <Bookmark size={22} />
           </Button>
         </div>
 
-        {/* Likes */}
-        {post.stats.likeCount > 0 && (
-          <div className="px-4 pt-1 font-semibold text-sm">
-            {post.stats.likeCount}{" "}
-            {post.stats.likeCount === 1 ? "like" : "likes"}
-          </div>
-        )}
+        {/* Reactions dialog */}
+        <div className="px-4 pt-1">
+          <ReactionsDialog contentType="post" contentId={post._id} />
+        </div>
 
         {/* Caption */}
-        <div className="px-4 py-1">
+        <div className="px-4 py-2">
           <div className="text-sm">
             <Link
               to={`/profile/${post.authorId._id}`}
-              className="font-semibold mr-1.5"
+              className="font-semibold mr-1.5 hover:underline"
             >
               {post.authorId.fullName}
             </Link>
-            {post.content.length > 100 ? (
+            {post.content.length > 150 ? (
               <>
-                {post.content.substring(0, 100)}...
-                <Link to={`/posts/${post._id}`} className="text-gray-500 ml-1">
-                  more
+                {post.content.substring(0, 150)}...
+                <Link
+                  to={`/posts/${post._id}`}
+                  className="text-gray-500 ml-1 hover:underline"
+                >
+                  xem thêm
                 </Link>
               </>
             ) : (
@@ -188,11 +302,15 @@ export const PostCard: React.FC<PostCardProps> = ({
 
           {/* Hashtags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
+            <div className="flex flex-wrap gap-1 mt-2">
               {post.tags.map((tag, index) => (
-                <span key={index} className="text-sm text-blue-500">
+                <Link
+                  key={index}
+                  to={`/tags/${tag}`}
+                  className="text-sm text-blue-500 hover:underline"
+                >
                   #{tag}
-                </span>
+                </Link>
               ))}
             </div>
           )}
@@ -200,32 +318,32 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         {/* View comments link */}
         {post.stats.commentCount > 0 && (
-          <div className="px-4 py-0.5">
-            <Link to={`/posts/${post._id}`} className="text-gray-500 text-sm">
-              View all {post.stats.commentCount} comments
+          <div className="px-4 py-1">
+            <Link
+              to={`/posts/${post._id}`}
+              className="text-gray-500 text-sm hover:underline"
+            >
+              Xem tất cả {post.stats.commentCount} bình luận
             </Link>
           </div>
         )}
-
-        {/* Date */}
-        <div className="px-4 py-0.5 text-xs text-gray-500 uppercase">
-          {formattedDate}
-        </div>
 
         {/* Add comment section */}
         <div className="flex items-center px-4 py-3 border-t mt-2">
           <input
             type="text"
-            placeholder="Add a comment..."
+            placeholder="Thêm bình luận..."
             className="flex-1 text-sm border-none bg-transparent outline-none"
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-blue-500 font-semibold text-sm"
-          >
-            Post
-          </Button>
+          <Link to={`/posts/${post._id}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary font-medium text-sm"
+            >
+              Đăng
+            </Button>
+          </Link>
         </div>
       </div>
     </>

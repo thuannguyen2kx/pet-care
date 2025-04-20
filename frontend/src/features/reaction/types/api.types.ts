@@ -1,25 +1,24 @@
-export type ReactionItemType = "like" | "love" | "laugh" | "sad" | "angry";
-export type ContentType = "posts" | "comments";
+// Define types for reaction-related features
 
-export type UserType  ={
-  _id: string;
-  fullName: string;
-  profilePicture?: {
-    url: string;
-    publicId: string;
-  };
-}
+export type ReactionItemType = 'like' | 'love' | 'laugh' | 'sad' | 'angry';
 
-export type ReactionType = {
+export type ContentType = 'post' | 'comment';
+
+export interface ReactionType {
   _id: string;
-  contentType: "post" | "comment";
+  userId: string;
+  contentType: ContentType;
   contentId: string;
-  userId: UserType;
   reactionType: ReactionItemType;
-  createdAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export type ReactionCountsType = {
+export interface UserReactionResponse {
+  reaction: ReactionType | null;
+}
+
+export interface ReactionCounts {
   like: number;
   love: number;
   laugh: number;
@@ -28,13 +27,27 @@ export type ReactionCountsType = {
   total: number;
 }
 
-export type ReactionsResponseType = {
-  message: string;
-  reactions: ReactionType[];
-  counts: ReactionCountsType;
+export interface ReactionsResponse {
+  counts: ReactionCounts;
+  topReactors?: {
+    userId: {
+      _id: string;
+      fullName: string;
+      profilePicture?: {
+        url: string;
+      };
+    };
+    reactionType: ReactionItemType;
+  }[];
 }
 
-export type UserReactionResponse = {
-  message: string;
-  reaction: ReactionType | null;
+export interface AddReactionRequest {
+  contentType: ContentType;
+  contentId: string;
+  reactionType: ReactionItemType;
+}
+
+export interface RemoveReactionRequest {
+  contentType: ContentType;
+  contentId: string;
 }

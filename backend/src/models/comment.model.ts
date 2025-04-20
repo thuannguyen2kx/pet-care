@@ -6,9 +6,12 @@ export interface IComment extends Document {
   content: string;
   parentCommentId?: mongoose.Types.ObjectId | string;
   status: 'active' | 'blocked' | 'deleted';
+  stats?: {
+    likeCount: number;
+    replyCount: number;
+  };
   createdAt: Date;
   updatedAt: Date;
-  // Thêm trường này để TypeScript biết về thuộc tính replies
   replies?: IComment[];
 }
 
@@ -35,10 +38,26 @@ const CommentSchema = new Schema({
     type: String,
     enum: ['active', 'blocked', 'deleted'],
     default: 'active'
+  },
+  // Add stats for reactions and replies
+  stats: {
+    likeCount: {
+      type: Number,
+      default: 0
+    },
+    replyCount: {
+      type: Number,
+      default: 0
+    }
   }
 }, {
   timestamps: true
 });
+
+// Indexes for better query performance
+CommentSchema.index({ postId: 1, createdAt: -1 });
+CommentSchema.index({ authorId: 1 });
+CommentSchema.index({ parentCommentId: 1 }); // For finding replies
 
 const CommentModel = mongoose.model<IComment>('Comment', CommentSchema);
 

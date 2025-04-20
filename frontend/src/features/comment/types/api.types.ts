@@ -1,3 +1,12 @@
+export type PostStatsType = {
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
+  reportCount?: number;
+}
+
+
 export type CommentType = {
   _id: string;
   postId: string;
@@ -16,6 +25,10 @@ export type CommentType = {
   updatedAt: string;
   replies?: CommentType[];
   replyCount?: number;
+  stats?: {
+    likeCount: number;
+    replyCount: number;
+  };
 };
 
 export type PaginationResultType = {

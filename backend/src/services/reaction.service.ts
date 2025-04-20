@@ -40,11 +40,21 @@ export const addReactionService = async ({
   });
   
   let reaction;
+  let previousReactionType: ReactionType | null = null;
   
   if (existingReaction) {
-    // Update existing reaction
-    existingReaction.reactionType = reactionType;
-    reaction = await existingReaction.save();
+    // Store previous reaction type for stats update
+    previousReactionType = existingReaction.reactionType as ReactionType;
+    
+    // Only update if reaction type changed
+    if (previousReactionType !== reactionType) {
+      // Update existing reaction
+      existingReaction.reactionType = reactionType;
+      reaction = await existingReaction.save();
+    } else {
+      // Same reaction type, no need to update
+      reaction = existingReaction;
+    }
   } else {
     // Create new reaction
     reaction = await Reaction.create({
@@ -54,7 +64,7 @@ export const addReactionService = async ({
       reactionType
     });
     
-    // Update content stats
+    // Update content stats - increment total count
     await updateContentStats(contentType, contentId, 1);
   }
   
@@ -91,7 +101,7 @@ export const removeReactionService = async ({
     throw new NotFoundException("Reaction not found");
   }
   
-  // Update content stats
+  // Update content stats - decrement count
   await updateContentStats(contentType, contentId, -1);
   
   return { success: true };
@@ -127,12 +137,72 @@ export const getReactionsService = async ({
   };
   
   reactions.forEach(reaction => {
-    counts[reaction.reactionType] += 1;
+    counts[reaction.reactionType as ReactionType] += 1;
   });
   
+  // Get top reactors (for display in UI)
+  const topReactors = reactions.slice(0, 10).map(reaction => ({
+    userId: reaction.userId,
+    reactionType: reaction.reactionType
+  }));
+  
   return {
-    reactions,
-    counts
+    counts,
+    topReactors
+  };
+};
+
+/**
+ * Get users who reacted to a post or comment
+ */
+export const getReactorsService = async ({
+  contentType,
+  contentId,
+  reactionType,
+  page = 1,
+  limit = 20
+}: {
+  contentType: ContentType;
+  contentId: string;
+  reactionType?: ReactionType;
+  page?: number;
+  limit?: number;
+}) => {
+  // Check if the content exists
+  await checkContentExists(contentType, contentId);
+  
+  // Build query
+  const query: any = {
+    contentType,
+    contentId
+  };
+  
+  // Add reaction type filter if provided
+  if (reactionType) {
+    query.reactionType = reactionType;
+  }
+  
+  // Calculate pagination
+  const skip = (page - 1) * limit;
+  
+  // Get total count
+  const total = await Reaction.countDocuments(query);
+  
+  // Get paginated reactors
+  const reactors = await Reaction.find(query)
+    .populate("userId", "fullName profilePicture")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+  
+  return {
+    reactors,
+    pagination: {
+      total,
+      page,
+      limit,
+      hasMore: skip + reactors.length < total
+    }
   };
 };
 
@@ -194,9 +264,32 @@ const updateContentStats = async (
   change: number
 ): Promise<void> => {
   if (contentType === "post") {
+    // Update post's likeCount
     await PostModel.findByIdAndUpdate(contentId, {
-      $inc: { "stats.reactionCount": change }
+      $inc: { "stats.likeCount": change }
     });
+  } else if (contentType === "comment") {
+    // For comments, initialize stats object if it doesn't exist
+    // and then update likeCount
+    const comment = await CommentModel.findById(contentId);
+    
+    if (comment) {
+      if (!comment.stats) {
+        // If stats doesn't exist, create it with initial values
+        await CommentModel.findByIdAndUpdate(contentId, {
+          $set: {
+            stats: {
+              likeCount: Math.max(0, change), // Ensure it's not negative
+              replyCount: 0
+            }
+          }
+        });
+      } else {
+        // If stats exists, just increment likeCount
+        await CommentModel.findByIdAndUpdate(contentId, {
+          $inc: { "stats.likeCount": change }
+        });
+      }
+    }
   }
-  // For comments, we could add a reactionCount field if needed
 };

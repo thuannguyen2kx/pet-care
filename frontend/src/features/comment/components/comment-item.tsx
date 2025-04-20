@@ -1,13 +1,17 @@
-// components/comments/CommentItem.tsx
-import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { MessageCircle, Trash2, Edit2 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { ReactionButton } from '@/features/reaction/components/reaction-button';
-import { useDeleteComment } from '../hooks/mutations/delete-comment';
-import { useUpdateComment } from '../hooks/mutations/update-comment';
+import React, { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
+import { MessageCircle, Trash2, Edit2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ReactionButton } from "@/features/reaction/components/reaction-button";
+import { useDeleteComment } from "../hooks/mutations/delete-comment";
+import { useUpdateComment } from "../hooks/mutations/update-comment";
+import { Link } from "react-router-dom";
+import { CommentForm } from "./comment-form";
+import { toast } from "sonner";
+import { useConfirm } from "@/hooks/use-confirm";
 
 interface Comment {
   _id: string;
@@ -17,16 +21,20 @@ interface Comment {
     fullName: string;
     profilePicture?: {
       url: string;
-      publicId: string;
+      publicId?: string;
     };
   };
   content: string;
   parentCommentId?: string;
   status: "active" | "blocked" | "deleted";
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   replies?: Comment[];
   replyCount?: number;
+  stats?: {
+    likeCount: number;
+    replyCount: number;
+  };
 }
 
 interface CommentItemProps {
@@ -35,173 +43,257 @@ interface CommentItemProps {
   currentUser?: {
     _id: string;
     role?: string;
-  };
+  } | null;
   onReplyClick?: (commentId: string) => void;
+  level?: number; // For nesting level
+  showReplyForm?: boolean;
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
   comment,
   postId,
   currentUser,
-  onReplyClick
+  onReplyClick,
+  level = 0,
+  showReplyForm = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
-  
+  const [showingReplyForm, setShowingReplyForm] = useState(showReplyForm);
+
   const updateCommentMutation = useUpdateComment();
   const deleteCommentMutation = useDeleteComment();
-  
+  const [DeleteDialog, confirmDelete] = useConfirm(
+    "Xoá bình luận",
+    "Bạn có chắc chắn muốn xoá bình luận này không?"
+  );
   const handleSubmitEdit = () => {
     if (editedContent.trim()) {
-      updateCommentMutation.mutate({
-        commentId: comment._id,
-        content: editedContent
-      }, {
-        onSuccess: () => setIsEditing(false)
-      });
+      updateCommentMutation.mutate(
+        {
+          commentId: comment._id,
+          content: editedContent,
+        },
+        {
+          onSuccess: () => {
+            setIsEditing(false);
+            toast.success("Bình luận đã được cập nhật");
+          },
+          onError: () => {
+            toast.error("Không thể cập nhật bình luận");
+          },
+        }
+      );
     }
   };
-  
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this comment?")) {
-      deleteCommentMutation.mutate(comment._id);
+
+  const handleDelete = async () => {
+    const ok = await confirmDelete();
+    if (!ok) return;
+    deleteCommentMutation.mutate(comment._id, {
+      onSuccess: () => {
+        toast.success("Đã xóa bình luận");
+      },
+      onError: () => {
+        toast.error("Không thể xóa bình luận");
+      },
+    });
+  };
+
+  const handleReplyClick = () => {
+    setShowingReplyForm(!showingReplyForm);
+
+    if (onReplyClick) {
+      onReplyClick(comment._id);
     }
   };
-  
+
   const isAuthor = currentUser && currentUser._id === comment.authorId._id;
   const isAdmin = currentUser && currentUser.role === "admin";
   const canModify = isAuthor || isAdmin;
-  
+  const remainingReplies =
+    (comment.replyCount || 0) - (comment.replies?.length || 0);
   // Format the date
-  const formattedDate = format(new Date(comment.createdAt), "PPp");
-  
+  const timeAgo =
+    typeof comment.createdAt === "string"
+      ? formatDistanceToNow(new Date(comment.createdAt), {
+          addSuffix: true,
+          locale: vi,
+        })
+      : formatDistanceToNow(comment.createdAt, { addSuffix: true, locale: vi });
+
   // Get initials for avatar fallback
   const getInitials = () => {
-    return comment.authorId.fullName
-      .split(" ")
-      .map(name => name[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+    return (
+      comment.authorId.fullName
+        ?.split(" ")
+        .map((name) => name[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase() || "U"
+    );
   };
-  
+
+  // Maximum nesting level
+  const maxLevel = 3;
+
   return (
-    <div className="pl-4 pr-2 py-3 border-b border-gray-100">
-      <div className="flex space-x-3">
-        <Avatar>
-          {comment.authorId.profilePicture ? (
-            <AvatarImage src={comment.authorId.profilePicture.url} alt={comment.authorId.fullName} />
-          ) : (
-            <AvatarFallback>{getInitials()}</AvatarFallback>
-          )}
-        </Avatar>
-        <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-medium">{comment.authorId.fullName}</p>
-              <p className="text-xs text-gray-500">{formattedDate}</p>
-            </div>
-            {canModify && (
-              <div className="flex space-x-2">
-                {isAuthor && (
+    <>
+      <DeleteDialog />
+      <div
+        className={`${
+          level > 0 ? "ml-6 pl-3 border-l border-gray-100" : ""
+        } py-3`}
+      >
+        <div className="flex space-x-3">
+          <Link
+            to={`/profile/${comment.authorId._id}`}
+            className="flex-shrink-0"
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarImage
+                src={comment.authorId.profilePicture?.url}
+                alt={comment.authorId.fullName}
+              />
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+          <div className="flex-1">
+            <div className="flex items-start justify-between">
+              <div>
+                <Link
+                  to={`/profile/${comment.authorId._id}`}
+                  className="text-sm font-medium hover:underline"
+                >
+                  {comment.authorId.fullName}
+                </Link>
+                <p className="text-xs text-gray-500">{timeAgo}</p>
+              </div>
+              {canModify && (
+                <div className="flex space-x-2">
+                  {isAuthor && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                      disabled={isEditing}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit2 size={14} className="text-gray-500" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsEditing(true)}
-                    disabled={isEditing}
+                    onClick={handleDelete}
+                    disabled={deleteCommentMutation.isPending}
+                    className="h-6 w-6 p-0"
                   >
-                    <Edit2 size={16} />
+                    <Trash2 size={14} className="text-red-500" />
                   </Button>
-                )}
+                </div>
+              )}
+            </div>
+
+            {isEditing ? (
+              <div className="mt-2">
+                <Textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  className="min-h-[60px] w-full text-sm"
+                />
+                <div className="flex justify-end space-x-2 mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditedContent(comment.content);
+                    }}
+                  >
+                    Hủy
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitEdit}
+                    disabled={
+                      updateCommentMutation.isPending || !editedContent.trim()
+                    }
+                  >
+                    {updateCommentMutation.isPending ? "Đang lưu..." : "Lưu"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-1 text-sm">{comment.content}</div>
+            )}
+
+            <div className="flex items-center mt-2 space-x-4">
+              <ReactionButton
+                contentType="comment"
+                contentId={comment._id}
+                currentUser={currentUser ? { _id: currentUser._id } : undefined}
+                variant="minimal"
+              />
+              {currentUser && level < maxLevel && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleDelete}
-                  disabled={deleteCommentMutation.isPending}
+                  onClick={handleReplyClick}
+                  className="text-xs px-2 h-6"
                 >
-                  <Trash2 size={16} />
+                  <MessageCircle size={14} className="mr-1" /> Phản hồi
                 </Button>
+              )}
+            </div>
+
+            {/* Reply form */}
+            {showingReplyForm && currentUser && level < maxLevel && (
+              <div className="mt-2">
+                <CommentForm
+                  postId={postId}
+                  parentCommentId={comment._id}
+                  placeholder="Viết phản hồi..."
+                  autoFocus={true}
+                  compact={true}
+                  onSuccess={() => setShowingReplyForm(false)}
+                />
               </div>
             )}
-          </div>
-          
-          {isEditing ? (
-            <div className="mt-2">
-              <Textarea
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="min-h-[80px] w-full"
-              />
-              <div className="flex justify-end space-x-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditedContent(comment.content);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSubmitEdit}
-                  disabled={updateCommentMutation.isPending}
-                >
-                  Save
-                </Button>
+
+            {/* Render replies if they exist */}
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="mt-3 space-y-3">
+                {comment.replies.map((reply) => (
+                  <CommentItem
+                    key={reply._id}
+                    comment={reply}
+                    postId={postId}
+                    currentUser={currentUser}
+                    onReplyClick={onReplyClick}
+                    level={level + 1}
+                  />
+                ))}
               </div>
-            </div>
-          ) : (
-            <div className="mt-1 text-sm">{comment.content}</div>
-          )}
-          
-          <div className="flex items-center mt-2 space-x-4">
-            <ReactionButton
-              contentType="comments"
-              contentId={comment._id}
-              currentUser={currentUser}
-            />
-            {currentUser && (
+            )}
+
+            {/* Show "View more replies" if there are more than what's displayed */}
+
+            {remainingReplies > 0 && (
               <Button
-                variant="ghost"
+                variant="link"
                 size="sm"
-                onClick={() => onReplyClick && onReplyClick(comment._id)}
-                className="text-xs"
+                className="mt-1 text-xs px-0"
+                onClick={() => onReplyClick?.(comment._id)}
               >
-                <MessageCircle size={16} className="mr-1" /> Reply
+                Xem thêm {remainingReplies} phản hồi
               </Button>
             )}
           </div>
-          
-          {/* Render replies if they exist */}
-          {comment.replies && comment.replies.length > 0 && (
-            <div className="ml-4 mt-3 space-y-3">
-              {comment.replies.map((reply) => (
-                <CommentItem
-                  key={reply._id}
-                  comment={reply}
-                  postId={postId}
-                  currentUser={currentUser}
-                  onReplyClick={onReplyClick}
-                />
-              ))}
-            </div>
-          )}
-          
-          {/* Show "View more replies" if there are more than what's displayed */}
-          {comment.replyCount && comment.replyCount > (comment.replies?.length || 0) && (
-            <Button
-              variant="link"
-              size="sm"
-              className="ml-4 mt-1 text-xs"
-              onClick={() => onReplyClick && onReplyClick(comment._id)}
-            >
-              View {comment.replyCount - (comment.replies?.length || 0)} more {comment.replyCount - (comment.replies?.length || 0) === 1 ? 'reply' : 'replies'}
-            </Button>
-          )}
         </div>
       </div>
-    </div>
+    </>
   );
 };

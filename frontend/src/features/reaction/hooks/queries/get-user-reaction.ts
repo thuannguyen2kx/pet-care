@@ -9,7 +9,7 @@ export const useUserReaction = (
 ) => {
   return useQuery({
     queryKey: ["userReaction", contentType, contentId],
-    queryFn: () => getUserReactionQueryFn({ contentType, contentId }),
+    queryFn: () => getUserReactionQueryFn(contentType, contentId),
     enabled: !!contentId,
   });
 };
