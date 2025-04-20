@@ -33,6 +33,7 @@ import AdminAppointmentDetailsPage from "@/pages/admin/appointment-details";
 import PaymentSuccessPage from "@/pages/customer/payment-success";
 import PaymentCancelPage from "@/pages/customer/payment-cancel";
 import AdminPaymentManagement from "@/pages/admin/payment-management";
+import CustomerDetailsPage from "@/pages/admin/customer-details";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -67,41 +68,48 @@ export const protectedCustomerRoutePaths = [
   },
   {
     path: CUSTOMER_ROUTES.APPOINTMENTS,
-    element: <AppointmentListPage />
+    element: <AppointmentListPage />,
   },
   {
     path: CUSTOMER_ROUTES.APPOINTMENTS_CREATION,
-    element: <AppointmentCreationPage />
+    element: <AppointmentCreationPage />,
   },
   {
     path: CUSTOMER_ROUTES.APPOINTMENTS_DETAILS,
-    element: <AppointmentDetailPage />
+    element: <AppointmentDetailPage />,
   },
   {
     path: CUSTOMER_ROUTES.PAYMENT_SUCCESS,
-    element: <PaymentSuccessPage />
+    element: <PaymentSuccessPage />,
   },
   {
     path: CUSTOMER_ROUTES.PAYMENT_CANCEL,
-    element: <PaymentCancelPage />
-  }
+    element: <PaymentCancelPage />,
+  },
 ];
 
 export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.DASHBOARD, element: <DashboardPage /> },
   { path: ADMIN_ROUTES.APPOINTMENT, element: <AppointementPage /> },
-  { path: ADMIN_ROUTES.APPOINTMENT_CALENDAR, element: <AppointmentCalendarPage />},
-  { path: ADMIN_ROUTES.APPOINTMENT_DETAILS, element: <AdminAppointmentDetailsPage /> },
+  {
+    path: ADMIN_ROUTES.APPOINTMENT_CALENDAR,
+    element: <AppointmentCalendarPage />,
+  },
+  {
+    path: ADMIN_ROUTES.APPOINTMENT_DETAILS,
+    element: <AdminAppointmentDetailsPage />,
+  },
   { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeesPage /> },
-  {path: ADMIN_ROUTES.EMPLOYEE_NEW, element: <EmployeeCreationPage /> },
-  {path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage />},
-  {path: ADMIN_ROUTES.EMPLOYEE_EDIT, element: <EmployeeEditionPage />},
-  {path: ADMIN_ROUTES.EMPLOYEE_SCHEDULE, element: <EmployeeCalendarPage />},
+  { path: ADMIN_ROUTES.EMPLOYEE_NEW, element: <EmployeeCreationPage /> },
+  { path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage /> },
+  { path: ADMIN_ROUTES.EMPLOYEE_EDIT, element: <EmployeeEditionPage /> },
+  { path: ADMIN_ROUTES.EMPLOYEE_SCHEDULE, element: <EmployeeCalendarPage /> },
   { path: ADMIN_ROUTES.CUSTOMER, element: <CustomerPage /> },
+  { path: ADMIN_ROUTES.CUSTOMER_DETAILS, element: <CustomerDetailsPage /> },
   { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage /> },
   { path: ADMIN_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
   { path: ADMIN_ROUTES.SERVICE_EDIT, element: <ServiceEditionPage /> },
-  {path: ADMIN_ROUTES.PAYMENT, element: <AdminPaymentManagement />}
+  { path: ADMIN_ROUTES.PAYMENT, element: <AdminPaymentManagement /> },
 ];
 
 export const baseRoutesPaths = [

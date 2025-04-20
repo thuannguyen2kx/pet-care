@@ -1,6 +1,10 @@
+import CustomerList from "@/features/user/components/customer-list";
+
 const CustomerPage = () => {
   return (
-    <div>CustomerPage</div>
+    <div>
+      <CustomerList />
+    </div>
   )
 }
 

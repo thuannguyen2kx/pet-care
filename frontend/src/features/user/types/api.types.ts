@@ -50,3 +50,17 @@ export type UpdateProfileResponseType = {
   message: string,
   user: UserType
 }
+
+export type UserFilters = {
+  search?: string;
+  status?: StatusUserType | undefined;
+  page?: number;
+  limit?: number;
+}
+export type GetAllCustomerResType = {
+  message: string;
+  users: UserType[];
+  totalUsers: number;
+  totalPages: number;
+  currentPage: number;
+};
