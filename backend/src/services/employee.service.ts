@@ -16,6 +16,8 @@ import mongoose from "mongoose";
 import ServicePackageModel from "../models/service-package.model";
 import { dateUtils } from "../utils/date-fns";
 import TimeSlotModel from "../models/time-slot.model";
+import AccountModel from "../models/account.model";
+import { ProviderEnum } from "../enums/account-provider.enum";
 
 // Get all employees with optional filtering
 export const getAllEmployeesService = async (filters: {
@@ -318,6 +320,12 @@ export const createEmployeeService = async (
       },
     },
   });
+  const account = new AccountModel({
+    userId: employee._id,
+    provider: ProviderEnum.EMAIL,
+    providerId: email,
+  });
+  await account.save();
 
   // Send welcome email
   if (employee) {
@@ -528,7 +536,7 @@ export const resetEmployeePasswordService = async ({
   }
 
   // Hash new password
-  employee.password = await hashValue(newPassword);
+  employee.password = newPassword;
   await employee.save();
 
   // Send password reset email

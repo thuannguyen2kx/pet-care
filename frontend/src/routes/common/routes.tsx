@@ -4,6 +4,7 @@ import {
   AUTH_ROUTES,
   BASE_ROUTES,
   CUSTOMER_ROUTES,
+  EMPLOYEE_ROUTES,
 } from "./routePaths";
 import SignUp from "@/pages/auth/sign-up";
 import GoogleOauth from "@/pages/auth/google-oauth";
@@ -34,6 +35,9 @@ import PaymentSuccessPage from "@/pages/customer/payment-success";
 import PaymentCancelPage from "@/pages/customer/payment-cancel";
 import AdminPaymentManagement from "@/pages/admin/payment-management";
 import CustomerDetailsPage from "@/pages/admin/customer-details";
+import EmployeeHomePape from "@/pages/employee/home";
+import EmployeeAppointmentPage from "@/pages/employee/appointment";
+import EmployeePostPage from "@/pages/employee/post";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -112,6 +116,11 @@ export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.PAYMENT, element: <AdminPaymentManagement /> },
 ];
 
+export const employeeRoutesPaths = [
+  { path: EMPLOYEE_ROUTES.HOME, element: <EmployeeHomePape /> },
+  { path: EMPLOYEE_ROUTES.APPOINTMENTS, element: <EmployeeAppointmentPage /> },
+  { path: EMPLOYEE_ROUTES.POST, element: <EmployeePostPage /> },
+];
 export const baseRoutesPaths = [
   { path: BASE_ROUTES.LANDING, element: <Landing /> },
 ];

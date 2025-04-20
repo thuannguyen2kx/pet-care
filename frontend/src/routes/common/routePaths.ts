@@ -38,7 +38,9 @@ export const ADMIN_ROUTES = {
   PAYMENT: "/admin/payments",
 };
 export const EMPLOYEE_ROUTES = {
-  DASHBOARD: "/employee/dashboard",
+  HOME: "/employee/home",
+  APPOINTMENTS: "/employee/appointments",
+  POST: "/employee/posts",
 };
 export const BASE_ROUTES = {
   LANDING: "/",
