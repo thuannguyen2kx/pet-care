@@ -452,11 +452,6 @@ export const getPostsForModerationService = async ({
   query: ModerationQuery;
   user?: any;
 }) => {
-  // Check if user is admin
-  if (user?.role !== "admin") {
-    throw new ForbiddenException("Admin access required");
-  }
-
   const {
     page = 1,
     limit = 20,
@@ -651,11 +646,6 @@ export const getReportedPostsService = async ({
   query: ReportedPostsQuery;
   user?: any;
 }) => {
-  // Check if user is admin
-  if (user?.role !== "admin") {
-    throw new ForbiddenException("Admin access required");
-  }
-
   const {
     page = 1,
     limit = 20,

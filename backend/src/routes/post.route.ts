@@ -33,10 +33,10 @@ postRoutes.post('/:id/report', reportPostController);
 postRoutes.get('/user/my-posts', getUserPostsController);
 
 // Admin routes
-postRoutes.get('/admin/moderation', authorizeRoles([Roles.ADMIN]), getPostsForModerationController);
-postRoutes.get('/admin/reported', authorizeRoles([Roles.ADMIN]), getReportedPostsController);
-postRoutes.put('/:id/status', authorizeRoles([Roles.ADMIN]), updatePostStatusController);
-postRoutes.put('/:id/featured', authorizeRoles([Roles.ADMIN]), setPostFeatureController);
-postRoutes.put('/:id/reports/:reportId', authorizeRoles([Roles.ADMIN]), resolveReportController);
+postRoutes.get('/admin/moderation', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getPostsForModerationController);
+postRoutes.get('/admin/reported', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getReportedPostsController);
+postRoutes.put('/:id/status', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), updatePostStatusController);
+postRoutes.put('/:id/featured', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), setPostFeatureController);
+postRoutes.put('/:id/reports/:reportId', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), resolveReportController);
 
 export default postRoutes;

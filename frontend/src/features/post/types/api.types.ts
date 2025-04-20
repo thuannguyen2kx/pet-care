@@ -1,6 +1,7 @@
 // Define interfaces for Post-related types
 
 import { CommentType } from "@/features/comment/types/api.types";
+import { UserType } from "@/features/user/types/api.types";
 
 export type MediaItemType = {
   type: 'image' | 'video';
@@ -23,8 +24,8 @@ export type ModerationNoteType = {
 }
 
 export type ReportType = {
-  _id?: string;
-  userId: string;
+  _id: string;
+  userId: string | UserType;
   reason: string;
   details?: string;
   createdAt: Date;
@@ -57,10 +58,10 @@ export type PostType = {
   petIds: PetType[];
   media?: MediaItemType[];
   visibility: 'public' | 'private';
-  status: 'active' | 'under-review' | 'blocked';
+  status: 'pending' | "resolved" | "rejected";
   isFeatured?: boolean;
   stats: PostStatsType;
-  reports?: Report[];
+  reports?: ReportType[];
   moderationNotes?: ModerationNoteType[];
   createdAt: Date;
   updatedAt: Date;

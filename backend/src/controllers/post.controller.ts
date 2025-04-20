@@ -229,7 +229,7 @@ export const getFeaturedPostsController = asyncHandler(
 
 // @desc    Admin: Set a post as featured
 // @route   PUT /api/posts/:id/featured
-// @access  Private (Admin only)
+// @access  Private (Admin/Employee)
 export const setPostFeatureController = asyncHandler(
   async (req: Request, res: Response) => {
     const postId = postIdSchema.parse(req.params.id);

@@ -41,6 +41,7 @@ export const EMPLOYEE_ROUTES = {
   HOME: "/employee/home",
   APPOINTMENTS: "/employee/appointments",
   POST: "/employee/posts",
+  POST_DETAILS: "/employee/posts/:postId",
 };
 export const BASE_ROUTES = {
   LANDING: "/",

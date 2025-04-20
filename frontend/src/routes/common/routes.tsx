@@ -38,6 +38,7 @@ import CustomerDetailsPage from "@/pages/admin/customer-details";
 import EmployeeHomePape from "@/pages/employee/home";
 import EmployeeAppointmentPage from "@/pages/employee/appointment";
 import EmployeePostPage from "@/pages/employee/post";
+import EmployeePostDetailPage from "@/pages/employee/post-details";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -120,6 +121,7 @@ export const employeeRoutesPaths = [
   { path: EMPLOYEE_ROUTES.HOME, element: <EmployeeHomePape /> },
   { path: EMPLOYEE_ROUTES.APPOINTMENTS, element: <EmployeeAppointmentPage /> },
   { path: EMPLOYEE_ROUTES.POST, element: <EmployeePostPage /> },
+  {path: EMPLOYEE_ROUTES.POST_DETAILS, element: <EmployeePostDetailPage />}
 ];
 export const baseRoutesPaths = [
   { path: BASE_ROUTES.LANDING, element: <Landing /> },
