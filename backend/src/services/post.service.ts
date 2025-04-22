@@ -74,7 +74,7 @@ export const getPostsService = async ({
 
   // Only admins can see all posts regardless of status/visibility
   // Regular users can only see active and public posts
-  if (user?.role === "admin") {
+  if (user?.role === Roles.ADMIN || user?.role === Roles.EMPLOYEE) {
     if (status) {
       filter.status = status;
     }
@@ -266,7 +266,7 @@ export const createPostService = async ({
 
       if (
         pet.ownerId.toString() !== user._id.toString() &&
-        user.role !== "admin"
+        user.role !== Roles.ADMIN && user.role !== Roles.EMPLOYEE
       ) {
         throw new BadRequestException(
           `Pet with ID ${petId} does not belong to you`
@@ -337,7 +337,7 @@ export const updatePostService = async ({
 
   // Check if user is authorized to update this post
   const isAuthor = post.authorId.toString() === user?._id.toString();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === Roles.ADMIN || user?.role === Roles.EMPLOYEE;
 
   if (!isAuthor && !isAdmin) {
     throw new ForbiddenException("Not authorized to update this post");
@@ -412,7 +412,7 @@ export const deletePostService = async ({
 
   // Check if user is authorized to delete this post
   const isAuthor = post.authorId.toString() === user?._id.toString();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === Roles.ADMIN || user?.role === Roles.EMPLOYEE;
 
   if (!isAuthor && !isAdmin) {
     throw new ForbiddenException("Not authorized to delete this post");
@@ -515,8 +515,8 @@ export const updatePostStatusService = async ({
   body: any;
   user?: any;
 }) => {
-  // Check if user is admin
-  if (user?.role !== "admin") {
+  console.log("user role", user?.role);
+  if (user?.role !== Roles.ADMIN && user?.role !== Roles.EMPLOYEE) {
     throw new ForbiddenException("Admin access required");
   }
 
@@ -641,10 +641,8 @@ export const reportPostService = async ({
 // Admin: Get reported posts
 export const getReportedPostsService = async ({
   query,
-  user,
 }: {
   query: ReportedPostsQuery;
-  user?: any;
 }) => {
   const {
     page = 1,
@@ -714,7 +712,7 @@ export const resolveReportService = async ({
   user?: any;
 }) => {
   // Check if user is admin
-  if (user?.role !== 'admin') {
+  if (user?.role !== Roles.ADMIN && user?.role !== Roles.EMPLOYEE) {
     throw new ForbiddenException('Admin access required');
   }
   
@@ -806,7 +804,7 @@ export const setPostFeatureService = async ({
   user?: any;
 }) => {
   // Check if user is admin
-  if (user?.role !== "admin") {
+  if (user?.role !== Roles.ADMIN && user?.role !== Roles.EMPLOYEE) {
     throw new ForbiddenException("Admin access required");
   }
 

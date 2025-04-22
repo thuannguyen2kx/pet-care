@@ -220,21 +220,21 @@ export default function EmployeePostDetailPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" onClick={handleBack}>
+        <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại
         </Button>
         
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" onClick={handleEdit}>
+          <Button variant="ghost" size="sm" onClick={handleEdit}>
             <Edit className="mr-2 h-4 w-4" /> Chỉnh sửa
           </Button>
           
-          <Button variant="outline" size="sm" onClick={handleModerate}>
+          <Button variant="ghost" size="sm" onClick={handleModerate}>
             <AlertTriangle className="mr-2 h-4 w-4" /> Kiểm duyệt
           </Button>
           
           <Button 
-            variant={post.isFeatured ? "default" : "outline"}
+            variant={post.isFeatured ? "default" : "ghost"}
             size="sm" 
             onClick={() => handleSetFeatured(!post.isFeatured)}
           >
@@ -304,7 +304,7 @@ export default function EmployeePostDetailPage() {
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
               {post.tags.map((tag, index) => (
-                <Badge key={index} variant="outline">
+                <Badge key={index} variant="secondary">
                   #{tag}
                 </Badge>
               ))}

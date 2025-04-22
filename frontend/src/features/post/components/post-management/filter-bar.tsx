@@ -106,7 +106,7 @@ export function PostFilterBar({
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Tất cả</SelectItem>
+              <SelectItem value="all">Tất cả</SelectItem>
               <SelectItem value="resolved">Hoạt động</SelectItem>
               <SelectItem value="pending">Đang xét duyệt</SelectItem>
               <SelectItem value="rejected">Đã chặn</SelectItem>
@@ -125,7 +125,7 @@ export function PostFilterBar({
               <SelectValue placeholder="Hiển thị" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Tất cả</SelectItem>
+              <SelectItem value="all">Tất cả</SelectItem>
               <SelectItem value="public">Công khai</SelectItem>
               <SelectItem value="private">Riêng tư</SelectItem>
             </SelectContent>
@@ -149,7 +149,7 @@ export function PostFilterBar({
                 <SelectItem value="stats.viewCount">Lượt xem</SelectItem>
                 <SelectItem value="stats.likeCount">Lượt thích</SelectItem>
                 <SelectItem value="stats.commentCount">Lượt bình luận</SelectItem>
-                <SelectItem value="stats.reportCount">Lượt báo cáo</SelectItem>
+                <SelectItem value="reportCount">Lượt báo cáo</SelectItem>
               </SelectContent>
             </Select>
             <Select

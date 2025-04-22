@@ -183,7 +183,6 @@ export const getReportedPostsController = asyncHandler(
     const query = reportedPostsQuerySchema.parse(req.query);
     const { posts, pagination } = await getReportedPostsService({
       query,
-      user: req.user
     });
 
     return res.status(HTTPSTATUS.OK).json({

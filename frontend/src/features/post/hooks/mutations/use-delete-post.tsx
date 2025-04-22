@@ -10,10 +10,10 @@ export const useDeletePost = () => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
-      toast("Bài viết đã được xoá");
+      toast.success("Bài viết đã được xoá");
     },
     onError: () => {
-      toast("Có lỗi khi xoá bài viết");
+      toast.error("Có lỗi khi xoá bài viết");
     },
   });
 

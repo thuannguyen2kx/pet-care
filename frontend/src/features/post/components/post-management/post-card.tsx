@@ -1,9 +1,12 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, ThumbsUp, MessageSquare, Flag } from "lucide-react";
+import { Eye, ThumbsUp, MessageSquare, Flag, Share2 } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import { PostType } from "@/features/post/types/api.types";
 import { PostStatusBadge } from "../post-status-badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface PostCardProps {
   post: PostType;
@@ -17,38 +20,35 @@ export function PostCard({ post, onClick, compact = false }: PostCardProps) {
   };
 
   const isReported = post.stats.reportCount && post.stats.reportCount > 0;
-  const author = typeof post.authorId === 'object' ? post.authorId : { fullName: 'Unknown', profilePicture: {url: ""} };
+  const author = typeof post.authorId === 'object' ? post.authorId : { fullName: 'Người dùng ẩn danh', profilePicture: {url: ""} };
   
   // Format creation date
   const createdAtDate = new Date(post.createdAt);
-  const timeAgo = formatDistanceToNow(createdAtDate, { addSuffix: true });
+  const timeAgo = formatDistanceToNow(createdAtDate, { addSuffix: true, locale: vi });
 
   return (
     <Card 
-      className={`w-full overflow-hidden hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`}
+      className={cn(
+        "w-full overflow-hidden transition-all hover:bg-accent/5",
+        onClick ? "cursor-pointer" : "",
+        compact ? "shadow-sm" : "shadow"
+      )}
       onClick={handleClick}
     >
-      <CardHeader className="py-3 flex flex-row justify-between items-center">
+      <CardHeader className="py-3 flex flex-row justify-between items-center space-y-0">
         <div className="flex items-center gap-3">
-          {author.profilePicture ? (
-            <img 
-              src={author.profilePicture?.url || ""} 
-              alt={author.fullName} 
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500 text-xs">{author.fullName.charAt(0)}</span>
-            </div>
-          )}
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={author.profilePicture?.url || ""} alt={author.fullName} />
+            <AvatarFallback>{author.fullName.charAt(0)}</AvatarFallback>
+          </Avatar>
           <div>
             <p className="font-medium text-sm">{author.fullName}</p>
-            <p className="text-xs text-gray-500">{timeAgo}</p>
+            <p className="text-xs text-muted-foreground">{timeAgo}</p>
           </div>
         </div>
         <div className="flex gap-2">
           {post.isFeatured && (
-            <Badge className="bg-purple-500 hover:bg-purple-600">Featured</Badge>
+            <Badge className="bg-purple-500 text-white hover:bg-purple-600">Nổi bật</Badge>
           )}
           <PostStatusBadge status={post.status} />
         </div>
@@ -67,15 +67,15 @@ export function PostCard({ post, onClick, compact = false }: PostCardProps) {
                 {item.type === 'image' ? (
                   <img src={item.url} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                     <span className="text-gray-500">Video</span>
                   </div>
                 )}
               </div>
             ))}
             {post.media.length > 2 && (
-              <div className="col-span-2 text-sm text-gray-500 mt-1">
-                +{post.media.length - 2} more
+              <div className="col-span-2 text-sm text-muted-foreground mt-1">
+                +{post.media.length - 2} nội dung khác
               </div>
             )}
           </div>
@@ -92,7 +92,7 @@ export function PostCard({ post, onClick, compact = false }: PostCardProps) {
         )}
       </CardContent>
       
-      <CardFooter className="py-3 border-t flex justify-between text-sm text-gray-500">
+      <CardFooter className="py-3 border-t flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
@@ -105,6 +105,10 @@ export function PostCard({ post, onClick, compact = false }: PostCardProps) {
           <div className="flex items-center gap-1">
             <MessageSquare className="w-4 h-4" />
             <span>{post.stats.commentCount}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Share2 className="w-4 h-4" />
+            <span>{post.stats.shareCount || 0}</span>
           </div>
         </div>
         
