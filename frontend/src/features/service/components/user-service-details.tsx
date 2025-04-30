@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useGetService } from "../hooks/queries/get-service";
 import { formatVND } from "@/lib/helper";
-import { ServiceAppointmentType } from "@/constants";
+import { PetCategory, petCategoryTranslations, PetSize, petSizeTranslations, ServiceAppointmentType, Specialty, specialtyTranslations } from "@/constants";
+import { formatDuration } from "@/features/appointment/utils/appointment-form-config";
 
 const ServiceDetails: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -89,15 +90,21 @@ const ServiceDetails: React.FC = () => {
         </BreadcrumbList>
       </Breadcrumb>
 
+      <div className="flex items-center gap-x-2 mb-2 ">
+
       <Button
         variant="ghost"
         size="sm"
-        className="mb-4"
+        className="rounded-full"
         onClick={() => navigate("/services")}
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Quay lại danh sách dịch vụ
+        <ArrowLeft className="h-4 w-4" />
       </Button>
+      <span>
+        Quay lại danh sách dịch vụ
+
+      </span>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -211,14 +218,14 @@ const ServiceDetails: React.FC = () => {
                       <h4 className="text-sm font-medium text-gray-500">
                         Loại dịch vụ
                       </h4>
-                      <p>{service.category}</p>
+                      <p>{specialtyTranslations[service.category as Specialty]}</p>
                     </div>
 
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">
                         Thời gian thực hiện
                       </h4>
-                      <p>{service.duration} phút</p>
+                      <p>{formatDuration(service.duration)}</p>
                     </div>
 
                     <div>
@@ -229,8 +236,8 @@ const ServiceDetails: React.FC = () => {
                         {service.applicablePetTypes &&
                         service.applicablePetTypes.length > 0 ? (
                           service.applicablePetTypes.map((type) => (
-                            <Badge key={type} variant="outline">
-                              {type}
+                            <Badge key={type} variant="secondary">
+                              {petCategoryTranslations[type as PetCategory]}
                             </Badge>
                           ))
                         ) : (
@@ -247,8 +254,8 @@ const ServiceDetails: React.FC = () => {
                           </h4>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {service.applicablePetSizes.map((size) => (
-                              <Badge key={size} variant="outline">
-                                {size}
+                              <Badge key={size} variant="secondary" >
+                                {petSizeTranslations[size as PetSize]}
                               </Badge>
                             ))}
                           </div>
@@ -266,12 +273,12 @@ const ServiceDetails: React.FC = () => {
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold">{service.name}</h2>
               <Badge className="mt-2" variant="secondary">
-                {service.category}
+                {specialtyTranslations[service.category as Specialty]}
               </Badge>
 
               <div className="flex items-center gap-2 mt-4">
                 <Clock className="h-4 w-4 text-gray-400" />
-                <span>{service.duration} phút</span>
+                <span>{formatDuration(service.duration)}</span>
               </div>
 
               <Separator className="my-6" />
