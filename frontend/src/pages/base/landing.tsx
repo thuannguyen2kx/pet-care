@@ -1,6 +1,5 @@
 import CallToAction from "./components/call-to-action";
 import Footer from "./components/footer";
-import Header from "./components/header";
 import Hero from "./components/hero";
 import LatestNews from "./components/lastest-news";
 import SafeHands from "./components/SafeHand";
@@ -11,8 +10,7 @@ import Testimonials from "./components/testimonials";
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
+    <>
       <main>
         <Hero />
         <Services />
@@ -24,7 +22,7 @@ const Landing = () => {
         <LatestNews />
       </main>
       <Footer />
-    </div>
+    </>
   );
 };
 

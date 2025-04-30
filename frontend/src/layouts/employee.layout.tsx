@@ -7,18 +7,15 @@ import {
 } from "lucide-react";
 import { EMPLOYEE_ROUTES } from "@/routes/common/routePaths";
 import { UserButton } from "@/features/user/components/user-button";
-import { AuthProvider } from "@/context/auth-provider";
 
 const EmployeeLayout = () => {
-  return (
-    <AuthProvider>
+  return ( 
       <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="container mx-auto px-4 py-6">
           <Outlet />
         </main>
-      </div>
-    </AuthProvider>
+      </div> 
   );
 };
 

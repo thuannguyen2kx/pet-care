@@ -10,7 +10,7 @@ import {
   Search,
 } from "lucide-react";
 
-import { AuthProvider, useAuthContext } from "@/context/auth-provider";
+import { useAuthContext } from "@/context/auth-provider";
 import { UserButton } from "@/features/user/components/user-button";
 import { cn } from "@/lib/utils";
 import { CUSTOMER_ROUTES } from "@/routes/common/routePaths";
@@ -31,7 +31,7 @@ const AppLayout = () => {
   const {open: openCreatePost, onClose: closeCreatePost} = useCreatePostModal()
   const {open: openCreatePet, onClose: closeCreatePet} = useCreatePetSheet()
   return (
-    <AuthProvider>
+    
       <div className="flex h-screen">
         <Sidebar />
         <section className="flex h-full flex-1 flex-col">
@@ -44,7 +44,7 @@ const AppLayout = () => {
           </div>
         </section>
       </div>
-    </AuthProvider>
+   
   );
 };
 export default AppLayout;

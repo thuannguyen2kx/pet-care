@@ -8,18 +8,15 @@ import {
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/routes/common/routePaths";
 import { UserButton } from "@/features/user/components/user-button";
-import { AuthProvider } from "@/context/auth-provider";
 
 const AdminLayout = () => {
   return (
-    <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="container mx-auto px-4 py-6">
           <Outlet />
         </main>
       </div>
-    </AuthProvider>
   );
 };
 
