@@ -115,9 +115,11 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
   };
   
   const getPaymentStatusLabel = (status: string): string => {
-    return status === "paid" ? "Đã thanh toán" :
-           status === "refunded" ? "Đã hoàn tiền" :
-           "Chưa thanh toán";
+    return status === "paid"
+      ? "Đã thanh toán"
+      : status === "refunded"
+      ? "Đã hoàn tiền"
+      : "Chưa thanh toán";
   };
   
   // Format appointment date

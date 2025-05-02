@@ -39,7 +39,7 @@ import { useGetEmployeeSchedule } from "../hooks/queries/get-employee-schedule";
 import { useDeleteEmployee } from "../hooks/mutations/delete-employee";
 import { useResetPassword } from "../hooks/mutations/reset-password";
 import { useUploadProfilePicture } from "../hooks/mutations/upload-profile-picture";
-import { StatusUser, StatusUserType } from "@/constants";
+import { specialtyTranslations, StatusUser, StatusUserType, weekdays } from "@/constants";
 import { useConfirm } from "@/hooks/use-confirm";
 import { cn } from "@/lib/utils";
 
@@ -160,10 +160,10 @@ export default function EmployeeDetails() {
               onClick={() => navigate("/admin/employees")}
               className="mr-4"
             >
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className="h-4 w-4 mr-1" />
               Quay lại
             </Button>
-            <h2 className="text-3xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight">
               Thông tin chi tiết nhân viên
             </h2>
           </div>
@@ -245,10 +245,10 @@ export default function EmployeeDetails() {
                       (specialty, idx) => (
                         <Badge
                           key={idx}
-                          variant="outline"
+                          variant="default"
                           className="capitalize"
                         >
-                          {specialty}
+                          {specialtyTranslations[specialty]}
                         </Badge>
                       )
                     ) || (
@@ -430,8 +430,7 @@ export default function EmployeeDetails() {
                                   {employee.employeeInfo?.schedule?.workDays
                                     .map(
                                       (day) =>
-                                        day.charAt(0).toUpperCase() +
-                                        day.slice(1)
+                                       weekdays.find((w) => w.id === day)?.label 
                                     )
                                     .join(", ") || "Chưa thiết lập"}
                                 </p>

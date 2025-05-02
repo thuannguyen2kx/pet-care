@@ -109,7 +109,6 @@ export const WeekView: React.FC<WeekViewProps> = ({
       onDateClick(day);
     }
   };
-
   return (
     <div className="h-full overflow-auto bg-white">
       <div className="sticky top-0 bg-slate-100 z-10 flex">
@@ -136,14 +135,13 @@ export const WeekView: React.FC<WeekViewProps> = ({
             now, 
             parse(time, "HH:mm", new Date())
           );
-          
           return (
             <TimeSlot key={time} time={time} isCurrentHour={isCurrentTime}>
               <div className="flex h-full">
                 {weekDays.map((day) => {
                   const timeAppointments = getAppointmentsForTimeSlotAndDay(time, day);
                   const appointmentGroups = groupAppointmentsByTimeSlot(timeAppointments);
-                  
+                   
                   return (
                     <div 
                       key={day.toString()} 

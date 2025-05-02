@@ -42,7 +42,7 @@ const AdminAppointmentsCalendar = () => {
     end: "18:00"
   };
   
-  const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   
   // Fetch data
   const { 

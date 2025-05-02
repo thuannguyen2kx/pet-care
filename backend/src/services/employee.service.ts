@@ -676,9 +676,17 @@ export const getEmployeeScheduleService = async ({
     scheduledDate: { $gte: start, $lte: end },
     status: { $nin: ["cancelled"] },
   })
-    .populate("petId", "name species")
-    .populate("customerId", "fullName phoneNumber")
-    .populate("serviceId", "name duration");
+    .populate("petId", "name species breed profilePicture")
+    .populate({
+      path: "employeeId",
+      select: "fullName profilePicture",
+    })
+    .populate("customerId", "fullName email phoneNumber")
+    .populate({
+      path: "serviceId",
+      select: "name description price duration",
+    })
+    .sort({ scheduledDate: -1 });
 
   return {
     workDays: employee.employeeInfo?.schedule?.workDays || [],
@@ -686,15 +694,7 @@ export const getEmployeeScheduleService = async ({
       start: "09:00",
       end: "17:00",
     },
-    appointments: appointments.map((appt) => ({
-      _id: appt._id,
-      date: appt.scheduledDate,
-      timeSlot: appt.scheduledTimeSlot,
-      status: appt.status,
-      service: appt.serviceId,
-      customer: appt.customerId,
-      pet: appt.petId,
-    })),
+    appointments
   };
 };
 

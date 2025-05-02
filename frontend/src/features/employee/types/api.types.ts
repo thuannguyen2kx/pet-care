@@ -1,4 +1,5 @@
 import {Specialty, StatusUserType } from "@/constants";
+import { AdminAppointmentType } from "@/features/appointment/types/api.types";
 
 export type EmployeeType = {
   _id: string;
@@ -70,22 +71,5 @@ export type GetEmployeeScheduleType = {
   message: string;
   workDays: string[];
   workHours: { start: string; end: string };
-  appointments: {
-    _id: string;
-    date: string;
-    timeSlot: {
-      start: string;
-      end: string;
-    };
-    status: string;
-    service: { name: string; duration: string };
-    customer: {
-      fullName: string;
-      phoneNumber: string;
-    };
-    pet: {
-      name: string;
-      species: string
-    };
-  }[];
+  appointments: AdminAppointmentType[];
 };

@@ -41,63 +41,64 @@ import {
   Search,
   Filter,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useDeleteEmployee } from "../hooks/mutations/delete-employee";
 import { useGetEmployees } from "../hooks/queries/get-employees";
-import { Specialty, specialtyTranslations, statusTranslations, StatusUser, StatusUserType } from "@/constants";
+import {
+  Specialty,
+  specialtyTranslations,
+  statusTranslations,
+  StatusUser,
+  StatusUserType,
+} from "@/constants";
 import { ADMIN_ROUTES } from "@/routes/common/routePaths";
+import { useConfirm } from "@/hooks/use-confirm";
 
 export default function EmployeeList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>();
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
-  
+
+  const [DeleteDialog, confirmDelete] = useConfirm(
+    "Xác nhận xoá nhân viên",
+    "Không thể hoàn tác hành động này. Nhân viên sẽ được đánh dấu là không hoạt động và tất cả dữ liệu của họ sẽ được bảo toàn, nhưng họ sẽ không còn xuất hiện trong danh sách nhân viên đang hoạt động."
+  );
   const navigate = useNavigate();
   const deleteEmployee = useDeleteEmployee();
 
   // Use the filters in the query
   const { data } = useGetEmployees({
-    status: statusFilter  === "ALL" ? undefined : statusFilter as StatusUserType,
+    status:
+      statusFilter === "ALL" ? undefined : (statusFilter as StatusUserType),
     specialty: specialtyFilter === "ALL ?" ? undefined : specialtyFilter,
   });
 
   const employees = data?.employees || [];
-  
+
   // Filter employees by search term
-  const filteredEmployees = employees.filter((employee ) =>
-    employee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEmployees = employees.filter(
+    (employee) =>
+      employee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Handle employee deletion
-  const handleDeleteClick = (id: string) => {
-    setEmployeeToDelete(id);
-    setDeleteDialogOpen(true);
-  };
+  const handleDeleteClick = async (id: string) => {
+    const ok = await confirmDelete();
+    if (!ok) return;
 
-  const confirmDelete = () => {
-    if (employeeToDelete) {
-      deleteEmployee.mutate(employeeToDelete);
-      setDeleteDialogOpen(false);
-      setEmployeeToDelete(null);
-    }
+    deleteEmployee.mutate(id);
   };
 
   // Get status badge color
   const getStatusBadge = (status: StatusUserType) => {
     switch (status) {
       case StatusUser.ACTIVE:
-        return <Badge variant="default" className="bg-green-500">Đang hoạt động</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-500">
+            Đang hoạt động
+          </Badge>
+        );
       case StatusUser.INACTIVE:
         return <Badge variant="secondary">Không hoạt động</Badge>;
       case StatusUser.BLOCKED:
@@ -110,12 +111,12 @@ export default function EmployeeList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Quản lý nhân viên</h2>
-        <Button 
+        <h2 className="text-2xl font-bold tracking-tight">Quản lý nhân viên</h2>
+        <Button
           onClick={() => navigate(ADMIN_ROUTES.EMPLOYEE_NEW)}
           className="flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" /> Thêm nhân viên 
+          <Plus className="w-4 h-4" /> Thêm nhân viên
         </Button>
       </div>
 
@@ -123,7 +124,7 @@ export default function EmployeeList() {
         <CardHeader>
           <CardTitle>Danh sách nhân viên</CardTitle>
           <CardDescription>
-           Quản lý nhân viên, chuyên môn và lịch trình. 
+            Quản lý nhân viên, chuyên môn và lịch trình.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -139,21 +140,28 @@ export default function EmployeeList() {
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[280px]">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    <span>{statusTranslations[statusFilter as StatusUserType] || statusFilter || "Trang thái nhân viên"}</span>
+                    <span>
+                      {statusTranslations[statusFilter as StatusUserType] ||
+                        statusFilter ||
+                        "Trang thái nhân viên"}
+                    </span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Tất cả</SelectItem>
-                  <SelectItem value={StatusUser.ACTIVE}>Đang hoạt động</SelectItem>
-                  <SelectItem value={StatusUser.INACTIVE}>Không hoạt động</SelectItem>
-                  <SelectItem value={StatusUser.BLOCKED}>Bị vô hiệu hoá</SelectItem>
+                  <SelectItem value={StatusUser.ACTIVE}>
+                    Đang hoạt động
+                  </SelectItem>
+                  <SelectItem value={StatusUser.INACTIVE}>
+                    Không hoạt động
+                  </SelectItem>
+                  <SelectItem value={StatusUser.BLOCKED}>
+                    Bị vô hiệu hoá
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -164,7 +172,11 @@ export default function EmployeeList() {
                 <SelectTrigger className="w-[180px]">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    <span>{specialtyTranslations[specialtyFilter as Specialty] || specialtyFilter || "Chuyên môn"}</span>
+                    <span>
+                      {specialtyTranslations[specialtyFilter as Specialty] ||
+                        specialtyFilter ||
+                        "Chuyên môn"}
+                    </span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
@@ -182,7 +194,7 @@ export default function EmployeeList() {
           <div className="rounded-md">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="border-slate-300 bg-gray-100">
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead className="w-[250px]">Họ tên</TableHead>
                   <TableHead>Email</TableHead>
@@ -195,32 +207,44 @@ export default function EmployeeList() {
                 {filteredEmployees.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                     Không tìm thấy nhân viên 
+                      Không tìm thấy nhân viên
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredEmployees.map((employee) => (
-                    <TableRow key={employee._id}>
+                    <TableRow key={employee._id} className="border-slate-200">
                       <TableCell>
                         <Avatar>
-                          <AvatarImage 
-                            src={employee.profilePicture?.url || ''} 
-                            alt={employee.fullName} 
+                          <AvatarImage
+                            src={employee.profilePicture?.url || ""}
+                            alt={employee.fullName}
                           />
                           <AvatarFallback>
-                            {employee.fullName.split(' ').map(name => name[0]).join('').toUpperCase()}
+                            {employee.fullName
+                              .split(" ")
+                              .map((name) => name[0])
+                              .join("")
+                              .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       </TableCell>
-                      <TableCell className="font-medium">{employee.fullName}</TableCell>
+                      <TableCell className="font-medium">
+                        {employee.fullName}
+                      </TableCell>
                       <TableCell>{employee.email}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {employee.employeeInfo?.specialties.map((specialty, idx) => (
-                            <Badge key={idx} variant="outline" className="capitalize">
-                              {specialty}
-                            </Badge>
-                          ))}
+                          {employee.employeeInfo?.specialties.map(
+                            (specialty, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="secondary"
+                                className="capitalize"
+                              >
+                                {specialtyTranslations[specialty]}
+                              </Badge>
+                            )
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(employee.status)}</TableCell>
@@ -235,15 +259,25 @@ export default function EmployeeList() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Hành động</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => navigate(`/admin/employees/${employee._id}`)}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                navigate(`/admin/employees/${employee._id}`)
+                              }
+                            >
                               <Eye className="mr-2 h-4 w-4" />
                               Xem chi tiết
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/admin/employees/${employee._id}/edit`)}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                navigate(
+                                  `/admin/employees/${employee._id}/edit`
+                                )
+                              }
+                            >
                               <Pencil className="mr-2 h-4 w-4" />
                               Chỉnh sửa
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteClick(employee._id)}
                               className="text-destructive focus:text-destructive"
                             >
@@ -263,26 +297,8 @@ export default function EmployeeList() {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you sure you want to delete this employee?</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. The employee will be marked as inactive
-              and all their data will be preserved, but they will no longer appear
-              in active employee lists.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+      <DeleteDialog />
     </div>
   );
 }

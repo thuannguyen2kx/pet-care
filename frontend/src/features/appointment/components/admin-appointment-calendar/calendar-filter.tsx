@@ -68,7 +68,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
       
       <div className="flex flex-wrap gap-2">
         <Popover>
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild className="border-gray-200">
             <Button variant="outline" className="w-[240px] justify-start">
               <CalendarIcon className="mr-2 h-4 w-4" />
               {dateRange?.from ? (
