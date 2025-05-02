@@ -5,6 +5,7 @@ import {
   Package,
   Calendar,
   UserPen,
+  CreditCard,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "@/routes/common/routePaths";
 import { UserButton } from "@/features/user/components/user-button";
@@ -37,6 +38,11 @@ const navItems = [
     path: ADMIN_ROUTES.APPOINTMENT,
     name: "Lịch đặt",
     icon: <Calendar size={18} />,
+  },
+  {
+    path: ADMIN_ROUTES.PAYMENT,
+    name: "Thanh toán",
+    icon: <CreditCard size={18} />,
   },
 ];
 const Header = () => {

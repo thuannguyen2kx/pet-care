@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import EmployeeList from "@/features/employee/components/employee-list";
+import { GlobalLoading } from "@/components/shared/global-loading";
 
 const EmployeesPage = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<GlobalLoading />}>
       <EmployeeList />
     </Suspense>
   );

@@ -32,7 +32,6 @@ import {
   DollarSign,
   RefreshCw,
   Download,
-  Loader2,
 } from "lucide-react";
 
 import {
@@ -48,6 +47,7 @@ import ReportsList from "./dashboard/report-list";
 
 import { useDashboardStatistics } from "@/features/report/hooks/queries";
 import { DateRange } from "@/features/report/types/api.types";
+import DashboardSkeleton from "./report-dashboard-skeleton";
 
 const ReportDashboard = () => {
   // State for period selection
@@ -116,6 +116,8 @@ const ReportDashboard = () => {
     console.log("Export report for period:", dateRange);
   };
 
+
+  if(isLoading) return <DashboardSkeleton />
   if (!dashboardStats && !isLoading) return null;
 
   return (
@@ -178,12 +180,7 @@ const ReportDashboard = () => {
         </div>
       </div>
 
-      {/* Thông tin tổng quan */}
-      {isLoading ? (
-        <div className="flex items-center justify-center h-40">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
+     
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* KPI Cards */}
           <KPICard
@@ -224,7 +221,6 @@ const ReportDashboard = () => {
             icon={<Users className="h-6 w-6 text-purple-600" />}
           />
         </div>
-      )}
 
       {/* Tabs chứa các báo cáo chi tiết */}
       <Tabs defaultValue="overview" className="space-y-6">
