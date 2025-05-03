@@ -10,7 +10,7 @@ export const getRedirectUrl = (role: RolesType): string => {
     case Roles.ADMIN:
       return ADMIN_ROUTES.DASHBOARD;
     case Roles.EMPLOYEE:
-      return EMPLOYEE_ROUTES.DASHBOARD;
+      return EMPLOYEE_ROUTES.HOME;
     case Roles.CUSTOMER:
       return CUSTOMER_ROUTES.HOME;
     default:

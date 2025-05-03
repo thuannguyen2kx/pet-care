@@ -56,22 +56,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useConfirm } from "@/hooks/use-confirm";
+import { GlobalLoading } from "@/components/shared/global-loading";
+import { PetCategory, petCategoryTranslations, Specialty, specialtyTranslations } from "@/constants";
 
 const ServiceList: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [filterCategory, setFilterCategory] = useState<string>("");
-  const [filterPetType, setFilterPetType] = useState<string>("");
-  const [filterIsActive, setFilterIsActive] = useState<boolean | undefined>(
-    true
-  );
+  const [filterCategory, setFilterCategory] = useState<string>("ALL");
+  const [filterPetType, setFilterPetType] = useState<string>("ALL");
+  const [filterIsActive, setFilterIsActive] = useState<string>("ALL");
   const pageSize = 10;
 
   // Fetch services with filters
   const { data, isLoading, isError } = useGetServices({
-    category: filterCategory || undefined,
-    petType: filterPetType || undefined,
-    isActive: filterIsActive,
+    category: filterCategory === "ALL" ? undefined : filterCategory,
+    petType: filterPetType === "ALL" ? undefined : filterPetType,
+    isActive: filterIsActive === "ALL" ? undefined : filterIsActive === "ACTIVE" ? true : false,
   });
   const services = data?.services;
 
@@ -110,15 +110,11 @@ const ServiceList: React.FC = () => {
   const resetFilters = () => {
     setFilterCategory("");
     setFilterPetType("");
-    setFilterIsActive(true);
+    setFilterIsActive("ALL");
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center p-8">
-        Đang tải danh sách dịch vụ...
-      </div>
-    );
+    return <GlobalLoading />;
   }
 
   if (isError) {
@@ -166,12 +162,12 @@ const ServiceList: React.FC = () => {
                         <SelectValue placeholder="Chọn loại dịch vụ" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả các loại</SelectItem>
-                        <SelectItem value="grooming">Grooming</SelectItem>
-                        <SelectItem value="medical">Medical</SelectItem>
-                        <SelectItem value="training">Training</SelectItem>
-                        <SelectItem value="boarding">Boarding</SelectItem>
-                        <SelectItem value="daycare">Daycare</SelectItem>
+                        <SelectItem value="ALL">Tất cả các loại</SelectItem>
+                        {Object.values(Specialty).map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {specialtyTranslations[category]}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -185,40 +181,30 @@ const ServiceList: React.FC = () => {
                         <SelectValue placeholder="Chọn loại thú cưng sử dụng" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả thú cưng</SelectItem>
-                        <SelectItem value="dog">Dogs</SelectItem>
-                        <SelectItem value="cat">Cats</SelectItem>
-                        <SelectItem value="bird">Birds</SelectItem>
-                        <SelectItem value="rabbit">Rabbits</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="ALL">Tất cả thú cưng</SelectItem>
+                        {Object.values(PetCategory).map((petType) => (
+                          <SelectItem key={petType} value={petType}>
+                            {petCategoryTranslations[petType]}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="status">Trạng thái</Label>
                     <Select
-                      value={
-                        filterIsActive === undefined
-                          ? "all"
-                          : filterIsActive
-                          ? "Đang cung cấp"
-                          : "Không cung cấp"
-                      }
+                      value={filterIsActive}
                       onValueChange={(value) => {
-                        if (value === "all") {
-                          setFilterIsActive(undefined);
-                        } else {
-                          setFilterIsActive(value === "active");
-                        }
+                        setFilterIsActive(value);
                       }}
                     >
                       <SelectTrigger id="status" className="w-full">
                         <SelectValue placeholder="Trạng thái dịch vụ" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
-                        <SelectItem value="active">Đang cung cấp</SelectItem>
-                        <SelectItem value="inactive">Không cung cấp</SelectItem>
+                        <SelectItem value="ALL">Tất cả</SelectItem>
+                        <SelectItem value="ACTIVE">Đang cung cấp</SelectItem>
+                        <SelectItem value="INACTIVE">Không cung cấp</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -243,11 +229,11 @@ const ServiceList: React.FC = () => {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="border-slate-200 bg-gray-100">
                 <TableHead>Tên dịch vụ</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Giá</TableHead>
-                <TableHead>Thời gian thực hiện</TableHead>
+                <TableHead className="text-center">Thời gian thực hiện</TableHead>
                 <TableHead>Thú cưng khả dụng</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead className="text-right">Hành động</TableHead>
@@ -262,15 +248,18 @@ const ServiceList: React.FC = () => {
                 </TableRow>
               ) : (
                 paginatedServices.map((service: ServiceType) => (
-                  <TableRow key={service._id}>
+                  <TableRow key={service._id} className="border-slate-200">
                     <TableCell className="font-medium">
                       {service.name}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{service.category}</Badge>
+                      <Badge variant="secondary">
+                        {specialtyTranslations[service.category as Specialty] ||
+                          service.category}
+                      </Badge>
                     </TableCell>
                     <TableCell>{formatVND(service.price)}</TableCell>
-                    <TableCell>{formatTime(service.duration)}</TableCell>
+                    <TableCell className="text-center">{formatTime(service.duration)}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {service.applicablePetTypes?.map((type) => (
@@ -279,7 +268,7 @@ const ServiceList: React.FC = () => {
                             variant="secondary"
                             className="text-xs"
                           >
-                            {type}
+                            {petCategoryTranslations[type as PetCategory]}
                           </Badge>
                         ))}
                       </div>

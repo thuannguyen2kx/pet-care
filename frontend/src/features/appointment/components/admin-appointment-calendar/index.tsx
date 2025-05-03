@@ -9,6 +9,7 @@ import { useGetAllAppointments } from "@/features/appointment/hooks/queries/get-
 import { useGetEmployees } from "@/features/employee/hooks/queries/get-employees";
 import { useUpdateAppointmentStatus } from "@/features/appointment/hooks/mutations/update-appointment";
 import { AdminAppointmentType } from "@/features/appointment/types/api.types";
+import { GlobalLoading } from "@/components/shared/global-loading";
 import { AppointmentDetails } from "./appointment-detatils";
 import { CalendarView } from "./calendar-view";
 import { CalendarFilters } from "./calendar-filter";
@@ -192,7 +193,7 @@ const AdminAppointmentsCalendar = () => {
   
   // Loading state
   if (isAppointmentsLoading || isEmployeesLoading) {
-    return <div className="flex justify-center p-8">Đang tải...</div>;
+    return <GlobalLoading />
   }
   
   return (

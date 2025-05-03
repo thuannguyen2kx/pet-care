@@ -10,6 +10,7 @@ import { StatusUpdateDialog } from "@/features/appointment/components/admin-appo
 import { AppointmentsTabs } from "@/features/appointment/components/admin-appointment-list/appointment-tabs";
 import { AppointmentsFilters } from "@/features/appointment/components/admin-appointment-list/appointment-filter";
 import { AppointmentsHeader } from "@/features/appointment/components/admin-appointment-list/appointment-header";
+import { LoadingSpinner } from "@/components/shared/global-loading";
 
 // Import components
 
@@ -108,9 +109,8 @@ const AdminAppointmentsPage: React.FC = () => {
     });
   };
   
-  // Loading state
   if (isAppointmentsLoading || isEmployeesLoading) {
-    return <div className="flex justify-center p-8">Đang tải...</div>;
+    return <LoadingSpinner />;
   }
   
   return (
