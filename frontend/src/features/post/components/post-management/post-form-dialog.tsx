@@ -157,7 +157,7 @@ export function PostFormDialog({
         
         <form onSubmit={handleSubmit}>
           <ScrollArea className="px-6 py-4 max-h-[70vh]">
-            <div className="grid gap-4">
+            <div className="grid gap-4 px-2">
               <div className="grid gap-2">
                 <Label htmlFor="title" className="flex items-center gap-2">
                   <Type className="h-4 w-4" />

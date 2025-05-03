@@ -366,7 +366,7 @@ export default function PostsManagerPage() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-1 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold tracking-tight mb-1 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Quản lý bài viết
           </h1>
           <p className="text-muted-foreground">

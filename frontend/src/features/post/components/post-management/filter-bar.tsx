@@ -107,9 +107,9 @@ export function PostFilterBar({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="resolved">Hoạt động</SelectItem>
-              <SelectItem value="pending">Đang xét duyệt</SelectItem>
-              <SelectItem value="rejected">Đã chặn</SelectItem>
+              <SelectItem value="active">Hoạt động</SelectItem>
+              <SelectItem value="under-review">Đang xét duyệt</SelectItem>
+              <SelectItem value="blocked">Đã chặn</SelectItem>
             </SelectContent>
           </Select>
         )}
