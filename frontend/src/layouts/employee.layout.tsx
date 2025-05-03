@@ -1,21 +1,14 @@
-
-import { Outlet, Link, useLocation } from "react-router-dom";
-import {
-  Calendar,
-  Home,
-  Newspaper,
-} from "lucide-react";
-import { EMPLOYEE_ROUTES } from "@/routes/common/routePaths";
+import { Link, useLocation } from "react-router-dom";
+import { ChartSpline, Home, Newspaper, Package, User } from "lucide-react";
+import { EMPLOYEE_ROUTES, MANAGER_ROUTES } from "@/routes/common/routePaths";
 import { UserButton } from "@/features/user/components/user-button";
 
-const EmployeeLayout = () => {
-  return ( 
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-6">
-          <Outlet />
-        </main>
-      </div> 
+const EmployeeLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="container mx-auto px-4 py-6">{children}</main>
+    </div>
   );
 };
 
@@ -26,12 +19,22 @@ const navItems = [
     icon: <Home size={18} />,
   },
   {
-    path: EMPLOYEE_ROUTES.APPOINTMENTS,
-    name: "Lịch đặt",
-    icon: <Calendar size={18} />,
+    path: EMPLOYEE_ROUTES.REPORT,
+    name: "Thống kê",
+    icon: <ChartSpline size={18} />,
   },
   {
-    path: EMPLOYEE_ROUTES.POST,
+    path: MANAGER_ROUTES.CUSTOMER,
+    name: "Khách hàng",
+    icon: <User size={18} />,
+  },
+  {
+    path: MANAGER_ROUTES.SERVICES,
+    name: "Dịch vụ",
+    icon: <Package size={18} />,
+  },
+  {
+    path: MANAGER_ROUTES.POST,
     name: "Bài viết",
     icon: <Newspaper size={18} />,
   },

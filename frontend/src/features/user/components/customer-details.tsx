@@ -124,7 +124,7 @@ const CustomerDetail = () => {
       {/* Back button */}
       <Button
         variant="ghost"
-        onClick={() => navigate("/admin/customers")}
+        onClick={() => navigate(-1)}
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />

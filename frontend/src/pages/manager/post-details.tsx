@@ -46,7 +46,7 @@ import { useResolveReportMutation } from "@/features/post/hooks/mutations/resolv
 import { useUpdatePostMutation } from "@/features/post/hooks/mutations/update-post";
 import { toast } from "sonner";
 
-export default function EmployeePostDetailPage() {
+export default function PostDetailsManagerPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   

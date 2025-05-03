@@ -104,7 +104,7 @@ const ServiceList: React.FC = () => {
   };
 
   const handleEditService = (id: string) => {
-    navigate(`/admin/services/edit/${id}`);
+    navigate(`/manager/services/edit/${id}`);
   };
 
   const resetFilters = () => {
@@ -220,7 +220,7 @@ const ServiceList: React.FC = () => {
               </DialogContent>
             </Dialog>
 
-            <Button onClick={() => navigate("/admin/services/create")}>
+            <Button onClick={() => navigate("/manager/services/create")}>
               <Plus className="h-4 w-4 mr-2" />
               Thêm dịch vụ
             </Button>

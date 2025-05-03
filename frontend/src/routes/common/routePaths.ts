@@ -27,21 +27,27 @@ export const ADMIN_ROUTES = {
   EMPLOYEE_EDIT: "/admin/employees/:employeeId/edit",
   EMPLOYEE_SCHEDULE: "/admin/employees/:employeeId/schedule",
   DASHBOARD: "/admin/dashboard",
-  CUSTOMER: "/admin/customers",
-  CUSTOMER_DETAILS: "/admin/customers/:customerId",
-  SERVICE: "/admin/services",
-  SERVICE_CREATION: "/admin/services/create",
-  SERVICE_EDIT: "/admin/services/edit/:serviceId",
   APPOINTMENT: "/admin/appointments",
   APPOINTMENT_CALENDAR: "/admin/appointments/calendar",
-  APPOINTMENT_DETAILS: "/admin/appointments/:appointmentId",
   PAYMENT: "/admin/payments",
 };
 export const EMPLOYEE_ROUTES = {
   HOME: "/employee/home",
-  APPOINTMENTS: "/employee/appointments",
-  POST: "/employee/posts",
-  POST_DETAILS: "/employee/posts/:postId",
+  PROFILE: "/employee/profile",
+  REPORT: "/employee/report",
+};
+
+export const MANAGER_ROUTES = {
+  CUSTOMER: "/manager/customers",
+  CUSTOMER_DETAILS: "/manager/customers/:customerId",
+  APPOINTMENTS_DETAILS: "/manager/appointments/:appointmentId",
+
+  POST: "/manager/posts",
+  POST_DETAILS: "/manager/posts/:postId",
+
+  SERVICES: "/manager/services",
+  SERVICE_CREATION: "/manager/services/create",
+  SERVICE_EDIT: "/manager/services/edit/:serviceId",
 };
 export const BASE_ROUTES = {
   LANDING: "/",

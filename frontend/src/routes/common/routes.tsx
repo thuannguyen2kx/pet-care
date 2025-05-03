@@ -5,6 +5,7 @@ import {
   BASE_ROUTES,
   CUSTOMER_ROUTES,
   EMPLOYEE_ROUTES,
+  MANAGER_ROUTES,
 } from "./routePaths";
 import SignUp from "@/pages/auth/sign-up";
 import GoogleOauth from "@/pages/auth/google-oauth";
@@ -15,11 +16,11 @@ import PetDetail from "@/pages/customer/pet-details";
 import PostDetailsPage from "@/pages/customer/post-details";
 import DashboardPage from "@/pages/admin/dashboard";
 import AppointementPage from "@/pages/admin/appointment";
-import CustomerPage from "@/pages/admin/customer";
-import ServicesPage from "@/pages/admin/services";
+import CustomerPage from "@/pages/manager/customer";
+import ServicesPage from "@/pages/manager/services";
 import ServiceDetailsPage from "@/pages/customer/service-details";
-import ServiceCreationPage from "@/pages/admin/service-creation";
-import ServiceEditionPage from "@/pages/admin/service-edition";
+import ServiceCreationPage from "@/pages/manager/service-creation";
+import ServiceEditionPage from "@/pages/manager/service-edition";
 import ServiceCatalogPage from "@/pages/customer/service-catalog";
 import EmployeeDetailsPage from "@/pages/admin/employee-details";
 import EmployeeCreationPage from "@/pages/admin/employee-new";
@@ -27,18 +28,18 @@ import EmployeesPage from "@/pages/admin/employee";
 import EmployeeCalendarPage from "@/pages/admin/employee-calendar";
 import EmployeeEditionPage from "@/pages/admin/employee-edition";
 import AppointmentCreationPage from "@/pages/customer/appointment-creation";
-import AppointmentDetailPage from "@/pages/customer/appointment-details";
+import AppointmentDetailsPage from "@/pages/customer/appointment-details";
 import AppointmentListPage from "@/pages/customer/appointment-list";
 import AppointmentCalendarPage from "@/pages/admin/appointment-calendar";
-import AdminAppointmentDetailsPage from "@/pages/admin/appointment-details";
+import AppointmentDetailsManagerPage from "@/pages/manager/appointment-details";
 import PaymentSuccessPage from "@/pages/customer/payment-success";
 import PaymentCancelPage from "@/pages/customer/payment-cancel";
 import AdminPaymentManagement from "@/pages/admin/payment-management";
-import CustomerDetailsPage from "@/pages/admin/customer-details";
-import EmployeeHomePape from "@/pages/employee/home";
-import EmployeeAppointmentPage from "@/pages/employee/appointment";
-import EmployeePostPage from "@/pages/employee/post";
-import EmployeePostDetailPage from "@/pages/employee/post-details";
+import CustomerDetailsPage from "@/pages/manager/customer-details";
+import PostManagerPage from "@/pages/manager/post";
+import PostDetailsManagerPage from "@/pages/manager/post-details";
+import EmployeeSchedulePage from "@/pages/employee/appointment";
+import EmployeeProfile from "@/features/employee/components/employee-profile";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -81,7 +82,7 @@ export const protectedCustomerRoutePaths = [
   },
   {
     path: CUSTOMER_ROUTES.APPOINTMENTS_DETAILS,
-    element: <AppointmentDetailPage />,
+    element: <AppointmentDetailsPage />,
   },
   {
     path: CUSTOMER_ROUTES.PAYMENT_SUCCESS,
@@ -100,28 +101,41 @@ export const adminRoutesPaths = [
     path: ADMIN_ROUTES.APPOINTMENT_CALENDAR,
     element: <AppointmentCalendarPage />,
   },
-  {
-    path: ADMIN_ROUTES.APPOINTMENT_DETAILS,
-    element: <AdminAppointmentDetailsPage />,
-  },
   { path: ADMIN_ROUTES.EMPLOYEE, element: <EmployeesPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE_NEW, element: <EmployeeCreationPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE_EDIT, element: <EmployeeEditionPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE_SCHEDULE, element: <EmployeeCalendarPage /> },
-  { path: ADMIN_ROUTES.CUSTOMER, element: <CustomerPage /> },
-  { path: ADMIN_ROUTES.CUSTOMER_DETAILS, element: <CustomerDetailsPage /> },
-  { path: ADMIN_ROUTES.SERVICE, element: <ServicesPage /> },
-  { path: ADMIN_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
-  { path: ADMIN_ROUTES.SERVICE_EDIT, element: <ServiceEditionPage /> },
+  
   { path: ADMIN_ROUTES.PAYMENT, element: <AdminPaymentManagement /> },
 ];
 
 export const employeeRoutesPaths = [
-  { path: EMPLOYEE_ROUTES.HOME, element: <EmployeeHomePape /> },
-  { path: EMPLOYEE_ROUTES.APPOINTMENTS, element: <EmployeeAppointmentPage /> },
-  { path: EMPLOYEE_ROUTES.POST, element: <EmployeePostPage /> },
-  {path: EMPLOYEE_ROUTES.POST_DETAILS, element: <EmployeePostDetailPage />}
+  { path: EMPLOYEE_ROUTES.HOME, element: <EmployeeSchedulePage /> },
+  { path: EMPLOYEE_ROUTES.PROFILE, element: <EmployeeProfile /> },
+  { path: EMPLOYEE_ROUTES.REPORT, element: <DashboardPage /> },
+];
+
+export const managerRoutesPaths = [
+  {
+    path: MANAGER_ROUTES.CUSTOMER,
+    element: <CustomerPage />,
+  },
+  {
+    path: MANAGER_ROUTES.CUSTOMER_DETAILS,
+    element: <CustomerDetailsPage />,
+  },
+  {
+    path: MANAGER_ROUTES.APPOINTMENTS_DETAILS,
+    element: <AppointmentDetailsManagerPage />,
+  },
+
+  {path: MANAGER_ROUTES.POST, element: <PostManagerPage />},
+  {path: MANAGER_ROUTES.POST_DETAILS, element: <PostDetailsManagerPage />},
+
+  { path: MANAGER_ROUTES.SERVICES, element: <ServicesPage /> },
+  { path: MANAGER_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
+  { path: MANAGER_ROUTES.SERVICE_EDIT, element: <ServiceEditionPage /> },
 ];
 export const baseRoutesPaths = [
   { path: BASE_ROUTES.LANDING, element: <Landing /> },

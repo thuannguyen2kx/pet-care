@@ -259,7 +259,7 @@ const CustomerList = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate(`/admin/customers/${user._id}`)}
+                        onClick={() => navigate(`/manager/customers/${user._id}`)}
                       >
                         Xem
                       </Button>

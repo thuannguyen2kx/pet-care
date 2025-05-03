@@ -275,7 +275,7 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
             asChild
             className="sm:ml-auto border-primary text-primary"
           >
-            <Link to={`/admin/appointments/${appointment._id}`}>
+            <Link to={`/manager/appointments/${appointment._id}`}>
               Xem chi tiết đầy đủ
             </Link>
           </Button>

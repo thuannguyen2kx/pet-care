@@ -37,14 +37,14 @@ employeeRoutes.post(
 // Get employee by ID
 employeeRoutes.get(
   "/:id",
-  authorizeRoles([Roles.ADMIN]),
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   getEmployeeByIdController
 );
 
 // Update employee
 employeeRoutes.put(
   "/:id",
-  authorizeRoles([Roles.ADMIN]),
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   updateEmployeeController
 );
 
@@ -58,7 +58,7 @@ employeeRoutes.delete(
 // Upload employee profile picture
 employeeRoutes.post(
   "/:id/profile-picture",
-  authorizeRoles([Roles.ADMIN]),
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   uploadEmployeeProfilePictureController
 );
 

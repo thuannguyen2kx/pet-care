@@ -14,6 +14,7 @@ import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
 import { getAvatarFallbackText } from "@/lib/helper";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Link } from "react-router-dom";
+import { Roles } from "@/constants";
 
 export const UserButton = () => {
   const { user, isLoading } = useAuthContext();
@@ -58,6 +59,7 @@ export const UserButton = () => {
           className="w-60 border-none"
           sideOffset={10}
         >
+          
           <div className="flex flex-col items-center justify-center gap-2 px-2.5 py-4">
             <Avatar className="transition border size-[52px] hover:opactiy-75 border-neutral-300">
               <AvatarFallback className="flex items-center justify-center text-xl font-medium bg-neutral-200 text-neutral-500">
@@ -69,13 +71,23 @@ export const UserButton = () => {
               <p className="text-sm text-neutral-500">{email}</p>
             </div>
           </div>
-          <DropdownMenuItem
-            asChild
-            className="items-center justify-center h-10 font-medium cursor-pointer"
-          >
-            <Link to={`/profile/${user._id}`}>Trang cá nhân</Link>
-          </DropdownMenuItem>
 
+          {user.role === Roles.CUSTOMER && (
+            <DropdownMenuItem
+              asChild
+              className="items-center justify-center h-10 font-medium cursor-pointer"
+            >
+              <Link to={`/profile/${user._id}`}>Trang cá nhân</Link>
+            </DropdownMenuItem>
+          )}
+          {user.role === Roles.EMPLOYEE && (
+            <DropdownMenuItem
+              asChild
+              className="items-center justify-center h-10 font-medium cursor-pointer"
+            >
+              <Link to={`/employee/profile/${user._id}`}>Trang cá nhân</Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={handleLogout}
             className="items-center justify-center h-10 font-medium cursor-pointer text-amber-700"

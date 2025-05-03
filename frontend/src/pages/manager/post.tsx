@@ -56,7 +56,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/hooks/use-confirm";
 
-export default function EmployeePostsPage() {
+export default function PostsManagerPage() {
   const navigate = useNavigate();
 
   // State for active tab
@@ -114,7 +114,7 @@ export default function EmployeePostsPage() {
   );
   // Handle view post
   const handleViewPost = (post: PostType) => {
-    navigate(`/employee/posts/${post._id}`);
+    navigate(`/manager/posts/${post._id}`);
   };
 
   // Handle edit post
