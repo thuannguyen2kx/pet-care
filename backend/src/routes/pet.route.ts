@@ -18,7 +18,7 @@ const petRoutes = express.Router();
 
 // Routes cơ bản CRUD
 petRoutes
-  .route("/")
+  .route("/:userId")
   .get(getUserPetsController)
 
 petRoutes.post("/", createPetController);

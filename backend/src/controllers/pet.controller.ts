@@ -13,6 +13,7 @@ import {
 import { HTTPSTATUS } from "../config/http.config";
 import { uploadPetPicture } from "../utils/file-uploade";
 import { createPetSchema, medicalRecordSchema, petIdSchema, updatePetSchema, vaccinationSchema } from "../validation/pet.validatioin";
+import { userIdSchema } from "../validation/user.validation";
 
 /**
  * @desc    Lấy danh sách thú cưng của người dùng đăng nhập
@@ -21,7 +22,7 @@ import { createPetSchema, medicalRecordSchema, petIdSchema, updatePetSchema, vac
  */
 export const getUserPetsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    const userId = userIdSchema.parse(req.params.userId);
     const { pets } = await getUserPetsService(userId);
     
     return res.status(HTTPSTATUS.OK).json({

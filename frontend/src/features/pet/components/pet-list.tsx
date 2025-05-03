@@ -11,14 +11,20 @@ import { Badge } from "@/components/ui/badge";
 import PetCard from "./pet-card";
 import { Plus } from "lucide-react";
 import useCreatePetSheet from "../hooks/use-create-pet-sheet";
+import { useAuthContext } from "@/context/auth-provider";
 
-export const PetList = () => {
-  const {onOpen} = useCreatePetSheet() 
-  const { data, isLoading } = useUserPets();
+interface PetListProps {
+  profileId: string;
+}
+export const PetList = ({ profileId }: PetListProps) => {
+  const { onOpen } = useCreatePetSheet();
+  const { user } = useAuthContext();
+  const { data, isLoading } = useUserPets(profileId);
 
   const pets = data?.pets || [];
+  const isOwner = user?._id === profileId;
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Đang tải...</div>;
 
   return (
     <>
@@ -42,19 +48,19 @@ export const PetList = () => {
               </DialogContent>
             </Dialog>
           ))}
-
-          <button
-            onClick={onOpen}
-            className="flex flex-col items-center gap-1"
-          >
-            <div className="h-16 w-16 rounded-full border-2 border-dashed border-orange-400 flex items-center justify-center bg-orange-50">
-              <Plus className="h-6 w-6 text-orange-500" />
-            </div>
-            <span className="text-xs font-medium">Thêm thú cưng</span>
-          </button>
+          {isOwner && (
+            <button
+              onClick={onOpen}
+              className="flex flex-col items-center gap-1"
+            >
+              <div className="h-16 w-16 rounded-full border-2 border-dashed border-orange-400 flex items-center justify-center bg-orange-50">
+                <Plus className="h-6 w-6 text-orange-500" />
+              </div>
+              <span className="text-xs font-medium">Thêm thú cưng</span>
+            </button>
+          )}
         </div>
       </div>
-      
     </>
   );
 };

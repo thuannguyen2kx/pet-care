@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, Grid, Pencil, Settings, User } from "lucide-react";
+import { Camera, Pencil, Settings } from "lucide-react";
 import { UpdateProfileInfoForm } from "@/features/user/components/update-info-form";
 import { useGetProfile } from "@/features/user/hooks/queries/user-get-profile";
 import { useParams } from "react-router-dom";
@@ -97,32 +96,16 @@ const SocialProfile = () => {
       </div>
 
       {/*  Pet List */}
-      <PetList />
+      {profileId && <PetList profileId={profileId} />}
 
-      {/* Create Post Button - Instagram style */}
-      <div className="flex justify-between items-center mb-6">
-        <Tabs defaultValue="grid" className="flex-1">
-          <TabsList className="bg-orange-50 border-orange-200 border">
-            <TabsTrigger
-              value="grid"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              <Grid className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger
-              value="pets"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              <User className="h-4 w-4" />
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <Button onClick={onOpen} variant="default" size="sm">
-          <Camera className="h-4 w-4 mr-2" /> Tạo bài viết
-        </Button>
-      </div>
-      <UserPostList />
+      {isAuthor && (
+        <div className="flex justify-end mb-6">
+          <Button onClick={onOpen} variant="default" size="sm">
+            <Camera className="h-4 w-4 mr-2" /> Tạo bài viết
+          </Button>
+        </div>
+      )}
+      {profileId && <UserPostList profileId={profileId} />}
     </div>
   );
 };

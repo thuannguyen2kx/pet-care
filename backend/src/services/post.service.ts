@@ -825,16 +825,15 @@ export const setPostFeatureService = async ({
   };
 };
 
-// Get user's own posts
 export const getUserPostsService = async ({
   query,
-  user,
+  userId
 }: {
   query: PostQuery;
-  user?: any;
+  userId?: string;
 }) => {
   // Check if user exists
-  if (!user?._id) {
+  if (!userId) {
     throw new ForbiddenException("Authentication required");
   }
 
@@ -850,7 +849,7 @@ export const getUserPostsService = async ({
 
   // Build filter
   const filter: any = {
-    authorId: user._id,
+    authorId: userId,
   };
 
   if (status && status !== "all") {

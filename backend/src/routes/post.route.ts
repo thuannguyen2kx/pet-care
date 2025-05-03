@@ -30,7 +30,7 @@ postRoutes.post('/', createPostController);
 postRoutes.put('/:id', updatePostController);
 postRoutes.delete('/:id', deletePostController);
 postRoutes.post('/:id/report', reportPostController);
-postRoutes.get('/user/my-posts', getUserPostsController);
+postRoutes.get('/user/:userId', getUserPostsController);
 
 // Admin routes
 postRoutes.get('/admin/moderation', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getPostsForModerationController);

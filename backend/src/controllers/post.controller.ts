@@ -30,6 +30,7 @@ import {
   resolveReportService,
   getFeaturedPostsService
 } from "../services/post.service";
+import { userIdSchema } from "../validation/user.validation";
 
 // @desc    Get all posts (with filtering, pagination)
 // @route   GET /api/posts
@@ -258,10 +259,11 @@ export const setPostFeatureController = asyncHandler(
 // @access  Private
 export const getUserPostsController = asyncHandler(
   async (req: Request, res: Response) => {
+    const userId = userIdSchema.parse(req.params.userId);
     const query = postQuerySchema.parse(req.query);
     const { posts, pagination } = await getUserPostsService({
       query,
-      user: req.user
+      userId 
     });
 
     return res.status(HTTPSTATUS.OK).json({

@@ -9,8 +9,8 @@ import {
 } from "./types/api.types";
 
 // API functions
-export const getPetsQueryFn = async (): Promise<GetPetsResponse> => {
-  const response = await API.get("/pets");
+export const getPetsQueryFn = async (userId: string): Promise<GetPetsResponse> => {
+  const response = await API.get(`/pets/${userId}`);
   return response.data;
 };
 export const getPetQueryFn = async (petId: string): Promise<GetPetResponse> => {

@@ -4,12 +4,13 @@ import { postKeys } from "@/features/post/query-key";
 import { getUserPosts } from "@/features/post/api";
 
 export const useUserPosts = (
+  userId: string,
   params?: PostQueryParams,
   options?: UseQueryOptions<PostsResponseType>
 ) => {
   return useQuery({
-    queryKey: [...postKeys.myPosts(), params || {}],
-    queryFn: () => getUserPosts(params),
+    queryKey: [...postKeys.myPosts(), params, userId || {}],
+    queryFn: () => getUserPosts({userId, params}),
     ...options,
   });
 };

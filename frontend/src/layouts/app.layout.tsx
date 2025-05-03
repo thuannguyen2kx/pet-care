@@ -28,23 +28,25 @@ import useCreatePetSheet from "@/features/pet/hooks/use-create-pet-sheet";
 import { AddPetSheet } from "@/features/pet/components/add-pet-sheet";
 
 const AppLayout = () => {
-  const {open: openCreatePost, onClose: closeCreatePost} = useCreatePostModal()
-  const {open: openCreatePet, onClose: closeCreatePet} = useCreatePetSheet()
+  const { open: openCreatePost, onClose: closeCreatePost } =
+    useCreatePostModal();
+  const { open: openCreatePet, onClose: closeCreatePet } = useCreatePetSheet();
   return (
-    
-      <div className="flex h-screen">
-        <Sidebar />
-        <section className="flex h-full flex-1 flex-col">
-          <MobileNavigation />
-          <Header />
-          <div className="remove-scrollbar h-full flex-1 overflow-auto bg-white px-5 py-2 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-4">
-            <Outlet />
-            <CreatePostModal open={openCreatePost} onOpenChange={closeCreatePost} />
-            <AddPetSheet open={openCreatePet} onOpenChange={closeCreatePet} />
-          </div>
-        </section>
-      </div>
-   
+    <div className="flex h-screen">
+      <Sidebar />
+      <section className="flex h-full flex-1 flex-col">
+        <MobileNavigation />
+        <Header />
+        <div className="remove-scrollbar h-full flex-1 overflow-auto bg-white px-5 py-2 sm:mr-7 sm:rounded-[30px] md:mb-7 md:px-9 md:py-4">
+          <Outlet />
+          <CreatePostModal
+            open={openCreatePost}
+            onOpenChange={closeCreatePost}
+          />
+          <AddPetSheet open={openCreatePet} onOpenChange={closeCreatePet} />
+        </div>
+      </section>
+    </div>
   );
 };
 export default AppLayout;
@@ -69,9 +71,9 @@ function Header() {
 }
 function Sidebar() {
   const { user, isLoading } = useAuthContext();
-
+  const {onOpen} = useCreatePostModal()
   return (
-    <aside className="remove-scrollbar hidden h-screen w-[90px] flex-col overflow-auto px-5 py-7 sm:flex lg:w-[280px] xl:w-[325px] !important">
+    <aside className="remove-scrollbar hidden h-screen w-[90px] flex-col overflow-auto px-5 py-7 sm:flex lg:w-[280px] xl:w-[325px] !important border-r border-slate-200">
       <Link to={"/"}>
         <h1 className="h1 hidden lg:block">
           PET<span className="text-brand">Care</span>
@@ -84,8 +86,9 @@ function Sidebar() {
           <NavItem name="Trang chủ" url={CUSTOMER_ROUTES.HOME} icon={House} />
           <NavItem
             name="Tạo bài viết"
-            url={CUSTOMER_ROUTES.CREATE_POST}
+            url={"#"}
             icon={Plus}
+            onClick={onOpen}
           />
           <NavItem
             name="Dịch vụ"
@@ -121,21 +124,22 @@ interface NavItemProps {
   name: string;
   url: string;
   icon: React.ElementType;
+  onClick?: () => void;
 }
-function NavItem({ name, url, icon: Icon }: NavItemProps) {
+function NavItem({ name, url, icon: Icon, onClick }: NavItemProps) {
   const pathname = useLocation().pathname;
   const isActive = pathname === url;
   return (
-    <Link to={url} className="lg:w-full">
+    <Link to={url} className="lg:w-full" onClick={onClick}>
       <li
         className={cn(
-          "flex text-light-100 gap-4 rounded-xl lg:w-full justify-center lg:justify-start items-center h5 lg:px-[30px] h-[52px] lg:rounded-full",
+          "flex text-light-100 gap-4 rounded-xl lg:w-full justify-center lg:justify-start items-center h5 lg:px-[30px] h-[48px] lg:rounded-full",
           isActive && "bg-brand text-white"
         )}
       >
         <Icon
           className={cn(
-            "w-6 filter invert opacity-25",
+            "w-6 filter invert opacity-50",
             isActive && "invert-0 opacity-100"
           )}
         />

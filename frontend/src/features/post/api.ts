@@ -39,8 +39,8 @@ export const fetchReportedPosts = async (params: ReportedPostsQueryParams): Prom
   return data;
 };
 // Get user's own posts
-export const getUserPosts = async (params?: PostQueryParams): Promise<PostsResponseType> => {
-  const { data } = await API.get('/posts/user/my-posts', { params });
+export const getUserPosts = async ({userId, params}:{userId: string, params?: PostQueryParams}): Promise<PostsResponseType> => {
+  const { data } = await API.get(`/posts/user/${userId}`, { params });
   return data;
 };
 export const deletePostFn = async (postId: string): Promise<void> => {

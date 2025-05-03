@@ -4,6 +4,7 @@ import {
   getAllCustomersController,
   getCurrentUserController,
   getCustomerByIdController,
+  getProfileByController,
   updateProfileController,
   updateProfilePictureController,
 } from "../controllers/user.controller";
@@ -16,7 +17,7 @@ userRoutes.get("/current", getCurrentUserController);
 
 userRoutes.put("/profile", updateProfileController);
 userRoutes.put("/profile/picture", updateProfilePictureController);
-userRoutes.get("/profile/:id", getCurrentUserController);
+userRoutes.get("/profile/:id", getProfileByController);
 
 userRoutes.get("/", authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getAllCustomersController);
 userRoutes.get("/:id",authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getCustomerByIdController);

@@ -1,39 +1,136 @@
-import { Camera, Heart, MessageCircle } from "lucide-react";
-import { useUserPosts } from "../hooks/queries/get-user-post";
+import { useCallback, useEffect, useRef } from "react";
+import { Camera, Heart, MessageCircle, Loader2 } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { PostType } from "../types/api.types";
+import { useAuthContext } from "@/context/auth-provider";
+import { postKeys } from "@/features/post/query-key";
+import { getUserPosts } from "@/features/post/api";
+import { useNavigate } from "react-router-dom";
 
-export const UserPostList = () => {
-  const { data, isLoading } = useUserPosts();
-  const posts = data?.posts || [];
+interface UserPostListProps {
+  profileId: string;
+}
 
-  if (isLoading) return <div>Loading...</div>;
-  return (
-    <>
+export const UserPostList = ({ profileId }: UserPostListProps) => {
+  const { user } = useAuthContext();
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const isOwner = user?._id === profileId;
+
+  // Set up infinite query
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+  } = useInfiniteQuery({
+    queryKey: postKeys.userPosts(profileId),
+    queryFn: ({ pageParam = 1 }) =>
+      getUserPosts({ userId: profileId, params: { page: pageParam } }),
+    getNextPageParam: (lastPage) => {
+      const { pagination } = lastPage;
+      return pagination.hasNextPage ? pagination.currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+
+  // Flatten all posts from all pages
+  const allPosts = data?.pages.flatMap((page) => page.posts) || [];
+
+  // Set up intersection observer for infinite scroll
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
+
+  useEffect(() => {
+    const element = observerTarget.current;
+    const option = { threshold: 0.5 };
+
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (element) observer.observe(element);
+
+    return () => {
+      if (element) observer.unobserve(element);
+    };
+  }, [handleObserver]);
+
+  // Handle loading state
+  if (isLoading) {
+    return (
       <div className="grid grid-cols-3 gap-4">
-        {posts.map((post) => (
-          <UserPostItem key={post._id} post={post} />
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div 
+            key={i} 
+            className="aspect-square bg-gray-200 animate-pulse rounded"
+          />
         ))}
       </div>
-      {posts.length === 0 && (
-        <div className="text-center py-12">
-          <div className="bg-orange-50 inline-flex rounded-full p-4 mb-4">
-            <Camera className="h-8 w-8 text-orange-500" />
-          </div>
-          <h3 className="text-xl font-medium text-gray-900 mb-2">
-            Bạn chưa có bài viết nào
-          </h3>
+    );
+  }
+
+  // Handle error state
+  if (isError) {
+    return (
+      <div className="text-center py-6">
+        <p className="text-red-500">{(error as Error).message}</p>
+      </div>
+    );
+  }
+
+  // Handle empty posts
+  if (allPosts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="bg-orange-50 inline-flex rounded-full p-4 mb-4">
+          <Camera className="h-8 w-8 text-orange-500" />
+        </div>
+        <h3 className="text-xl font-medium text-gray-900 mb-2">
+          {isOwner
+            ? "Bạn chưa có bài viết nào"
+            : "Người dùng chưa đăng bài viết nào"}
+        </h3>
+        {isOwner && (
           <p className="text-gray-500 max-w-md mx-auto mb-4">
             Chia sẻ ảnh và thông tin cập nhật về thú cưng của bạn với cộng đồng.
           </p>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-4">
+        {allPosts.map((post) => (
+          <UserPostItem key={post._id} post={post} />
+        ))}
+      </div>
+      
+      {/* Loading indicator and observer target */}
+      <div 
+        ref={observerTarget} 
+        className="h-20 flex justify-center items-center"
+      >
+        {isFetchingNextPage && (
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        )}
+      </div>
+    </div>
   );
 };
 
 function UserPostItem({ post }: { post: PostType }) {
+  const navigate = useNavigate()
   return (
-    <div className="aspect-square bg-gray-100 relative cursor-pointer overflow-hidden group">
+    <div onClick={() => navigate(`/posts/${post._id}`)} className="aspect-square bg-gray-100 relative cursor-pointer overflow-hidden group">
       {post.media && post.media.length > 0 && (
         <div className="relative aspect-square overflow-hidden bg-muted">
           {post.media[0].type === "image" ? (

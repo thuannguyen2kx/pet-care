@@ -11,4 +11,5 @@ export const postKeys = {
   myPosts: () => [...postKeys.all, 'my-posts'] as const,
   moderation: () => [...postKeys.all, 'moderation'] as const,
   reported: () => [...postKeys.all, 'reported'] as const,
+  userPosts: (userId: string) => [...postKeys.all, 'user', userId] as const,
 };
