@@ -26,16 +26,11 @@ import { Roles } from "@/constants";
 import { useDeletePost } from "../hooks/mutations/use-delete-post";
 import { useConfirm } from "@/hooks/use-confirm";
 import { toast } from "sonner";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
 import ReportPostDialog from "./report-dialog";
 import { ReactionButton } from "@/features/reaction/components/reaction-button";
 import { ReactionsDialog } from "@/features/reaction/components/reaction-dialog";
+import { ShareModal } from "./shared-modal";
+import SimpleImageCarousel from "@/components/shared/image-carousel";
 
 interface PostCardProps {
   post: PostType;
@@ -54,6 +49,7 @@ export const PostCard: React.FC<PostCardProps> = ({
     "Bạn có chắc chắn muốn xoá bài viết này? Hành động này không thể hoàn tác."
   );
   const [showReportDialog, setShowReportDialog] = useState(false);
+  const [isOpenShareModal, setIsOpenShareModal] = useState(false);
   const { mutate: deletePost } = useDeletePost();
 
   const isAuthor = user && post.authorId._id === user._id;
@@ -75,15 +71,6 @@ export const PostCard: React.FC<PostCardProps> = ({
     });
   };
 
-  // Handle share post
-  const handleShare = () => {
-    const postUrl = `${window.location.origin}/posts/${post._id}`;
-    navigator.clipboard
-      .writeText(postUrl)
-      .then(() => toast.success("Đã sao chép liên kết bài viết"))
-      .catch(() => toast.error("Không thể sao chép liên kết"));
-  };
-
   // Format the post date
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), {
     addSuffix: true,
@@ -92,6 +79,12 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <>
+      <ShareModal
+        isOpen={isOpenShareModal}
+        onOpenChange={setIsOpenShareModal}
+        title={post.title || ""}
+        url={`${window.location.origin}/posts/${post._id}`}
+      />
       <DeleteDialog />
       {showReportDialog && (
         <ReportPostDialog
@@ -155,7 +148,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                 )}
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={handleShare}
+                  onClick={() => setIsOpenShareModal(true)}
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Sao chép liên kết
@@ -182,53 +175,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         )}
 
         {/* Media content */}
-        {post.media && post.media.length > 0 && (
-          <div className="aspect-square bg-gray-50 relative">
-            {post.media.length === 1 ? (
-              // Single media
-              <>
-                {post.media[0].type === "image" ? (
-                  <img
-                    src={post.media[0].url}
-                    alt="Post image"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <video
-                    src={post.media[0].url}
-                    controls
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </>
-            ) : (
-              // Multiple media
-              <Carousel className="w-full">
-                <CarouselContent>
-                  {post.media.map((media, index) => (
-                    <CarouselItem key={index}>
-                      {media.type === "image" ? (
-                        <img
-                          src={media.url}
-                          alt={`Post image ${index + 1}`}
-                          className="w-full h-full object-cover aspect-square"
-                        />
-                      ) : (
-                        <video
-                          src={media.url}
-                          controls
-                          className="w-full h-full object-cover aspect-square"
-                        />
-                      )}
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-2" />
-                <CarouselNext className="right-2" />
-              </Carousel>
-            )}
-          </div>
-        )}
+        <SimpleImageCarousel media={post.media} aspectRatio="aspect-square" />
 
         {/* Action buttons */}
         <div className="flex justify-between px-4 pt-3 pb-1">
@@ -255,7 +202,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               variant="ghost"
               size="sm"
               className="flex items-center space-x-2"
-              onClick={handleShare}
+              onClick={() => setIsOpenShareModal(true)}
             >
               <Share2 size={22} />
               <span>Chia sẻ</span>
@@ -329,7 +276,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         )}
 
         {/* Add comment section */}
-        <div className="flex items-center px-4 py-3 border-t mt-2">
+        <div className="flex items-center px-4 py-3 border-t border-slate-200 mt-2">
           <input
             type="text"
             placeholder="Thêm bình luận..."

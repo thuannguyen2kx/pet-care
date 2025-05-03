@@ -20,7 +20,7 @@ import {
   Specialty,
   specialtyTranslations,
 } from "@/constants";
-import SimpleImageCarousel from "./image-carousel";
+import SimpleImageCarousel from "@/components/shared/image-carousel";
 
 const ServiceCatalog: React.FC = () => {
   const navigate = useNavigate();
@@ -131,7 +131,7 @@ const ServiceCatalog: React.FC = () => {
               className="overflow-hidden h-full flex flex-col p-0 border-none shadow rounded-md"
             >
               <div className="w-full relative">
-                <SimpleImageCarousel images={service.images} aspectRatio="aspect-square" />
+                <SimpleImageCarousel media={service.images} aspectRatio="aspect-square" />
                 <Badge className="absolute top-2 right-2" variant="secondary">
                   {specialtyTranslations[service.category as Specialty]}
                 </Badge>

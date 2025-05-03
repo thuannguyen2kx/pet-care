@@ -222,7 +222,7 @@ export const getFeaturedPostsController = asyncHandler(
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 5;
     const { posts } = await getFeaturedPostsService({ limit });
 
-    return res.status(HTTPSTATUS.OK).json(posts);
+    return res.status(HTTPSTATUS.OK).json({ posts });
   }
 );
 

@@ -24,8 +24,10 @@ export const getPostByIdQueryFn = async (postId: string): Promise<PostResponseTy
 };
 
 // Get featured posts
-export const getFeaturedPosts = async (limit = 5): Promise<PostType[]> => {
-  const { data } = await API.get('/posts/featured', { params: { limit } });
+export const getFeaturedPosts = async (
+  limit = 5
+): Promise<{ posts: PostType[] }> => {
+  const { data } = await API.get("/posts/featured", { params: { limit } });
   return data;
 };
 export const fetchPostsForModeration = async (params: ModerationQueryParams): Promise<PostsResponseType> => {
