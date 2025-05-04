@@ -6,7 +6,7 @@ import {
   DialogTitle, 
   DialogClose
 } from '@/components/ui/dialog';
-import CreatePostForm from './create-post-formt'; 
+import CreatePostForm from './create-post-form'; 
 
 interface CreatePostModalProps {
   open: boolean;

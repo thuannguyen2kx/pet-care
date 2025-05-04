@@ -70,9 +70,10 @@ const fileToDataURL = (file: File): Promise<string> => {
 const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const userId = user?._id || "";
   const mutation = useCreatePost();
 
-  const {data} = useUserPets()
+  const {data} = useUserPets(userId)
   const pets = data?.pets || [];
   
   // Form with React Hook Form

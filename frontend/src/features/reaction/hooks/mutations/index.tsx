@@ -108,7 +108,7 @@ export const useAddReaction = () => {
       }
     },
     
-    onError: (error, variables, context) => {
+    onError: (_, variables, context) => {
       // Rollback to previous values
       if (context?.previousUserReaction) {
         queryClient.setQueryData(
@@ -222,7 +222,7 @@ export const useRemoveReaction = () => {
       }
     },
     
-    onError: (error, variables, context) => {
+    onError: (_, variables, context) => {
       // Rollback to previous values
       if (context?.previousUserReaction) {
         queryClient.setQueryData(

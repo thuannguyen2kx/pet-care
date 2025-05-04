@@ -15,10 +15,14 @@ import { useProcessPayment, useCreateCheckoutSession } from "@/features/payment/
 import { DateSelectionStep, EmployeeSelectionStep, NotesStep, PaymentStep, PetSelectionStep, ReviewStep, StepIndicator, TimeSelectionStep } from "./form-steps";
 import { useUserPets } from "@/features/pet/hooks/queries/get-pets";
 import { ServiceAppointmentType } from "@/constants";
+import { useAuthContext } from "@/context/auth-provider";
 
 export const AppointmentFormStep: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const {user} = useAuthContext()
+  const userId = user?._id || "";
+
   const [currentStep, setCurrentStep] = useState(STEPS.PET);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isPetCompatible, setIsPetCompatible] = useState(true);
@@ -48,7 +52,7 @@ export const AppointmentFormStep: React.FC = () => {
   });
 
   // Fetch queries
-  const { data: petsData, isLoading: isPetsLoading } = useUserPets();
+  const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId);
   const { data: serviceData, isLoading: isServiceLoading } = useGetService(serviceId);
   const isLoading = isPetsLoading || isServiceLoading;
   

@@ -1,4 +1,3 @@
-// src/components/dashboard/dashboard-charts.tsx
 import {
   BarChart, 
   Bar, 
@@ -15,7 +14,6 @@ import {
   Line
 } from 'recharts';
 import { COLORS, formatCurrency } from './dashboard-utils';
-// import { ReportDataPoint } from '@/features/report/types/api.types';
 
 interface ChartProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,7 +83,7 @@ export const ServicePieChart: React.FC<ChartProps> = ({ data, height = 300 }) =>
             dataKey="value"
             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
           >
-            {data.map((entry, index) => (
+            {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>

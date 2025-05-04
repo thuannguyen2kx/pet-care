@@ -146,7 +146,7 @@ const PaymentDashboardWidget = () => {
                           `${name} ${(percent * 100).toFixed(0)}%`
                         }
                       >
-                        {dashboardData.paymentsByMethod.map((entry, index) => (
+                        {dashboardData.paymentsByMethod.map((_, index) => (
                           <Cell
                             key={`cell-${index}`}
                             fill={COLORS[index % COLORS.length]}

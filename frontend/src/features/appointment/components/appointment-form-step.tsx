@@ -57,6 +57,7 @@ import { ServiceType } from "@/features/service/types/api.types";
 import { PetType } from "@/features/pet/types/api.types";
 import { Badge } from "@/components/ui/badge";
 import { useGetAvailableEmployeesForService } from "@/features/employee/hooks/queries/get-available-employee-for-service";
+import { useAuthContext } from "@/context/auth-provider";
 
 // Steps
 const STEPS = {
@@ -106,6 +107,10 @@ interface TimeSlot {
 export const AppointmentFormStep = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const {user} = useAuthContext();
+  const userId = user?._id;
+
   const [currentStep, setCurrentStep] = useState(STEPS.PET);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isPetCompatible, setIsPetCompatible] = useState(true);
@@ -134,7 +139,7 @@ export const AppointmentFormStep = () => {
   });
 
   // Fetch queries
-  const { data: petsData, isLoading: isPetsLoading } = useUserPets();
+  const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId || "");
   const { data: serviceData, isLoading: isServiceLoading } =
     useGetService(serviceId);
   const isLoading = isPetsLoading || isServiceLoading;

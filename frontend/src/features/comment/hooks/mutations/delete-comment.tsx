@@ -8,7 +8,7 @@ export const useDeleteComment = () => {
   return useMutation({
     mutationFn: deleteCommentMutationFn,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onSuccess: (_, commentId) => {
+    onSuccess: () => {
       // We need to find the postId to invalidate the correct query
       // This requires us to either have the postId passed in additionally
       // or to get it from the cache
