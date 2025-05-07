@@ -41,6 +41,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { PetCategory, petCategoryTranslations } from "@/constants";
 
 // Schema for adding vaccination
 const vaccinationSchema = z.object({
@@ -195,7 +196,7 @@ const PetDetail = () => {
           <PetAvatar pet={pet} size="lg" editable={true} />
           <h1 className="text-2xl font-bold text-gray-800 mt-4">{pet.name}</h1>
           <div className="flex gap-2 mt-2">
-            <Badge className="bg-orange-500">{pet.species}</Badge>
+            <Badge className="bg-orange-500">{petCategoryTranslations[pet.species as PetCategory]}</Badge>
             {pet.breed && (
               <Badge variant="outline" className="border-orange-200">
                 {pet.breed}
@@ -290,7 +291,7 @@ const PetDetail = () => {
 
         <TabsContent value="vaccinations">
           <Card className="border-orange-200">
-            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100 pb-4">
+            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100 py-2">
               <CardTitle className="text-lg text-orange-800">
                 Lịch sử tiêm phòng
               </CardTitle>

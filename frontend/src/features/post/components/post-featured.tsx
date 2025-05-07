@@ -28,7 +28,7 @@ const PostCard = ({ post }: PostCardProps) => {
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
-      <SimpleImageCarousel media={post.media} aspectRatio="aspect-square" />
+      <SimpleImageCarousel media={post.media} aspectRatio="aspect-square" showNoImageMessage />
 
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">

@@ -27,7 +27,7 @@ petRoutes.post("/", createPetController);
 petRoutes.post("/with-picture", createPetWithPictureController);
 
 petRoutes
-  .route("/:id")
+  .route("/details/:id")
   .get(getPetByIdController)
   .put( 
     updatePetController

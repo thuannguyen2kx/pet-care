@@ -14,7 +14,7 @@ export const getPetsQueryFn = async (userId: string): Promise<GetPetsResponse> =
   return response.data;
 };
 export const getPetQueryFn = async (petId: string): Promise<GetPetResponse> => {
-  const response = await API.get(`/pets/${petId}`);
+  const response = await API.get(`/pets/details/${petId}`);
   return response.data;
 };
 export const createPetMutationFn = async (
