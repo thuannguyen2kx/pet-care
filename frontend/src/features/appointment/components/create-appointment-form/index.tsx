@@ -1,41 +1,77 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import type React from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Form } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useGetService } from "@/features/service/hooks/queries/get-service";
-import { formSchema, FormValues, STEPS } from "../../utils/appointment-form-config";
-import { TimeSlotType } from "../../types/api.types";
+import {
+  formSchema,
+  type FormValues,
+  STEPS,
+} from "../../utils/appointment-form-config";
+import type { TimeSlotType } from "../../types/api.types";
 import { useCreateAppointment } from "../../hooks/mutations/create-appointment";
-import { useProcessPayment, useCreateCheckoutSession } from "@/features/payment/hooks/api";
-import { DateSelectionStep, EmployeeSelectionStep, NotesStep, PaymentStep, PetSelectionStep, ReviewStep, StepIndicator, TimeSelectionStep } from "./form-steps";
+import {
+  useProcessPayment,
+  useCreateCheckoutSession,
+} from "@/features/payment/hooks/api";
+import {
+  DateSelectionStep,
+  EmployeeSelectionStep,
+  NotesStep,
+  PaymentStep,
+  PetSelectionStep,
+  ReviewStep,
+  StepIndicator,
+  TimeSelectionStep,
+} from "./form-steps";
 import { useUserPets } from "@/features/pet/hooks/queries/get-pets";
 import { ServiceAppointmentType } from "@/constants";
 import { useAuthContext } from "@/context/auth-provider";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 export const AppointmentFormStep: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const {user} = useAuthContext()
+  const { user } = useAuthContext();
   const userId = user?._id || "";
 
   const [currentStep, setCurrentStep] = useState(STEPS.PET);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isPetCompatible, setIsPetCompatible] = useState(true);
   const [incompatibilityReason, setIncompatibilityReason] = useState("");
-  const [selectedTimeSlotData, setSelectedTimeSlotData] = useState<TimeSlotType | null>(null);
-  const [createdAppointmentId, setCreatedAppointmentId] = useState<string | null>(null);
+  const [selectedTimeSlotData, setSelectedTimeSlotData] =
+    useState<TimeSlotType | null>(null);
+  const [createdAppointmentId, setCreatedAppointmentId] = useState<
+    string | null
+  >(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get service data from location state
-  const { serviceId, serviceType = ServiceAppointmentType.SINGLE } = location.state || {};
+  const { serviceId, serviceType = ServiceAppointmentType.SINGLE } =
+    location.state || {};
 
   // Redirect if no service is selected
   useEffect(() => {
     if (!serviceId) {
+      toast.error("Không tìm thấy dịch vụ", {
+        description: "Vui lòng chọn dịch vụ phù hợp",
+      });
       navigate("/services", { replace: true });
     }
   }, [serviceId, navigate]);
@@ -53,9 +89,10 @@ export const AppointmentFormStep: React.FC = () => {
 
   // Fetch queries
   const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId);
-  const { data: serviceData, isLoading: isServiceLoading } = useGetService(serviceId);
+  const { data: serviceData, isLoading: isServiceLoading } =
+    useGetService(serviceId);
   const isLoading = isPetsLoading || isServiceLoading;
-  
+
   // Mutations
   const createAppointmentMutation = useCreateAppointment();
   const processPaymentMutation = useProcessPayment();
@@ -87,42 +124,65 @@ export const AppointmentFormStep: React.FC = () => {
     }
   }, [selectedDate, form]);
 
+  // Calculate progress percentage
+  const progressPercentage = useMemo(() => {
+    const totalSteps = Object.keys(STEPS).length / 2;
+    return ((currentStep + 1) / totalSteps) * 100;
+  }, [currentStep]);
+
   // Form submission
   const onSubmit = async (data: FormValues) => {
-    // First create the appointment
-    if (!createdAppointmentId) {
-      createAppointmentMutation.mutate(
-        {
-          petId: data.petId,
-          serviceType,
-          serviceId,
-          scheduledDate: format(data.scheduledDate, "yyyy-MM-dd"),
-          scheduledTimeSlot: data.timeSlot,
-          employeeId: data.employeeId,
-          notes: data.notes,
-        },
-        {
-          onSuccess: (response) => {
-            const newAppointmentId = response.appointment._id;
-            setCreatedAppointmentId(newAppointmentId);
-            
-            // Process payment based on selected method
-            processPayment(newAppointmentId, data);
+    setIsSubmitting(true);
+
+    try {
+      // First create the appointment
+      if (!createdAppointmentId) {
+        createAppointmentMutation.mutate(
+          {
+            petId: data.petId,
+            serviceType,
+            serviceId,
+            scheduledDate: format(data.scheduledDate, "yyyy-MM-dd"),
+            scheduledTimeSlot: data.timeSlot,
+            employeeId: data.employeeId,
+            notes: data.notes,
           },
-        }
-      );
-    } else {
-      // If appointment already created, just process payment
-      processPayment(createdAppointmentId, data);
+          {
+            onSuccess: (response) => {
+              const newAppointmentId = response.appointment._id;
+              setCreatedAppointmentId(newAppointmentId);
+
+              // Process payment based on selected method
+              processPayment(newAppointmentId, data);
+            },
+            onError: (error) => {
+              toast.error(
+                error.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
+              );
+              setIsSubmitting(false);
+            },
+          }
+        );
+      } else {
+        // If appointment already created, just process payment
+        processPayment(createdAppointmentId, data);
+      }
+    } catch {
+      toast.error("Đã xảy ra lỗi không mong muốn, vui lòng thử lại sau");
+      setIsSubmitting(false);
     }
   };
 
   const processPayment = (appointmentId: string, data: FormValues) => {
     const paymentMethod = data.paymentMethod;
-    
+
     if (paymentMethod === "card") {
       // For card payments, redirect to Stripe checkout
-      createCheckoutSessionMutation.mutate(appointmentId);
+      createCheckoutSessionMutation.mutate(appointmentId, {
+        onError: () => {
+          setIsSubmitting(false);
+        },
+      });
     } else {
       // For cash or bank transfer, use the regular payment endpoint
       processPaymentMutation.mutate(
@@ -135,6 +195,9 @@ export const AppointmentFormStep: React.FC = () => {
             navigate("/appointments", {
               state: { paymentSuccess: true, appointmentId },
             });
+          },
+          onError: () => {
+            setIsSubmitting(false);
           },
         }
       );
@@ -176,6 +239,8 @@ export const AppointmentFormStep: React.FC = () => {
 
     if (canContinue) {
       setCurrentStep((prev) => prev + 1);
+      // Scroll to top when changing steps
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -200,10 +265,7 @@ export const AppointmentFormStep: React.FC = () => {
         );
       case STEPS.DATE:
         return (
-          <DateSelectionStep
-            form={form}
-            setSelectedDate={setSelectedDate}
-          />
+          <DateSelectionStep form={form} setSelectedDate={setSelectedDate} />
         );
       case STEPS.TIME:
         return (
@@ -288,68 +350,89 @@ export const AppointmentFormStep: React.FC = () => {
     return false;
   };
 
-  const isSubmitting = 
-    createAppointmentMutation.isPending || 
+  const isProcessing =
+    createAppointmentMutation.isPending ||
     processPaymentMutation.isPending ||
-    createCheckoutSessionMutation.isPending;
+    createCheckoutSessionMutation.isPending ||
+    isSubmitting;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="secondary" onClick={handleBack} disabled={isSubmitting}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {currentStep === STEPS.PET ? "Quay lại" : "Trước đó"}
-        </Button>
-        <div className="text-sm font-medium">{getStepTitle()}</div>
+    <div className="container mx-auto py-8 px-4 max-w-5xl">
+      <div className="mb-8">
+        <Progress value={progressPercentage} className="h-2 mb-2" />
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            disabled={isProcessing}
+            className="gap-2 hover:bg-muted/80"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {currentStep === STEPS.PET ? "Quay lại" : "Trước đó"}
+          </Button>
+          <div className="text-sm font-medium bg-primary/10 px-3 py-1 rounded-full">
+            Bước {currentStep + 1}/{Object.keys(STEPS).length}: {getStepTitle()}
+          </div>
+        </div>
       </div>
 
-      <Card className="w-full max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle>Đặt lịch hẹn mới</CardTitle>
+      <Card className="w-full mx-auto shadow border-muted/60 overflow-hidden">
+        <CardHeader className="bg-muted/30 border-b border-slate-200">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-primary-foreground text-sm">
+              {currentStep + 1}
+            </span>
+            Đặt lịch hẹn mới
+          </CardTitle>
           <CardDescription>
             {currentStep === STEPS.PET
-              ? `Chọn thú cưng của bạn cho dịch vụ ${serviceData?.service?.name || ""}`
+              ? `Chọn thú cưng của bạn cho dịch vụ ${
+                  serviceData?.service?.name || ""
+                }`
               : `Đặt lịch hẹn cho ${
-                  petsData?.pets.find((pet) => pet._id === form.watch("petId"))?.name || ""
+                  petsData?.pets.find((pet) => pet._id === form.watch("petId"))
+                    ?.name || ""
                 } - ${serviceData?.service?.name || ""}`}
           </CardDescription>
         </CardHeader>
 
         <Form {...form}>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-6">
               <StepIndicator currentStep={currentStep} steps={STEPS} />
               {renderStepContent()}
             </CardContent>
 
-            <CardFooter className="flex justify-between mt-4">
-              <Button 
-                type="button" 
-                variant="secondary" 
+            <CardFooter className="flex justify-between p-6 bg-muted/20 border-t border-slate-200">
+              <Button
+                type="button"
+                variant="outline"
                 onClick={handleBack}
-                disabled={isSubmitting}
+                disabled={isProcessing}
+                className="min-w-[100px]"
               >
                 {currentStep === STEPS.PET ? "Hủy" : "Trước đó"}
               </Button>
 
-              {currentStep < STEPS.REVIEW ? (
-                <Button
-                  type="button"
-                  onClick={handleContinue}
-                  disabled={isContinueButtonDisabled() || isSubmitting}
-                >
-                  Tiếp theo
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting
-                    ? "Đang xử lý..."
-                    : "Xác nhận và thanh toán"}
-                </Button>
-              )}
+              <Button
+                type={currentStep < STEPS.REVIEW ? "button" : "submit"}
+                onClick={
+                  currentStep < STEPS.REVIEW ? handleContinue : undefined
+                }
+                disabled={isProcessing || isContinueButtonDisabled()}
+                className="min-w-[180px]"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : currentStep < STEPS.REVIEW ? (
+                  "Tiếp theo"
+                ) : (
+                  "Xác nhận và thanh toán"
+                )}
+              </Button>
             </CardFooter>
           </form>
         </Form>
