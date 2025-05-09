@@ -129,7 +129,7 @@ export const DayView: React.FC<DayViewProps> = ({
         </h2>
       </div>
       
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-gray-200 mt-12">
         {timeSlots.map((time) => {
           const timeAppointments = getAppointmentsForTimeSlot(time);
           

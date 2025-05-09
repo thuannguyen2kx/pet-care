@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, PawPrint } from "lucide-react";
+import { CreditCard, MoreHorizontal, PawPrint } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +38,35 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
       </div>
     );
   }
+  const getPaymentStatusLabel = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "Đã thanh toán";
+      case "pending":
+        return "Chờ thanh toán";
+      case "failed":
+        return "Thanh toán thất bại";
+      case "refunded":
+        return "Đã hoàn tiền";
+      default:
+        return "Không xác định";
+    }
+  };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "failed":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "refunded":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
 
   return (
     <div className="rounded-md overflow-hidden">
@@ -59,8 +88,12 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
           {appointments.map((appointment) => (
             <TableRow key={appointment._id} className="border-slate-100">
               <TableCell>
-                <div className="font-medium">{appointment.customerId?.fullName}</div>
-                <div className="text-sm text-gray-500">{appointment.customerId?.email}</div>
+                <div className="font-medium">
+                  {appointment.customerId?.fullName}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {appointment.customerId?.email}
+                </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -84,14 +117,19 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
               <TableCell>
                 <div>{appointment.serviceId?.name}</div>
                 <div className="text-sm text-gray-500">
-                  {appointment.serviceType === "single" ? "Dịch vụ đơn lẻ" : "Gói dịch vụ"}
+                  {appointment.serviceType === "single"
+                    ? "Dịch vụ đơn lẻ"
+                    : "Gói dịch vụ"}
                 </div>
               </TableCell>
               <TableCell>
-                {format(new Date(appointment.scheduledDate), "dd/MM/yyyy", { locale: vi })}
+                {format(new Date(appointment.scheduledDate), "dd/MM/yyyy", {
+                  locale: vi,
+                })}
               </TableCell>
               <TableCell>
-                {appointment.scheduledTimeSlot.start} - {appointment.scheduledTimeSlot.end}
+                {appointment.scheduledTimeSlot.start} -{" "}
+                {appointment.scheduledTimeSlot.end}
               </TableCell>
               <TableCell>
                 {appointment.employeeId?.fullName || (
@@ -104,10 +142,12 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="default">
-                  {appointment.paymentStatus === "paid" ? "Đã thanh toán" :
-                   appointment.paymentStatus === "refunded" ? "Đã hoàn tiền" :
-                   "Chưa thanh toán"}
+                <Badge
+                  variant="outline"
+                  className={getPaymentStatusColor(appointment?.paymentStatus)}
+                >
+                  <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                  {getPaymentStatusLabel(appointment?.paymentStatus)}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
@@ -120,18 +160,23 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link to={`/admin/appointments/${appointment._id}`}>
+                      <Link to={`/manager/appointments/${appointment._id}`}>
                         Xem chi tiết
                       </Link>
                     </DropdownMenuItem>
-                    {(appointment.status !== "completed" && appointment.status !== "cancelled") && (
-                      <DropdownMenuItem onClick={() => onUpdateStatus(appointment)}>
-                        Cập nhật trạng thái
-                      </DropdownMenuItem>
-                    )}
+                    {appointment.status !== "completed" &&
+                      appointment.status !== "cancelled" && (
+                        <DropdownMenuItem
+                          onClick={() => onUpdateStatus(appointment)}
+                        >
+                          Cập nhật trạng thái
+                        </DropdownMenuItem>
+                      )}
                     {!appointment.employeeId && (
                       <DropdownMenuItem asChild>
-                        <Link to={`/admin/appointments/${appointment._id}/assign`}>
+                        <Link
+                          to={`/admin/appointments/${appointment._id}/assign`}
+                        >
                           Phân công nhân viên
                         </Link>
                       </DropdownMenuItem>

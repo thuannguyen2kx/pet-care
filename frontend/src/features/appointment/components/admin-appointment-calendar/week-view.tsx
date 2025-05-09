@@ -129,7 +129,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
         ))}
       </div>
       
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-gray-200 mt-10">
         {timeSlots.map((time) => {
           const isCurrentTime = isSameHour(
             now, 

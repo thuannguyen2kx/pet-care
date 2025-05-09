@@ -266,7 +266,7 @@ const ServiceForm: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/admin/services")}
+            onClick={() => navigate("/manager/services")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
