@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -28,7 +27,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, ArrowLeft, ImagePlus, X, Upload } from "lucide-react";
+import { 
+  Loader2, 
+  ArrowLeft, 
+  ImagePlus, 
+  X, 
+  Upload, 
+  Sparkles 
+} from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -49,6 +55,11 @@ import {
   Specialty,
   specialtyTranslations,
 } from "@/constants";
+import ServiceAIAssistantModal from "@/features/ai-assitant/components/service-ai-assitant";
+
+// Import ReactQuill
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
 type ServiceFormValues = z.infer<typeof serviceFormSchema>;
 
@@ -63,6 +74,16 @@ const ServiceForm: React.FC = () => {
   const navigate = useNavigate();
   const isEditMode = !!serviceId;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const quillRef = useRef<ReactQuill | null>(null);
+
+  // AI Assistant state
+  const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [documentContext, setDocumentContext] = useState("");
+  const [selectionRange, setSelectionRange] = useState<{
+    index: number;
+    length: number;
+  } | null>(null);
 
   // Fetch service details if in edit mode
   const {
@@ -111,6 +132,25 @@ const ServiceForm: React.FC = () => {
       setImageUrls(serviceData.images || []);
     }
   }, [serviceData, isEditMode, form]);
+
+  // Watch form values for AI context
+  const watchedName = form.watch("name");
+  const watchedCategory = form.watch("category");
+  const watchedPetTypes = form.watch("applicablePetTypes");
+  const watchedDescription = form.watch("description");
+
+  // Update document context for AI whenever form values change
+  useEffect(() => {
+    const petTypesText = watchedPetTypes.map(type => petCategoryTranslations[type as PetCategory] || type).join(", ");
+    const categoryText = specialtyTranslations[watchedCategory as Specialty] || watchedCategory;
+    
+    setDocumentContext(
+      `Tên dịch vụ: ${watchedName || 'Chưa có tên'}\n` +
+      `Loại dịch vụ: ${categoryText || 'Chưa chọn'}\n` +
+      `Loại thú cưng: ${petTypesText || 'Chưa chọn'}\n` +
+      `Mô tả hiện tại: ${watchedDescription || 'Chưa có mô tả'}`
+    );
+  }, [watchedName, watchedCategory, watchedPetTypes, watchedDescription]);
 
   const onSubmit = (data: ServiceFormValues) => {
     if (isEditMode) {
@@ -175,7 +215,7 @@ const ServiceForm: React.FC = () => {
       createServiceMutation.mutate(formData, {
         onSuccess: () => {
           toast.success("Tạo dịch vụ thành công");
-          navigate("/admin/services");
+          navigate("/manager/services");
         },
         onError: (error) => {
           toast.error("Tạo dịch vụ thất bại");
@@ -243,6 +283,97 @@ const ServiceForm: React.FC = () => {
     setImageUrls(imageUrls.filter((img) => img.url !== url));
   };
 
+  // AI Assistant functions
+  const handleOpenAI = useCallback(() => {
+    if (quillRef.current) {
+      const editor = quillRef.current.getEditor();
+      const selection = editor.getSelection();
+      
+      if (selection && selection.length > 0) {
+        // Text is selected
+        setSelectionRange(selection);
+        const selected = editor.getText(selection.index, selection.length);
+        setSelectedText(selected);
+      } else {
+        // No text selected
+        setSelectionRange(null);
+        setSelectedText("");
+      }
+    }
+    setIsAIMenuOpen(true);
+  }, []);
+
+  // Insert AI-generated content into the Quill editor
+  const insertAIContent = useCallback((aiContent: string) => {
+    if (quillRef.current) {
+      const editor = quillRef.current.getEditor();
+      
+      if (selectionRange) {
+        // Replace selected text with AI content
+        editor.deleteText(selectionRange.index, selectionRange.length);
+        editor.insertText(selectionRange.index, aiContent);
+        editor.setSelection(selectionRange.index + aiContent.length, 0);
+      } else {
+        // No selection, insert at current cursor position or at the end
+        const currentSelection = editor.getSelection();
+        const insertIndex = currentSelection ? currentSelection.index : editor.getLength();
+        editor.insertText(insertIndex, aiContent);
+        editor.setSelection(insertIndex + aiContent.length, 0);
+      }
+      
+      // Update form value with new editor content
+      const html = editor.root.innerHTML;
+      form.setValue("description", html, { 
+        shouldDirty: true, 
+        shouldTouch: true,
+        shouldValidate: true 
+      });
+    }
+    
+    setIsAIMenuOpen(false);
+  }, [form, selectionRange]);
+
+  // Handle keyboard shortcut for AI assistant
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === " ") {
+        // Check if we're in the editor (look for quill-related elements)
+        const activeElement = document.activeElement;
+        const isInQuillEditor = 
+          activeElement?.className?.includes("ql-editor") || 
+          activeElement?.closest(".ql-editor");
+        
+        if (isInQuillEditor) {
+          e.preventDefault();
+          handleOpenAI();
+        }
+      }
+    };
+    
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleOpenAI]);
+
+  // Cấu hình ReactQuill
+  const quillModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['clean']
+    ],
+  };
+  
+  const quillFormats = [
+    'bold', 'italic', 'underline', 'strike',
+    'blockquote', 'code-block',
+    'list', 'bullet',
+    'header',
+    'color', 'background'
+  ];
+
   if (isLoadingService && isEditMode) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -304,14 +435,37 @@ const ServiceForm: React.FC = () => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mô Tả</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Mô Tả</FormLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleOpenAI}
+                      className="h-7 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 flex items-center"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1" />
+                      AI Hỗ trợ
+                    </Button>
+                  </div>
                   <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Mô tả dịch vụ"
-                      className="min-h-24"
-                    />
+                    <div className="editor-container min-h-[150px]">
+                      <ReactQuill
+                        ref={quillRef}
+                        value={field.value}
+                        onChange={(content) => {
+                          field.onChange(content);
+                        }}
+                        placeholder="Mô tả dịch vụ chi tiết tại đây..."
+                        modules={quillModules}
+                        formats={quillFormats}
+                        theme="snow"
+                      />
+                    </div>
                   </FormControl>
+                  <FormDescription className="text-xs text-gray-500">
+                    Nhấn Ctrl+Space để sử dụng trợ lý AI viết mô tả
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -659,6 +813,16 @@ const ServiceForm: React.FC = () => {
           </form>
         </Form>
       </CardContent>
+
+      {/* AI Assistant Modal */}
+      <ServiceAIAssistantModal
+        isOpen={isAIMenuOpen}
+        onClose={() => setIsAIMenuOpen(false)}
+        selectedText={selectedText}
+        documentContext={documentContext}
+        insertContent={insertAIContent}
+        serviceCategory={watchedCategory}
+      />
     </Card>
   );
 };

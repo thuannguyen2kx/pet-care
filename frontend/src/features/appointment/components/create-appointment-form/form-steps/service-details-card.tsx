@@ -8,6 +8,7 @@ import { type PetCategory, petCategoryTranslations } from "@/constants"
 import { Clock, DollarSign, Info, PawPrint } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
+import Renderer from "@/components/shared/renderer"
 
 interface ServiceDetailsCardProps {
   service?: ServiceType
@@ -31,7 +32,7 @@ const ServiceDetailsCard: React.FC<ServiceDetailsCardProps> = ({ service }) => {
         <div className="grid grid-cols-1 gap-4">
           <div>
             <h4 className="text-xl font-medium text-primary">{service.name}</h4>
-            {service.description && <p className="mt-1 text-muted-foreground">{service.description}</p>}
+            <Renderer value={service.description || ""} maxHeight={100} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">

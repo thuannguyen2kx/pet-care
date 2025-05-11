@@ -55,6 +55,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthContext } from "@/context/auth-provider";
 import { Roles } from "@/constants";
 import PaymentManagement from "@/features/payment/components/payment-management";
+import Renderer from "@/components/shared/renderer";
 
 const AppointmentDetail: React.FC = () => {
   const { user } = useAuthContext();
@@ -619,10 +620,7 @@ const AppointmentDetail: React.FC = () => {
                   </div>
                 ) : (
                   <div>
-                    <p className="text-sm text-gray-600">
-                      {appointment?.serviceId?.description ||
-                        "Không có mô tả chi tiết dịch vụ."}
-                    </p>
+                   <Renderer value={appointment?.serviceId?.description || ""} /> 
 
                     {appointment?.serviceId?.images &&
                       appointment.serviceId.images.length > 0 && (

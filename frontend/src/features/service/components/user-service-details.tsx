@@ -23,6 +23,7 @@ import { useGetService } from "../hooks/queries/get-service";
 import { formatVND } from "@/lib/helper";
 import { PetCategory, petCategoryTranslations, PetSize, petSizeTranslations, ServiceAppointmentType, Specialty, specialtyTranslations } from "@/constants";
 import { formatDuration } from "@/features/appointment/utils/appointment-form-config";
+import Renderer from "@/components/shared/renderer";
 
 const ServiceDetails: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -199,10 +200,7 @@ const ServiceDetails: React.FC = () => {
               <Card className="border-none shadow-none">
                 <CardContent className="pt-6">
                   <h3 className="text-xl font-bold mb-4">Về dịch vụ này</h3>
-                  <p className="text-gray-700 whitespace-pre-line">
-                    {service.description ||
-                      "Chưa có thông tin mô tả về dịch vụ này"}
-                  </p>
+                  <Renderer value={service.description || ""} />
                 </CardContent>
               </Card>
             </TabsContent>

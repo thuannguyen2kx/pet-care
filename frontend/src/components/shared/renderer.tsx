@@ -5,7 +5,7 @@ interface RendererProps {
   maxHeight?: number; // chiều cao tối đa trước khi rút gọn
 }
 
-const Renderer = ({ value, maxHeight = 200 }: RendererProps) => {
+const Renderer = ({ value, maxHeight }: RendererProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const rendererRef = useRef<HTMLDivElement>(null);
@@ -18,8 +18,11 @@ const Renderer = ({ value, maxHeight = 200 }: RendererProps) => {
 
     // Kiểm tra xem nội dung có vượt quá maxHeight hay không
     requestAnimationFrame(() => {
-      if (container.scrollHeight > maxHeight) {
-        setIsOverflowing(true);
+      if(maxHeight && typeof maxHeight === "number") {
+        if (container.scrollHeight > maxHeight) {
+          setIsOverflowing(true);
+        }
+        
       }
     });
 
@@ -42,7 +45,7 @@ const Renderer = ({ value, maxHeight = 200 }: RendererProps) => {
         }}
       ></div>
 
-      {isOverflowing && (
+      {maxHeight && isOverflowing && (
         <button
           className="text-blue-500 mt-2 hover:underline"
           onClick={toggleCollapse}
