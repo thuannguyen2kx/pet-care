@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { CommentList } from "@/features/comment/components/comment-list";
 import { useAuthContext } from "@/context/auth-provider";
 import { GlobalLoading } from "@/components/shared/global-loading";
+import Renderer from "@/components/shared/renderer";
 
 export default function PostDetailsManagerPage() {
   const { user } = useAuthContext();
@@ -300,7 +301,9 @@ export default function PostDetailsManagerPage() {
             <h1 className="text-2xl font-bold mb-3">{post.title}</h1>
           )}
 
-          <div className="mb-6 whitespace-pre-line">{post.content}</div>
+          <div className="mb-6 whitespace-pre-line">
+            <Renderer value={post.content} />
+          </div>
 
           {post.media && post.media.length > 0 && (
             <div className="mb-6 grid grid-cols-2 md:grid-cols-3 gap-4">

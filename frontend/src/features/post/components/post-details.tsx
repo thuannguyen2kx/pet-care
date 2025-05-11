@@ -15,8 +15,6 @@ import {
   Trash2,
   Edit,
   AlertTriangle,
-  ChevronDown,
-  ChevronUp
 } from 'lucide-react';
 import { 
   DropdownMenu,
@@ -41,6 +39,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShareModal } from './shared-modal';
 import SimpleImageCarousel from '@/components/shared/image-carousel';
+import Renderer from '@/components/shared/renderer';
 
 const PostDetails = () => {
   const { postId = '' } = useParams();
@@ -54,7 +53,6 @@ const PostDetails = () => {
   
   // UI states
   const [showReportDialog, setShowReportDialog] = useState(false);
-  const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
   const [isOpenShareModal, setIsOpenShareModal] = useState(false);
   
@@ -80,12 +78,6 @@ const PostDetails = () => {
   if (isLoading) return <PostDetailSkeleton />;
   if (isError) return <PostDetailError error={error as Error} />;
   if (!data || !post) return <PostDetailNotFound />;
-  
-  // Determine if content is long and needs expansion toggle
-  const isLongContent = post.content && post.content.length > 300;
-  const displayContent = isLongContent && !isContentExpanded 
-    ? post.content.substring(0, 300) + '...' 
-    : post.content;
   
   // Handle post deletion
   const handleDeletePost = async () => {
@@ -224,28 +216,7 @@ const PostDetails = () => {
 
                   {/* Post content */}
                   <div className="prose max-w-none mb-4">
-                    <p className="whitespace-pre-wrap text-gray-800">
-                      {displayContent}
-                    </p>
-
-                    {isLongContent && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsContentExpanded(!isContentExpanded)}
-                        className="mt-2 text-gray-500 flex items-center gap-1"
-                      >
-                        {isContentExpanded ? (
-                          <>
-                            Thu gọn <ChevronUp className="h-4 w-4" />
-                          </>
-                        ) : (
-                          <>
-                            Xem thêm <ChevronDown className="h-4 w-4" />
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <Renderer value={post.content} />
                   </div>
 
                   {/* Pet tags */}

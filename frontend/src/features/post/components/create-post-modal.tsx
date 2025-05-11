@@ -4,7 +4,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogClose
+  DialogClose,
 } from '@/components/ui/dialog';
 import CreatePostForm from './create-post-form'; 
 
@@ -23,9 +23,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl md:max-w-4xl p-0 border-none">
+      <DialogContent className="gap-0 sm:max-w-3xl md:max-w-5xl p-0 border-none">
         <DialogHeader className="px-4 pt-4 pb-0 flex justify-between items-center">
-          <DialogTitle>Create Post</DialogTitle>
+          <DialogTitle>Tạo bài viết</DialogTitle>
           <DialogClose className="h-6 w-6 rounded-sm opacity-70 transition-opacity hover:opacity-100" />
         </DialogHeader>
         <div className="overflow-y-auto max-h-[80vh] remove-scrollbar">

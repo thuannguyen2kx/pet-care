@@ -31,6 +31,7 @@ import { ReactionButton } from "@/features/reaction/components/reaction-button";
 import { ReactionsDialog } from "@/features/reaction/components/reaction-dialog";
 import { ShareModal } from "./shared-modal";
 import SimpleImageCarousel from "@/components/shared/image-carousel";
+import Renderer from "@/components/shared/renderer";
 
 interface PostCardProps {
   post: PostType;
@@ -232,7 +233,8 @@ export const PostCard: React.FC<PostCardProps> = ({
             >
               {post.authorId.fullName}
             </Link>
-            {post.content.length > 150 ? (
+            <Renderer value={post.content} maxHeight={150}/>
+            {/* {post.content.length > 150 ? (
               <>
                 {post.content.substring(0, 150)}...
                 <Link
@@ -244,7 +246,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               </>
             ) : (
               post.content
-            )}
+            )} */}
           </div>
 
           {/* Hashtags */}
