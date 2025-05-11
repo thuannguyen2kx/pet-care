@@ -177,7 +177,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="p-2">
+        <DialogHeader className="py-2 px-4">
           <div className="flex justify-between items-center">
             <DialogTitle className="text-xl flex items-center">
               <Sparkles className="mr-2 h-5 w-5" /> 
@@ -185,7 +185,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
             </DialogTitle>
             
           </div>
-          <DialogDescription className="text-purple-100">
+          <DialogDescription>
             Sử dụng AI để tạo nội dung chuyên nghiệp cho dịch vụ của bạn
           </DialogDescription>
         </DialogHeader>
@@ -225,14 +225,14 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
               <h3 className="text-base font-medium mb-3">Gợi ý cho dịch vụ {serviceCategory}</h3>
               
               {/* Service Suggestion Cards */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-2 gap-2 mb-6">
                 {serviceSuggestionPrompts.map((suggestion) => (
                   <Card 
                     key={suggestion.key}
-                    className="hover:border-purple-300 dark:hover:border-purple-700 cursor-pointer transition-all"
+                    className="border border-slate-200 hover:border-primary/90 cursor-pointer transition-all"
                     onClick={() => handleQuickSuggestion(suggestion.key)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="px-4">
                       <div className="flex gap-3 items-center">
                         <div className="text-2xl">{suggestion.icon}</div>
                         <div>
@@ -308,10 +308,10 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
                 value={userDescription}
                 onChange={(e) => setUserDescription(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Describe what you want the AI to do with your text..."
+                placeholder="Mô tả những gì bạn muốn AI làm với văn bản của bạn..."
                 disabled={isGenerating}
                 rows={3}
-                label="Custom instructions"
+                label="Hướng dẫn tùy chỉnh (tuỳ chọn)"
               />
 
               <GenerateButton
@@ -319,7 +319,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
                 disabled={!userDescription.trim() || isGenerating || (!selectedText && !documentContext.trim())}
                 isLoading={isGenerating}
               >
-                Generate with Custom Instructions
+                Tạo với hướng dẫn tùy chỉnh
               </GenerateButton>
             </TabsContent>
 
@@ -363,15 +363,15 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
               <TextArea
                 value={userDescription}
                 onChange={(e) => setUserDescription(e.target.value)}
-                placeholder="Add any specific instructions to refine the AI's output..."
+                placeholder="Thêm bất kỳ hướng dẫn cụ thể nào để tinh chỉnh đầu ra của AI..."
                 disabled={isGenerating}
                 rows={2}
-                label="Additional instructions (optional)"
+                label="Hướng dẫn bổ sung (tùy chọn)"
               />
 
               {/* Advanced Options */}
               {showAdvancedOptions && (
-                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 mb-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 mb-4">
                   {/* Language Selection for Translation */}
                   <LanguageSelector
                     value={selectedLanguage}
@@ -384,7 +384,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
                     disabled={isGenerating || (!selectedText && !documentContext.trim())}
                     isLoading={isGenerating}
                   >
-                    Generate Translation
+                    Tạo bản dịch
                   </GenerateButton>
 
                   <Button
@@ -393,7 +393,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
                     className="text-gray-500 dark:text-gray-400 text-xs mt-2 p-0 h-auto"
                     onClick={() => setShowAdvancedOptions(false)}
                   >
-                    Hide Options
+                    Ẩn tuỳ chọn 
                   </Button>
                 </div>
               )}
@@ -407,7 +407,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
               >
                 <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-3 border-b border-gray-200 dark:border-gray-700">
                   <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                    <Sparkles className="h-4 w-4 mr-2" /> AI Response
+                    <Sparkles className="h-4 w-4 mr-2" /> Phản hồi của AI  
                   </h4>
                   <div className="flex gap-2">
                     <Button
@@ -415,7 +415,7 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
                       variant="ghost"
                       className="h-8 w-8 p-0"
                       onClick={handleCopyResponse}
-                      title="Copy to clipboard"
+                      title="Sao chép vào clipboard"
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -428,11 +428,11 @@ const ServiceAIAssistantModal: React.FC<ServiceAIAssistantModalProps> = ({
                     >
                       {isAIInserted ? (
                         <>
-                          <span className="mr-1">✓</span> Inserted
+                          <span className="mr-1">✓</span> Đã thêm 
                         </>
                       ) : (
                         <>
-                          <ArrowRightCircle className="h-4 w-4 mr-1" /> Insert
+                          <ArrowRightCircle className="h-4 w-4 mr-1" /> Thêm 
                         </>
                       )}
                     </Button>

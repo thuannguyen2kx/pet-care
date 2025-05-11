@@ -110,11 +110,11 @@ export const LanguageSelector: React.FC<{
   options: { value: string; label: string }[];
 }> = ({ value, onChange, options }) => (
   <div className="mb-3">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Language:</label>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Ngôn ngữ mục tiêu:</label>
     <select 
       value={value} 
       onChange={(e) => onChange(e.target.value)}
-      className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+      className="w-full border border-gray-300 rounded-lg p-2 text-sm"
     >
       {options.map(option => (
         <option key={option.value} value={option.value}>{option.label}</option>
@@ -136,7 +136,7 @@ export const TextArea: React.FC<{
   <div className="space-y-2">
     {label && <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>}
     <textarea
-      className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+      className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none"
       placeholder={placeholder}
       value={value}
       onChange={onChange}

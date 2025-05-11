@@ -219,10 +219,10 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                 value={userDescription}
                 onChange={(e) => setUserDescription(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Describe what you want the AI to do with your text..."
+                placeholder="Mô tả những gì bạn muốn AI làm với văn bản của bạn..."
                 disabled={isGenerating}
                 rows={3}
-                label="Custom instructions"
+                label="Hướng dẫn tùy chỉnh(tuỳ chọn)"
               />
 
               <GenerateButton
@@ -230,7 +230,7 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                 disabled={!userDescription.trim() || isGenerating || (!selectedText && !documentContext.trim())}
                 isLoading={isGenerating}
               >
-                Generate with Custom Instructions
+                Tạo với hướng dẫn tùy chỉnh
               </GenerateButton>
             </TabsContent>
 
@@ -274,10 +274,10 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
               <TextArea
                 value={userDescription}
                 onChange={(e) => setUserDescription(e.target.value)}
-                placeholder="Add any specific instructions to refine the AI's output..."
+                placeholder="Thêm bất kỳ hướng dẫn cụ thể nào để tinh chỉnh đầu ra của AI..."
                 disabled={isGenerating}
                 rows={2}
-                label="Additional instructions (optional)"
+                label="Hướng dẫn bổ sung (tùy chọn)"
               />
 
               {/* Advanced Options */}
@@ -295,7 +295,7 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                     disabled={isGenerating || (!selectedText && !documentContext.trim())}
                     isLoading={isGenerating}
                   >
-                    Generate Translation
+                   Tạo bản dịch 
                   </GenerateButton>
 
                   <Button
@@ -304,7 +304,7 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                     className="text-gray-500 dark:text-gray-400 text-xs mt-2 p-0 h-auto"
                     onClick={() => setShowAdvancedOptions(false)}
                   >
-                    Hide Options
+                    Ẩn lựa chọn 
                   </Button>
                 </div>
               )}
@@ -318,7 +318,7 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
               >
                 <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-3 border-b border-gray-200 dark:border-gray-700">
                   <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                    <Sparkles className="h-4 w-4 mr-2" /> AI Response
+                    <Sparkles className="h-4 w-4 mr-2" /> Phản hổi của AI 
                   </h4>
                   <div className="flex gap-2">
                     <Button
@@ -339,11 +339,11 @@ const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                     >
                       {isAIInserted ? (
                         <>
-                          <span className="mr-1">✓</span> Inserted
+                          <span className="mr-1">✓</span> Đã thêm
                         </>
                       ) : (
                         <>
-                          <ArrowRightCircle className="h-4 w-4 mr-1" /> Insert
+                          <ArrowRightCircle className="h-4 w-4 mr-1" /> Thêm 
                         </>
                       )}
                     </Button>
