@@ -85,7 +85,7 @@ export const UserButton = () => {
               asChild
               className="items-center justify-center h-10 font-medium cursor-pointer"
             >
-              <Link to={`/employee/profile/${user._id}`}>Trang cá nhân</Link>
+              <Link to={`/employee/profile`}>Trang cá nhân</Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem

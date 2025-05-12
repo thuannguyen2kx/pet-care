@@ -156,3 +156,53 @@ export const getAvailableEmployeesSchema = z.object({
   timeSlot: z.string().optional(),
   date: z.string().optional(),
 });
+
+
+const timeRangeSchema = z.object({
+  start: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Thời gian phải có định dạng HH:MM"),
+  end: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Thời gian phải có định dạng HH:MM")
+}).refine(data => data.start < data.end, {
+  message: "Thời gian kết thúc phải sau thời gian bắt đầu",
+  path: ["end"]
+});
+
+// Schema cho việc đặt lịch làm việc
+export const setScheduleSchema = z.object({
+  schedules: z.array(
+    z.object({
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ngày phải có định dạng YYYY-MM-DD"),
+      isWorking: z.boolean(),
+      workHours: z.array(timeRangeSchema)
+        .refine(ranges => {
+          // Không cần kiểm tra nếu không làm việc
+          if (ranges.length === 0) return true;
+          
+          // Sắp xếp các khoảng thời gian theo thời gian bắt đầu
+          const sortedRanges = [...ranges].sort((a, b) => a.start.localeCompare(b.start));
+          
+          // Kiểm tra các khoảng thời gian chồng chéo
+          for (let i = 0; i < sortedRanges.length - 1; i++) {
+            if (sortedRanges[i].end > sortedRanges[i + 1].start) {
+              return false;
+            }
+          }
+          return true;
+        }, {
+          message: "Các khoảng thời gian không được chồng chéo nhau"
+        }),
+      note: z.string().optional()
+    })
+  )
+});
+
+export const scheduleIdSchema = z.string().nonempty("ID lịch không được để trống");
+
+
+export const dateSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ngày phải có định dạng YYYY-MM-DD")
+});
+
+export const scheduleRangeSchema = z.object({
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ngày bắt đầu phải có định dạng YYYY-MM-DD"),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ngày kết thúc phải có định dạng YYYY-MM-DD")
+});

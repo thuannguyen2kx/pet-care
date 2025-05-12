@@ -42,6 +42,7 @@ import { specialtyTranslations, StatusUser, StatusUserType, weekdays } from "@/c
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/context/auth-provider";
 import { EMPLOYEE_ROUTES } from "@/routes/common/routePaths";
+import EmployeeScheduleManagement from "./schedule";
 
 export default function EmployeeProfile() {
   const {user} = useAuthContext()
@@ -431,6 +432,7 @@ export default function EmployeeProfile() {
                               </div>
                             </div>
                           </div>
+                          <EmployeeScheduleManagement employeeId={employee._id} />
                         </CardContent>
                       </Card>
                     </div>

@@ -18,6 +18,7 @@ import { dateUtils } from "../utils/date-fns";
 import TimeSlotModel from "../models/time-slot.model";
 import AccountModel from "../models/account.model";
 import { ProviderEnum } from "../enums/account-provider.enum";
+import EmployeeScheduleModel, { EmployeeScheduleDocument } from "../models/employee-schedule.model";
 
 // Get all employees with optional filtering
 export const getAllEmployeesService = async (filters: {
@@ -888,4 +889,447 @@ export const assignAppointmentToEmployeeService = async ({
   }
 
   return { appointment };
+};
+
+// Interface for setting employee schedule for specific dates
+
+/**
+ * Set employee schedule for specific dates
+ */
+interface TimeRange {
+  start: string; // HH:MM format
+  end: string; // HH:MM format
+}
+
+interface ScheduleInput {
+  date: string; // YYYY-MM-DD format
+  isWorking: boolean;
+  workHours: TimeRange[]; // Modified to be an array of time ranges
+  note?: string;
+}
+
+/**
+ * Set employee schedule for specific dates
+ */
+export const setEmployeeScheduleService = async ({
+  employeeId,
+  schedules
+}: {
+  employeeId: string;
+  schedules: ScheduleInput[];
+}) => {
+  // Validate employee exists and is active
+  const employee = await UserModel.findOne({
+    _id: employeeId,
+    role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
+    status: StatusUser.ACTIVE
+  });
+
+  if (!employee) {
+    throw new NotFoundException("Không tìm thấy nhân viên hoặc nhân viên không hoạt động");
+  }
+
+  // Validate time format for all schedules
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  const allTimesValid = schedules.every(schedule => 
+    schedule.workHours.every(range => 
+      timeRegex.test(range.start) && timeRegex.test(range.end)
+    )
+  );
+
+  if (!allTimesValid) {
+    throw new BadRequestException("Định dạng thời gian không hợp lệ (phải là HH:MM)");
+  }
+
+  // Check for time range validity
+  const areTimeRangesValid = schedules.every(schedule => 
+    !schedule.isWorking || // If not working, no validation needed
+    schedule.workHours.every(range => range.start < range.end)
+  );
+
+  if (!areTimeRangesValid) {
+    throw new BadRequestException("Thời gian kết thúc phải sau thời gian bắt đầu");
+  }
+
+  // Check for overlapping time ranges
+  const doTimeRangesOverlap = (ranges: TimeRange[]): boolean => {
+    if (ranges.length <= 1) return false;
+    
+    // Sort ranges by start time
+    const sortedRanges = [...ranges].sort((a, b) => a.start.localeCompare(b.start));
+    
+    // Check for overlaps
+    for (let i = 0; i < sortedRanges.length - 1; i++) {
+      if (sortedRanges[i].end > sortedRanges[i + 1].start) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const hasOverlappingRanges = schedules.some(schedule => 
+    schedule.isWorking && doTimeRangesOverlap(schedule.workHours)
+  );
+
+  if (hasOverlappingRanges) {
+    throw new BadRequestException("Các khoảng thời gian không được chồng chéo nhau");
+  }
+
+  // Process each date's schedule
+  const results = [];
+  for (const schedule of schedules) {
+    const scheduleDate = new Date(schedule.date);
+    
+    // Check for invalid date
+    if (isNaN(scheduleDate.getTime())) {
+      throw new BadRequestException(`Ngày không hợp lệ: ${schedule.date}. Vui lòng sử dụng định dạng YYYY-MM-DD`);
+    }
+
+    // Set time to start of day for consistent date comparison
+    scheduleDate.setHours(0, 0, 0, 0);
+
+    // Check if this date's schedule conflicts with any confirmed appointments
+    if (!schedule.isWorking) {
+      // If marking as not working, check for existing appointments
+      const existingAppointments = await AppointmentModel.find({
+        employeeId,
+        scheduledDate: {
+          $gte: scheduleDate,
+          $lt: new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000) // Next day
+        },
+        status: { $in: [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING] }
+      });
+
+      if (existingAppointments.length > 0) {
+        throw new BadRequestException(
+          `Không thể đánh dấu ngày ${schedule.date} là không làm việc vì đã có ${existingAppointments.length} cuộc hẹn được xác nhận`
+        );
+      }
+    } else if (schedule.workHours.length > 0) {
+      // If working, check if any appointments fall outside of any work hours
+      const appointmentsForDay = await AppointmentModel.find({
+        employeeId,
+        scheduledDate: {
+          $gte: scheduleDate,
+          $lt: new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000)
+        },
+        status: { $in: [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING] }
+      });
+
+      // Check each appointment against all time ranges
+      const conflictingAppointments = appointmentsForDay.filter(appointment => {
+        const { start: apptStart, end: apptEnd } = appointment.scheduledTimeSlot;
+        
+        // Appointment conflicts if it falls outside ALL work hour ranges
+        return !schedule.workHours.some(range => 
+          apptStart >= range.start && apptEnd <= range.end
+        );
+      });
+
+      if (conflictingAppointments.length > 0) {
+        throw new BadRequestException(
+          `Không thể thay đổi giờ làm việc cho ngày ${schedule.date} vì có ${conflictingAppointments.length} cuộc hẹn nằm ngoài khung giờ mới`
+        );
+      }
+    }
+
+    // Update or create schedule for this date
+    const updatedSchedule = await EmployeeScheduleModel.findOneAndUpdate(
+      { employeeId, date: scheduleDate },
+      {
+        isWorking: schedule.isWorking,
+        workHours: schedule.isWorking ? schedule.workHours : [], // Empty array if not working
+        note: schedule.note
+      },
+      { new: true, upsert: true }
+    );
+
+    results.push(updatedSchedule);
+  }
+
+  return { schedules: results };
+};
+/**
+ * Get employee schedule for a date range
+ */
+export const getEmployeeScheduleRangeService = async ({
+  employeeId,
+  startDate,
+  endDate
+}: {
+  employeeId: string;
+  startDate: string;
+  endDate: string;
+}) => {
+  // Validate employee exists
+  const employee = await UserModel.findOne({
+    _id: employeeId,
+    role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] }
+  });
+
+  if (!employee) {
+    throw new NotFoundException("Không tìm thấy nhân viên");
+  }
+
+  // Parse dates
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  // Validate dates
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new BadRequestException("Ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD");
+  }
+
+  // Set time to start/end of day for consistent date comparison
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  // Get all schedule entries in the date range
+  const schedules = await EmployeeScheduleModel.find({
+    employeeId,
+    date: { $gte: start, $lte: end }
+  }).sort({ date: 1 });
+
+  // Get all appointments in the date range
+  const appointments = await AppointmentModel.find({
+    employeeId,
+    scheduledDate: { $gte: start, $lte: end },
+    status: { $nin: [AppointmentStatus.CANCELLED] }
+  })
+    .populate("petId", "name species breed profilePicture")
+    .populate("customerId", "fullName email phoneNumber")
+    .populate({
+      path: "serviceId",
+      select: "name description price duration"
+    })
+    .sort({ scheduledDate: 1, "scheduledTimeSlot.start": 1 });
+
+  // Get default work hours from employee profile if available
+  const defaultWorkHours = employee.employeeInfo?.schedule?.workHours || {
+    start: "09:00",
+    end: "17:00"
+  };
+
+  // Create a map of date to schedule for easy lookup
+  const scheduleMap = new Map();
+  schedules.forEach(schedule => {
+    const dateStr = schedule.date.toISOString().split('T')[0];
+    scheduleMap.set(dateStr, schedule);
+  });
+
+  // Generate a complete schedule for each day in the range
+  const completeSchedule = [];
+  const currentDate = new Date(start);
+  
+  while (currentDate <= end) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    const existingSchedule = scheduleMap.get(dateStr);
+    
+    // If we have a custom schedule for this date, use it
+    // Otherwise, create a default entry based on employee's settings
+    if (existingSchedule) {
+      completeSchedule.push(existingSchedule);
+    } else {
+      completeSchedule.push({
+        date: new Date(currentDate),
+        employeeId,
+        isWorking: true, // Default to working
+        workHours: defaultWorkHours,
+        isDefault: true // Flag to indicate this is a default entry, not a saved one
+      });
+    }
+    
+    // Move to the next day
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return {
+    schedules: completeSchedule,
+    appointments
+  };
+};
+
+/**
+ * Delete a specific schedule entry
+ */
+export const deleteEmployeeScheduleService = async ({
+  employeeId,
+  scheduleId
+}: {
+  employeeId: string;
+  scheduleId: string;
+}) => {
+  const schedule = await EmployeeScheduleModel.findOne({
+    _id: scheduleId,
+    employeeId
+  });
+
+  if (!schedule) {
+    throw new NotFoundException("Không tìm thấy lịch làm việc");
+  }
+
+  // Check if there are appointments on this date
+  const scheduleDate = new Date(schedule.date);
+  const nextDay = new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000);
+  
+  const existingAppointments = await AppointmentModel.find({
+    employeeId,
+    scheduledDate: { $gte: scheduleDate, $lt: nextDay },
+    status: { $in: [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING] }
+  });
+
+  if (existingAppointments.length > 0) {
+    throw new BadRequestException(
+      `Không thể xóa lịch làm việc vì đã có ${existingAppointments.length} cuộc hẹn được xác nhận cho ngày này`
+    );
+  }
+
+  // Sử dụng deleteOne thay vì remove
+  await EmployeeScheduleModel.deleteOne({ _id: scheduleId });
+  return { success: true, message: "Đã xóa lịch làm việc thành công" };
+};
+
+/**
+ * Get employee availability for a specific date
+ * This can be used to show available time slots for customers to book
+ */
+/**
+ * Get employee availability for a specific date
+ * This can be used to show available time slots for customers to book
+ */
+export const getEmployeeAvailabilityForDateService = async ({
+  employeeId,
+  date
+}: {
+  employeeId: string;
+  date: string;
+}) => {
+  // Validate employee exists and is active
+  const employee = await UserModel.findOne({
+    _id: employeeId,
+    role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
+    status: StatusUser.ACTIVE
+  });
+
+  if (!employee) {
+    throw new NotFoundException("Không tìm thấy nhân viên hoặc nhân viên không hoạt động");
+  }
+
+  // Parse date
+  const scheduleDate = new Date(date);
+  if (isNaN(scheduleDate.getTime())) {
+    throw new BadRequestException("Ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD");
+  }
+  
+  // Set time to start of day for consistent date comparison
+  scheduleDate.setHours(0, 0, 0, 0);
+  const nextDay = new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000);
+
+  // Get the schedule for this specific date
+  const schedule = await EmployeeScheduleModel.findOne({
+    employeeId,
+    date: scheduleDate
+  });
+
+  // Default work hours if no specific schedule is found
+  let workHours = employee.employeeInfo?.schedule?.workHours 
+    ? [{ 
+        start: employee.employeeInfo.schedule.workHours.start || "09:00", 
+        end: employee.employeeInfo.schedule.workHours.end || "17:00" 
+      }]
+    : [{ start: "09:00", end: "17:00" }];
+  
+  let isWorking = true; // Default to working
+
+  // If a specific schedule exists for this date, use it
+  if (schedule) {
+    isWorking = schedule.isWorking;
+    workHours = schedule.workHours;
+  }
+
+  // If not working on this day, return empty availability
+  if (!isWorking || workHours.length === 0) {
+    return {
+      date: scheduleDate,
+      isWorking: false,
+      availableTimeSlots: []
+    };
+  }
+
+  // Get all appointments for this date
+  const appointments = await AppointmentModel.find({
+    employeeId,
+    scheduledDate: { $gte: scheduleDate, $lt: nextDay },
+    status: { $nin: [AppointmentStatus.CANCELLED] }
+  }).select("scheduledTimeSlot");
+
+  // Generate all possible time slots during work hours (30-min slots)
+  const allTimeSlots = [];
+  
+  // Helper to format time as HH:MM
+  const formatTime = (hour: number, minute: number) => 
+    `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+  
+  // Process each work hour range
+  for (const range of workHours) {
+    const [startHour, startMinute] = range.start.split(":").map(Number);
+    const [endHour, endMinute] = range.end.split(":").map(Number);
+    
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    
+    // Generate all possible time slots for this range
+    while (
+      currentHour < endHour || 
+      (currentHour === endHour && currentMinute < endMinute)
+    ) {
+      const slotStart = formatTime(currentHour, currentMinute);
+      
+      // Move 30 minutes forward
+      currentMinute += 30;
+      if (currentMinute >= 60) {
+        currentHour++;
+        currentMinute -= 60;
+      }
+      
+      // Skip if we've gone past the end time
+      if (
+        currentHour > endHour || 
+        (currentHour === endHour && currentMinute > endMinute)
+      ) {
+        break;
+      }
+      
+      const slotEnd = formatTime(currentHour, currentMinute);
+      
+      // Check if this slot conflicts with any appointments
+      const isAvailable = !appointments.some(appointment => {
+        const apptStart = appointment.scheduledTimeSlot.start;
+        const apptEnd = appointment.scheduledTimeSlot.end;
+        
+        // Check for overlap
+        return (
+          (slotStart >= apptStart && slotStart < apptEnd) || // Slot start is during appointment
+          (slotEnd > apptStart && slotEnd <= apptEnd) || // Slot end is during appointment
+          (slotStart <= apptStart && slotEnd >= apptEnd) // Slot completely contains appointment
+        );
+      });
+      
+      allTimeSlots.push({
+        start: slotStart,
+        end: slotEnd,
+        isAvailable
+      });
+    }
+  }
+  
+  // Sort all time slots by start time
+  allTimeSlots.sort((a, b) => a.start.localeCompare(b.start));
+  
+  return {
+    date: scheduleDate,
+    isWorking,
+    workHours,
+    availableTimeSlots: allTimeSlots
+  };
 };

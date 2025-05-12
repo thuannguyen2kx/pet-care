@@ -12,6 +12,10 @@ import {
   updateEmployeeAvailabilityController,
   assignAppointmentToEmployeeController,
   getAvailableEmployeesController,
+  getEmployeeScheduleRangeController,
+  setEmployeeScheduleController,
+  deleteEmployeeScheduleController,
+  getEmployeeAvailabilityForDateController,
 } from "../controllers/employee.controller";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
@@ -72,7 +76,7 @@ employeeRoutes.put(
 // Get employee performance metrics
 employeeRoutes.get(
   "/:id/performance",
-  authorizeRoles([Roles.ADMIN]),
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   getEmployeePerformanceController
 );
 
@@ -95,6 +99,34 @@ employeeRoutes.get(
   "/:id/schedule",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   getEmployeeScheduleController
+);
+
+// Get employee schedule range
+employeeRoutes.get(
+  "/:id/schedule-range",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getEmployeeScheduleRangeController
+);
+
+// Set employee daily schedule
+employeeRoutes.post(
+  "/:id/schedule",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  setEmployeeScheduleController
+);
+
+// Delete specific schedule entry
+employeeRoutes.delete(
+  "/:id/schedule/:scheduleId",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  deleteEmployeeScheduleController
+);
+
+// Get employee availability for a specific date (can be accessed by customers)
+employeeRoutes.get(
+  "/:id/availability",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE, Roles.CUSTOMER]),
+  getEmployeeAvailabilityForDateController
 );
 
 export default employeeRoutes;
