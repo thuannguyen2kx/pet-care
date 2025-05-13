@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
@@ -371,9 +371,9 @@ const getPaymentStatusColor = (status: string) => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">
+                          <Link to={`/manager/pets/${appointment?.petId?._id}`} className="font-medium hover:underline hover:text-primary">
                             {appointment?.petId?.name}
-                          </div>
+                          </Link>
                           <div className="text-sm text-gray-500">
                             {appointment?.petId?.species} • {appointment?.petId?.breed}
                           </div>

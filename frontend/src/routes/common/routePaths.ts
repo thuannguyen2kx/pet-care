@@ -48,6 +48,8 @@ export const MANAGER_ROUTES = {
   SERVICES: "/manager/services",
   SERVICE_CREATION: "/manager/services/create",
   SERVICE_EDIT: "/manager/services/edit/:serviceId",
+
+  PET_DETAILS: "/manager/pets/:petId",
 };
 export const BASE_ROUTES = {
   LANDING: "/",

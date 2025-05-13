@@ -41,8 +41,9 @@ export const getPetByIdController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
+    const role = req.user?.role;
     
-    const { pet } = await getPetByIdService({ petId, userId });
+    const { pet } = await getPetByIdService({ petId, userId, role });
     
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy thông tin thú cưng thành công",
@@ -227,6 +228,7 @@ export const addVaccinationController = asyncHandler(
     const { pet } = await addVaccinationService({
       petId,
       userId,
+      role: req.user?.role,
       vaccinationData
     });
     
@@ -258,6 +260,7 @@ export const addMedicalRecordController = asyncHandler(
     const { pet } = await addMedicalRecordService({
       petId,
       userId,
+      role: req.user?.role,
       medicalData
     });
     

@@ -40,6 +40,7 @@ import PostManagerPage from "@/pages/manager/post";
 import PostDetailsManagerPage from "@/pages/manager/post-details";
 import EmployeeSchedulePage from "@/pages/employee/appointment";
 import EmployeeProfile from "@/features/employee/components/employee-profile";
+import PetDetailPage from "@/pages/manager/pet-detail";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -136,6 +137,7 @@ export const managerRoutesPaths = [
   { path: MANAGER_ROUTES.SERVICES, element: <ServicesPage /> },
   { path: MANAGER_ROUTES.SERVICE_CREATION, element: <ServiceCreationPage /> },
   { path: MANAGER_ROUTES.SERVICE_EDIT, element: <ServiceEditionPage /> },
+  {path: MANAGER_ROUTES.PET_DETAILS, element: <PetDetailPage />},
 ];
 export const baseRoutesPaths = [
   { path: BASE_ROUTES.LANDING, element: <Landing /> },

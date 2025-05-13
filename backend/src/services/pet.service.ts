@@ -1,7 +1,12 @@
 import { Types } from "mongoose";
 import PetModel, { IPet } from "../models/pet.model";
-import { BadRequestException, NotFoundException, UnauthorizedException } from "../utils/app-error";
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from "../utils/app-error";
 import { deleteFile } from "../utils/file-uploade";
+import { Roles, RoleType } from "../enums/role.enum";
 
 /**
  * Service để lấy danh sách thú cưng của người dùng
@@ -14,16 +19,24 @@ export const getUserPetsService = async (userId: string) => {
 /**
  * Service để lấy thông tin thú cưng theo id
  */
-export const getPetByIdService = async ({ petId, userId }: { petId: string; userId: string }) => {
+export const getPetByIdService = async ({
+  petId,
+  userId,
+  role
+}: {
+  petId: string;
+  userId: string;
+  role: RoleType | undefined;
+}) => {
   const pet = await PetModel.findById(petId);
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
-  } 
+  }
   // Kiểm tra quyền truy cập
-  if (!pet.ownerId.equals(userId)) {
-  throw new UnauthorizedException("Không có quyền truy cập thú cưng này");
+ if (!(pet.ownerId.equals(userId) || role === Roles.ADMIN || role === Roles.EMPLOYEE)) {
+  throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
 }
-  
+
   return { pet };
 };
 
@@ -33,7 +46,7 @@ export const getPetByIdService = async ({ petId, userId }: { petId: string; user
 export const createPetService = async ({
   userId,
   petData,
-  file
+  file,
 }: {
   userId: string;
   petData: {
@@ -56,18 +69,18 @@ export const createPetService = async ({
     habits: Array.isArray(petData.habits) ? petData.habits : [],
     allergies: Array.isArray(petData.allergies) ? petData.allergies : [],
   };
-  
+
   // Nếu có file ảnh, thêm thông tin ảnh
   if (file) {
     petInfo.profilePicture = {
       url: file.path,
-      publicId: file.filename
+      publicId: file.filename,
     };
   }
-  
+
   // Tạo thú cưng mới
   const pet = await PetModel.create(petInfo);
-  
+
   return { pet };
 };
 
@@ -84,24 +97,30 @@ export const updatePetService = async ({
   updateData: Partial<IPet>;
 }) => {
   const pet = await PetModel.findById(petId);
-  
+
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
   }
-  
+
   // Kiểm tra quyền truy cập
   if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
-  
+
   // Cập nhật thông tin
   Object.keys(updateData).forEach((key) => {
-    if (key !== 'ownerId' && key !== '_id' && key !== 'createdAt' && key !== 'updatedAt' && key !== 'profilePicture') {
+    if (
+      key !== "ownerId" &&
+      key !== "_id" &&
+      key !== "createdAt" &&
+      key !== "updatedAt" &&
+      key !== "profilePicture"
+    ) {
       // @ts-ignore - Động với các thuộc tính
       pet[key] = updateData[key];
     }
   });
-  
+
   const updatedPet = await pet.save();
   return { pet: updatedPet };
 };
@@ -109,18 +128,24 @@ export const updatePetService = async ({
 /**
  * Service để xóa thú cưng
  */
-export const deletePetService = async ({ petId, userId }: { petId: string; userId: string }) => {
+export const deletePetService = async ({
+  petId,
+  userId,
+}: {
+  petId: string;
+  userId: string;
+}) => {
   const pet = await PetModel.findById(petId);
-  
+
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
   }
-  
+
   // Kiểm tra quyền truy cập
   if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền xóa thú cưng này");
   }
-  
+
   // Xóa ảnh đại diện trên cloud nếu có
   if (pet.profilePicture && pet.profilePicture.publicId) {
     try {
@@ -129,7 +154,7 @@ export const deletePetService = async ({ petId, userId }: { petId: string; userI
       console.error("Lỗi khi xóa ảnh đại diện:", error);
     }
   }
-  
+
   await pet.deleteOne();
   return { message: "Đã xóa thú cưng thành công" };
 };
@@ -147,20 +172,20 @@ export const updatePetPictureService = async ({
   file?: Express.Multer.File;
 }) => {
   const pet = await PetModel.findById(petId);
-  
+
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
   }
-  
+
   // Kiểm tra quyền truy cập
   if (!pet.ownerId.equals(userId)) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
-  
+
   if (!file) {
     throw new BadRequestException("Không có file được tải lên");
   }
-  
+
   // Xóa ảnh cũ nếu có
   if (pet.profilePicture && pet.profilePicture.publicId) {
     try {
@@ -169,13 +194,13 @@ export const updatePetPictureService = async ({
       console.error("Lỗi khi xóa ảnh đại diện cũ:", error);
     }
   }
-  
+
   // Cập nhật ảnh mới
   pet.profilePicture = {
     url: file.path,
     publicId: file.filename,
   };
-  
+
   const updatedPet = await pet.save();
   return { pet: updatedPet };
 };
@@ -186,10 +211,12 @@ export const updatePetPictureService = async ({
 export const addVaccinationService = async ({
   petId,
   userId,
+  role,
   vaccinationData,
 }: {
   petId: string;
   userId: string;
+  role: RoleType | undefined;
   vaccinationData: {
     name: string;
     date: Date;
@@ -198,23 +225,29 @@ export const addVaccinationService = async ({
   };
 }) => {
   const pet = await PetModel.findById(petId);
-  
+
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
   }
-  
+
   // Kiểm tra quyền truy cập
-  if (!pet.ownerId.equals(userId)) {
+  if (
+    !(
+      pet.ownerId.equals(userId) ||
+      role === Roles.ADMIN ||
+      role === Roles.EMPLOYEE
+    )
+  ) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
-  
+
   if (!pet.vaccinations) {
     pet.vaccinations = [];
   }
-  
+
   pet.vaccinations.push(vaccinationData);
   const updatedPet = await pet.save();
-  
+
   return { pet: updatedPet };
 };
 
@@ -224,10 +257,12 @@ export const addVaccinationService = async ({
 export const addMedicalRecordService = async ({
   petId,
   userId,
+  role,
   medicalData,
 }: {
   petId: string;
   userId: string;
+  role: RoleType | undefined;
   medicalData: {
     condition: string;
     diagnosis: Date;
@@ -236,22 +271,27 @@ export const addMedicalRecordService = async ({
   };
 }) => {
   const pet = await PetModel.findById(petId);
-  
+
   if (!pet) {
     throw new NotFoundException("Không tìm thấy thú cưng");
   }
-  
-  // Kiểm tra quyền truy cập
-  if (!pet.ownerId.equals(userId)) {
+
+  if (
+    !(
+      pet.ownerId.equals(userId) ||
+      role === Roles.ADMIN ||
+      role === Roles.EMPLOYEE
+    )
+  ) {
     throw new UnauthorizedException("Không có quyền cập nhật thú cưng này");
   }
-  
+
   if (!pet.medicalHistory) {
     pet.medicalHistory = [];
   }
-  
+
   pet.medicalHistory.push(medicalData);
   const updatedPet = await pet.save();
-  
+
   return { pet: updatedPet };
 };

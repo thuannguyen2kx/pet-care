@@ -252,7 +252,7 @@ export const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
           <div className="flex items-start space-x-3">
             <PawPrint className="h-5 w-5 text-gray-400 mt-0.5" />
             <div>
-              <div className="font-medium">{appointment.petId?.name}</div>
+              <Link to={`/manager/pets/${appointment.petId?._id}`} className="font-medium hover:underline hover:text-primary">{appointment.petId?.name}</Link>
               <div className="text-gray-500">
                 {appointment.petId?.species} • {appointment.petId?.breed}
               </div>

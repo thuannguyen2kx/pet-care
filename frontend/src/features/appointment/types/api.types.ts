@@ -125,6 +125,7 @@ export type AdminAppointmentType = {
     phoneNumber: string;
   };
   petId: {
+    _id: string;
     name: string;
     species: string;
     breed: string;
