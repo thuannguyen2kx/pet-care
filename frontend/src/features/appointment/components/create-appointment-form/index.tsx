@@ -1,444 +1,444 @@
-"use client";
+// "use client";
 
-import type React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { Form } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { useGetService } from "@/features/service/hooks/queries/get-service";
-import {
-  formSchema,
-  type FormValues,
-  STEPS,
-} from "../../utils/appointment-form-config";
-import type { TimeSlotType } from "../../types/api.types";
-import { useCreateAppointment } from "../../hooks/mutations/create-appointment";
-import {
-  useProcessPayment,
-  useCreateCheckoutSession,
-} from "@/features/payment/hooks/api";
-import {
-  DateSelectionStep,
-  EmployeeSelectionStep,
-  NotesStep,
-  PaymentStep,
-  PetSelectionStep,
-  ReviewStep,
-  StepIndicator,
-  TimeSelectionStep,
-} from "./form-steps";
-import { useUserPets } from "@/features/pet/hooks/queries/get-pets";
-import { ServiceAppointmentType } from "@/constants";
-import { useAuthContext } from "@/context/auth-provider";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "sonner";
+// import type React from "react";
+// import { useState, useEffect, useMemo } from "react";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import { useForm } from "react-hook-form";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { format } from "date-fns";
+// import { Form } from "@/components/ui/form";
+// import {
+//   Card,
+//   CardContent,
+//   CardDescription,
+//   CardFooter,
+//   CardHeader,
+//   CardTitle,
+// } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { ArrowLeft, Loader2 } from "lucide-react";
+// import { useGetService } from "@/features/service/hooks/queries/get-service";
+// import {
+//   formSchema,
+//   type FormValues,
+//   STEPS,
+// } from "../../utils/appointment-form-config";
+// import type { TimeSlotType } from "../../types/api.types";
+// import { useCreateAppointment } from "../../hooks/mutations/create-appointment";
+// import {
+//   useProcessPayment,
+//   useCreateCheckoutSession,
+// } from "@/features/payment/hooks/api";
+// import {
+//   DateSelectionStep,
+//   EmployeeSelectionStep,
+//   NotesStep,
+//   PaymentStep,
+//   PetSelectionStep,
+//   ReviewStep,
+//   StepIndicator,
+//   TimeSelectionStep,
+// } from "./form-steps";
+// import { useUserPets } from "@/features/pet/hooks/queries/get-pets";
+// import { ServiceAppointmentType } from "@/constants";
+// import { useAuthContext } from "@/context/auth-provider";
+// import { Progress } from "@/components/ui/progress";
+// import { toast } from "sonner";
 
-export const AppointmentFormStep: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useAuthContext();
-  const userId = user?._id || "";
+// export const AppointmentFormStep: React.FC = () => {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   const { user } = useAuthContext();
+//   const userId = user?._id || "";
 
-  const [currentStep, setCurrentStep] = useState(STEPS.PET);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [isPetCompatible, setIsPetCompatible] = useState(true);
-  const [incompatibilityReason, setIncompatibilityReason] = useState("");
-  const [selectedTimeSlotData, setSelectedTimeSlotData] =
-    useState<TimeSlotType | null>(null);
-  const [createdAppointmentId, setCreatedAppointmentId] = useState<
-    string | null
-  >(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [currentStep, setCurrentStep] = useState(STEPS.PET);
+//   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+//   const [isPetCompatible, setIsPetCompatible] = useState(true);
+//   const [incompatibilityReason, setIncompatibilityReason] = useState("");
+//   const [selectedTimeSlotData, setSelectedTimeSlotData] =
+//     useState<TimeSlotType | null>(null);
+//   const [createdAppointmentId, setCreatedAppointmentId] = useState<
+//     string | null
+//   >(null);
+//   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get service data from location state
-  const { serviceId, serviceType = ServiceAppointmentType.SINGLE } =
-    location.state || {};
+//   // Get service data from location state
+//   const { serviceId, serviceType = ServiceAppointmentType.SINGLE } =
+//     location.state || {};
 
-  // Redirect if no service is selected
-  useEffect(() => {
-    if (!serviceId) {
-      toast.error("Không tìm thấy dịch vụ", {
-        description: "Vui lòng chọn dịch vụ phù hợp",
-      });
-      navigate("/services", { replace: true });
-    }
-  }, [serviceId, navigate]);
+//   // Redirect if no service is selected
+//   useEffect(() => {
+//     if (!serviceId) {
+//       toast.error("Không tìm thấy dịch vụ", {
+//         description: "Vui lòng chọn dịch vụ phù hợp",
+//       });
+//       navigate("/services", { replace: true });
+//     }
+//   }, [serviceId, navigate]);
 
-  // Form setup
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      petId: "",
-      employeeId: "",
-      notes: "",
-      paymentMethod: "card",
-    },
-  });
+//   // Form setup
+//   const form = useForm<FormValues>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: {
+//       petId: "",
+//       employeeId: "",
+//       notes: "",
+//       paymentMethod: "card",
+//     },
+//   });
 
-  // Fetch queries
-  const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId);
-  const { data: serviceData, isLoading: isServiceLoading } =
-    useGetService(serviceId);
-  const isLoading = isPetsLoading || isServiceLoading;
+//   // Fetch queries
+//   const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId);
+//   const { data: serviceData, isLoading: isServiceLoading } =
+//     useGetService(serviceId);
+//   const isLoading = isPetsLoading || isServiceLoading;
 
-  // Mutations
-  const createAppointmentMutation = useCreateAppointment();
-  const processPaymentMutation = useProcessPayment();
-  const createCheckoutSessionMutation = useCreateCheckoutSession();
+//   // Mutations
+//   const createAppointmentMutation = useCreateAppointment();
+//   const processPaymentMutation = useProcessPayment();
+//   const createCheckoutSessionMutation = useCreateCheckoutSession();
 
-  // Reset time slot when date changes
-  useEffect(() => {
-    if (form.getValues("timeSlot")?.start) {
-      form.setValue(
-        "timeSlot",
-        { start: "", end: "", originalSlotIndexes: [] },
-        { shouldValidate: true }
-      );
-      setSelectedTimeSlotData(null);
-    }
-  }, [selectedDate, form]);
+//   // Reset time slot when date changes
+//   useEffect(() => {
+//     if (form.getValues("timeSlot")?.start) {
+//       form.setValue(
+//         "timeSlot",
+//         { start: "", end: "", originalSlotIndexes: [] },
+//         { shouldValidate: true }
+//       );
+//       setSelectedTimeSlotData(null);
+//     }
+//   }, [selectedDate, form]);
 
-  // Reset employee when time slot changes
-  useEffect(() => {
-    if (form.getValues("employeeId")) {
-      form.setValue("employeeId", "", { shouldValidate: false });
-    }
-  }, [form.watch("timeSlot"), form]);
+//   // Reset employee when time slot changes
+//   useEffect(() => {
+//     if (form.getValues("employeeId")) {
+//       form.setValue("employeeId", "", { shouldValidate: false });
+//     }
+//   }, [form.watch("timeSlot"), form]);
 
-  // Update scheduledDate when selectedDate changes
-  useEffect(() => {
-    if (selectedDate) {
-      form.setValue("scheduledDate", selectedDate, { shouldValidate: true });
-    }
-  }, [selectedDate, form]);
+//   // Update scheduledDate when selectedDate changes
+//   useEffect(() => {
+//     if (selectedDate) {
+//       form.setValue("scheduledDate", selectedDate, { shouldValidate: true });
+//     }
+//   }, [selectedDate, form]);
 
-  // Calculate progress percentage
-  const progressPercentage = useMemo(() => {
-    const totalSteps = Object.keys(STEPS).length / 2;
-    return ((currentStep + 1) / totalSteps) * 100;
-  }, [currentStep]);
+//   // Calculate progress percentage
+//   const progressPercentage = useMemo(() => {
+//     const totalSteps = Object.keys(STEPS).length / 2;
+//     return ((currentStep + 1) / totalSteps) * 100;
+//   }, [currentStep]);
 
-  // Form submission
-  const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
+//   // Form submission
+//   const onSubmit = async (data: FormValues) => {
+//     setIsSubmitting(true);
 
-    try {
-      // First create the appointment
-      if (!createdAppointmentId) {
-        createAppointmentMutation.mutate(
-          {
-            petId: data.petId,
-            serviceType,
-            serviceId,
-            scheduledDate: format(data.scheduledDate, "yyyy-MM-dd"),
-            scheduledTimeSlot: data.timeSlot,
-            employeeId: data.employeeId,
-            notes: data.notes,
-          },
-          {
-            onSuccess: (response) => {
-              const newAppointmentId = response.appointment._id;
-              setCreatedAppointmentId(newAppointmentId);
+//     try {
+//       // First create the appointment
+//       if (!createdAppointmentId) {
+//         createAppointmentMutation.mutate(
+//           {
+//             petId: data.petId,
+//             serviceType,
+//             serviceId,
+//             scheduledDate: format(data.scheduledDate, "yyyy-MM-dd"),
+//             scheduledTimeSlot: data.timeSlot,
+//             employeeId: data.employeeId,
+//             notes: data.notes,
+//           },
+//           {
+//             onSuccess: (response) => {
+//               const newAppointmentId = response.appointment._id;
+//               setCreatedAppointmentId(newAppointmentId);
 
-              // Process payment based on selected method
-              processPayment(newAppointmentId, data);
-            },
-            onError: (error) => {
-              toast.error(
-                error.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
-              );
-              setIsSubmitting(false);
-            },
-          }
-        );
-      } else {
-        // If appointment already created, just process payment
-        processPayment(createdAppointmentId, data);
-      }
-    } catch {
-      toast.error("Đã xảy ra lỗi không mong muốn, vui lòng thử lại sau");
-      setIsSubmitting(false);
-    }
-  };
+//               // Process payment based on selected method
+//               processPayment(newAppointmentId, data);
+//             },
+//             onError: (error) => {
+//               toast.error(
+//                 error.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
+//               );
+//               setIsSubmitting(false);
+//             },
+//           }
+//         );
+//       } else {
+//         // If appointment already created, just process payment
+//         processPayment(createdAppointmentId, data);
+//       }
+//     } catch {
+//       toast.error("Đã xảy ra lỗi không mong muốn, vui lòng thử lại sau");
+//       setIsSubmitting(false);
+//     }
+//   };
 
-  const processPayment = (appointmentId: string, data: FormValues) => {
-    const paymentMethod = data.paymentMethod;
+//   const processPayment = (appointmentId: string, data: FormValues) => {
+//     const paymentMethod = data.paymentMethod;
 
-    if (paymentMethod === "card") {
-      // For card payments, redirect to Stripe checkout
-      createCheckoutSessionMutation.mutate(appointmentId, {
-        onError: () => {
-          setIsSubmitting(false);
-        },
-      });
-    } else {
-      // For cash or bank transfer, use the regular payment endpoint
-      processPaymentMutation.mutate(
-        {
-          appointmentId,
-          paymentMethod,
-        },
-        {
-          onSuccess: () => {
-            navigate("/appointments", {
-              state: { paymentSuccess: true, appointmentId },
-            });
-          },
-          onError: () => {
-            setIsSubmitting(false);
-          },
-        }
-      );
-    }
-  };
+//     if (paymentMethod === "card") {
+//       // For card payments, redirect to Stripe checkout
+//       createCheckoutSessionMutation.mutate(appointmentId, {
+//         onError: () => {
+//           setIsSubmitting(false);
+//         },
+//       });
+//     } else {
+//       // For cash or bank transfer, use the regular payment endpoint
+//       processPaymentMutation.mutate(
+//         {
+//           appointmentId,
+//           paymentMethod,
+//         },
+//         {
+//           onSuccess: () => {
+//             navigate("/appointments", {
+//               state: { paymentSuccess: true, appointmentId },
+//             });
+//           },
+//           onError: () => {
+//             setIsSubmitting(false);
+//           },
+//         }
+//       );
+//     }
+//   };
 
-  // Handle back button
-  const handleBack = () => {
-    if (currentStep === STEPS.PET) {
-      navigate(-1);
-    } else {
-      setCurrentStep((prev) => prev - 1);
-    }
-  };
+//   // Handle back button
+//   const handleBack = () => {
+//     if (currentStep === STEPS.PET) {
+//       navigate(-1);
+//     } else {
+//       setCurrentStep((prev) => prev - 1);
+//     }
+//   };
 
-  // Handle continue button
-  const handleContinue = async () => {
-    let canContinue = false;
+//   // Handle continue button
+//   const handleContinue = async () => {
+//     let canContinue = false;
 
-    if (currentStep === STEPS.PET) {
-      const petValid = await form.trigger("petId");
-      if (petValid && isPetCompatible) canContinue = true;
-    } else if (currentStep === STEPS.DATE) {
-      const dateValid = await form.trigger("scheduledDate");
-      if (dateValid) canContinue = true;
-    } else if (currentStep === STEPS.TIME) {
-      const timeValid = await form.trigger("timeSlot");
-      if (timeValid) canContinue = true;
-    } else if (currentStep === STEPS.EMPLOYEE) {
-      // Employee selection is optional
-      canContinue = true;
-    } else if (currentStep === STEPS.NOTES) {
-      // Notes are optional, can always continue
-      canContinue = true;
-    } else if (currentStep === STEPS.PAYMENT) {
-      const paymentMethodValid = await form.trigger("paymentMethod");
-      if (paymentMethodValid) canContinue = true;
-    }
+//     if (currentStep === STEPS.PET) {
+//       const petValid = await form.trigger("petId");
+//       if (petValid && isPetCompatible) canContinue = true;
+//     } else if (currentStep === STEPS.DATE) {
+//       const dateValid = await form.trigger("scheduledDate");
+//       if (dateValid) canContinue = true;
+//     } else if (currentStep === STEPS.TIME) {
+//       const timeValid = await form.trigger("timeSlot");
+//       if (timeValid) canContinue = true;
+//     } else if (currentStep === STEPS.EMPLOYEE) {
+//       // Employee selection is optional
+//       canContinue = true;
+//     } else if (currentStep === STEPS.NOTES) {
+//       // Notes are optional, can always continue
+//       canContinue = true;
+//     } else if (currentStep === STEPS.PAYMENT) {
+//       const paymentMethodValid = await form.trigger("paymentMethod");
+//       if (paymentMethodValid) canContinue = true;
+//     }
 
-    if (canContinue) {
-      setCurrentStep((prev) => prev + 1);
-      // Scroll to top when changing steps
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+//     if (canContinue) {
+//       setCurrentStep((prev) => prev + 1);
+//       // Scroll to top when changing steps
+//       window.scrollTo({ top: 0, behavior: "smooth" });
+//     }
+//   };
 
-  // Handle submit
-  const handleSubmit = form.handleSubmit(onSubmit);
+//   // Handle submit
+//   const handleSubmit = form.handleSubmit(onSubmit);
 
-  // Render step content
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case STEPS.PET:
-        return (
-          <PetSelectionStep
-            form={form}
-            service={serviceData?.service}
-            pets={petsData?.pets || []}
-            isLoading={isLoading}
-            isPetCompatible={isPetCompatible}
-            incompatibilityReason={incompatibilityReason}
-            setIsPetCompatible={setIsPetCompatible}
-            setIncompatibilityReason={setIncompatibilityReason}
-          />
-        );
-      case STEPS.DATE:
-        return (
-          <DateSelectionStep form={form} setSelectedDate={setSelectedDate} />
-        );
-      case STEPS.TIME:
-        return (
-          <TimeSelectionStep
-            form={form}
-            selectedDate={selectedDate}
-            serviceId={serviceId}
-            serviceType={serviceType}
-            service={serviceData?.service}
-            setSelectedTimeSlotData={setSelectedTimeSlotData}
-          />
-        );
-      case STEPS.EMPLOYEE:
-        return (
-          <EmployeeSelectionStep
-            form={form}
-            serviceId={serviceId}
-            serviceType={serviceType}
-            selectedDate={selectedDate}
-            selectedTimeSlotData={selectedTimeSlotData}
-          />
-        );
-      case STEPS.NOTES:
-        return <NotesStep form={form} />;
-      case STEPS.PAYMENT:
-        return (
-          <PaymentStep
-            form={form}
-            servicePrice={serviceData?.service?.price || 0}
-            serviceName={serviceData?.service?.name || ""}
-          />
-        );
-      case STEPS.REVIEW:
-        return (
-          <ReviewStep
-            serviceType={serviceType}
-            form={form}
-            petsData={petsData}
-            service={serviceData?.service}
-            selectedDate={selectedDate}
-            paymentMethod={form.watch("paymentMethod")}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+//   // Render step content
+//   const renderStepContent = () => {
+//     switch (currentStep) {
+//       case STEPS.PET:
+//         return (
+//           <PetSelectionStep
+//             form={form}
+//             service={serviceData?.service}
+//             pets={petsData?.pets || []}
+//             isLoading={isLoading}
+//             isPetCompatible={isPetCompatible}
+//             incompatibilityReason={incompatibilityReason}
+//             setIsPetCompatible={setIsPetCompatible}
+//             setIncompatibilityReason={setIncompatibilityReason}
+//           />
+//         );
+//       case STEPS.DATE:
+//         return (
+//           <DateSelectionStep form={form} setSelectedDate={setSelectedDate} />
+//         );
+//       case STEPS.TIME:
+//         return (
+//           <TimeSelectionStep
+//             form={form}
+//             selectedDate={selectedDate}
+//             serviceId={serviceId}
+//             serviceType={serviceType}
+//             service={serviceData?.service}
+//             setSelectedTimeSlotData={setSelectedTimeSlotData}
+//           />
+//         );
+//       case STEPS.EMPLOYEE:
+//         return (
+//           <EmployeeSelectionStep
+//             form={form}
+//             serviceId={serviceId}
+//             serviceType={serviceType}
+//             selectedDate={selectedDate}
+//             selectedTimeSlotData={selectedTimeSlotData}
+//           />
+//         );
+//       case STEPS.NOTES:
+//         return <NotesStep form={form} />;
+//       case STEPS.PAYMENT:
+//         return (
+//           <PaymentStep
+//             form={form}
+//             servicePrice={serviceData?.service?.price || 0}
+//             serviceName={serviceData?.service?.name || ""}
+//           />
+//         );
+//       case STEPS.REVIEW:
+//         return (
+//           <ReviewStep
+//             serviceType={serviceType}
+//             form={form}
+//             petsData={petsData}
+//             service={serviceData?.service}
+//             selectedDate={selectedDate}
+//             paymentMethod={form.watch("paymentMethod")}
+//           />
+//         );
+//       default:
+//         return null;
+//     }
+//   };
 
-  // Render step title
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case STEPS.PET:
-        return "Chọn thú cưng";
-      case STEPS.DATE:
-        return "Chọn ngày hẹn";
-      case STEPS.TIME:
-        return "Chọn khung giờ";
-      case STEPS.EMPLOYEE:
-        return "Chọn nhân viên";
-      case STEPS.NOTES:
-        return "Thêm ghi chú";
-      case STEPS.PAYMENT:
-        return "Thanh toán";
-      case STEPS.REVIEW:
-        return "Xác nhận thông tin";
-      default:
-        return "Đặt lịch hẹn";
-    }
-  };
+//   // Render step title
+//   const getStepTitle = () => {
+//     switch (currentStep) {
+//       case STEPS.PET:
+//         return "Chọn thú cưng";
+//       case STEPS.DATE:
+//         return "Chọn ngày hẹn";
+//       case STEPS.TIME:
+//         return "Chọn khung giờ";
+//       case STEPS.EMPLOYEE:
+//         return "Chọn nhân viên";
+//       case STEPS.NOTES:
+//         return "Thêm ghi chú";
+//       case STEPS.PAYMENT:
+//         return "Thanh toán";
+//       case STEPS.REVIEW:
+//         return "Xác nhận thông tin";
+//       default:
+//         return "Đặt lịch hẹn";
+//     }
+//   };
 
-  // Check for continue button disabled state
-  const isContinueButtonDisabled = () => {
-    if (currentStep === STEPS.PET) {
-      return !form.watch("petId") || !isPetCompatible;
-    } else if (currentStep === STEPS.DATE) {
-      return !selectedDate;
-    } else if (currentStep === STEPS.TIME) {
-      return !form.watch("timeSlot")?.start || !form.watch("timeSlot")?.end;
-    } else if (currentStep === STEPS.PAYMENT) {
-      return !form.watch("paymentMethod");
-    }
-    return false;
-  };
+//   // Check for continue button disabled state
+//   const isContinueButtonDisabled = () => {
+//     if (currentStep === STEPS.PET) {
+//       return !form.watch("petId") || !isPetCompatible;
+//     } else if (currentStep === STEPS.DATE) {
+//       return !selectedDate;
+//     } else if (currentStep === STEPS.TIME) {
+//       return !form.watch("timeSlot")?.start || !form.watch("timeSlot")?.end;
+//     } else if (currentStep === STEPS.PAYMENT) {
+//       return !form.watch("paymentMethod");
+//     }
+//     return false;
+//   };
 
-  const isProcessing =
-    createAppointmentMutation.isPending ||
-    processPaymentMutation.isPending ||
-    createCheckoutSessionMutation.isPending ||
-    isSubmitting;
+//   const isProcessing =
+//     createAppointmentMutation.isPending ||
+//     processPaymentMutation.isPending ||
+//     createCheckoutSessionMutation.isPending ||
+//     isSubmitting;
 
-  return (
-    <div className="container mx-auto py-8 px-4 max-w-5xl">
-      <div className="mb-8">
-        <Progress value={progressPercentage} className="h-2 mb-2" />
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            disabled={isProcessing}
-            className="gap-2 hover:bg-muted/80"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {currentStep === STEPS.PET ? "Quay lại" : "Trước đó"}
-          </Button>
-          <div className="text-sm font-medium bg-primary/10 px-3 py-1 rounded-full">
-            Bước {currentStep + 1}/{Object.keys(STEPS).length}: {getStepTitle()}
-          </div>
-        </div>
-      </div>
+//   return (
+//     <div className="container mx-auto py-8 px-4 max-w-5xl">
+//       <div className="mb-8">
+//         <Progress value={progressPercentage} className="h-2 mb-2" />
+//         <div className="flex items-center justify-between">
+//           <Button
+//             variant="ghost"
+//             onClick={handleBack}
+//             disabled={isProcessing}
+//             className="gap-2 hover:bg-muted/80"
+//           >
+//             <ArrowLeft className="h-4 w-4" />
+//             {currentStep === STEPS.PET ? "Quay lại" : "Trước đó"}
+//           </Button>
+//           <div className="text-sm font-medium bg-primary/10 px-3 py-1 rounded-full">
+//             Bước {currentStep + 1}/{Object.keys(STEPS).length}: {getStepTitle()}
+//           </div>
+//         </div>
+//       </div>
 
-      <Card className="w-full mx-auto shadow border-muted/60 overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-slate-200">
-          <CardTitle className="text-xl flex items-center gap-2">
-            <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-primary-foreground text-sm">
-              {currentStep + 1}
-            </span>
-            Đặt lịch hẹn mới
-          </CardTitle>
-          <CardDescription>
-            {currentStep === STEPS.PET
-              ? `Chọn thú cưng của bạn cho dịch vụ ${
-                  serviceData?.service?.name || ""
-                }`
-              : `Đặt lịch hẹn cho ${
-                  petsData?.pets.find((pet) => pet._id === form.watch("petId"))
-                    ?.name || ""
-                } - ${serviceData?.service?.name || ""}`}
-          </CardDescription>
-        </CardHeader>
+//       <Card className="w-full mx-auto shadow border-muted/60 overflow-hidden">
+//         <CardHeader className="bg-muted/30 border-b border-slate-200">
+//           <CardTitle className="text-xl flex items-center gap-2">
+//             <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary text-primary-foreground text-sm">
+//               {currentStep + 1}
+//             </span>
+//             Đặt lịch hẹn mới
+//           </CardTitle>
+//           <CardDescription>
+//             {currentStep === STEPS.PET
+//               ? `Chọn thú cưng của bạn cho dịch vụ ${
+//                   serviceData?.service?.name || ""
+//                 }`
+//               : `Đặt lịch hẹn cho ${
+//                   petsData?.pets.find((pet) => pet._id === form.watch("petId"))
+//                     ?.name || ""
+//                 } - ${serviceData?.service?.name || ""}`}
+//           </CardDescription>
+//         </CardHeader>
 
-        <Form {...form}>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="p-6 space-y-6">
-              <StepIndicator currentStep={currentStep} steps={STEPS} />
-              {renderStepContent()}
-            </CardContent>
+//         <Form {...form}>
+//           <form onSubmit={handleSubmit}>
+//             <CardContent className="p-6 space-y-6">
+//               <StepIndicator currentStep={currentStep} steps={STEPS} />
+//               {renderStepContent()}
+//             </CardContent>
 
-            <CardFooter className="flex justify-between p-6 bg-muted/20 border-t border-slate-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                disabled={isProcessing}
-                className="min-w-[100px]"
-              >
-                {currentStep === STEPS.PET ? "Hủy" : "Trước đó"}
-              </Button>
+//             <CardFooter className="flex justify-between p-6 bg-muted/20 border-t border-slate-200">
+//               <Button
+//                 type="button"
+//                 variant="outline"
+//                 onClick={handleBack}
+//                 disabled={isProcessing}
+//                 className="min-w-[100px]"
+//               >
+//                 {currentStep === STEPS.PET ? "Hủy" : "Trước đó"}
+//               </Button>
 
-              <Button
-                type={currentStep < STEPS.REVIEW ? "button" : "submit"}
-                onClick={
-                  currentStep < STEPS.REVIEW ? handleContinue : undefined
-                }
-                disabled={isProcessing || isContinueButtonDisabled()}
-                className="min-w-[180px]"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang xử lý...
-                  </>
-                ) : currentStep < STEPS.REVIEW ? (
-                  "Tiếp theo"
-                ) : (
-                  "Xác nhận và thanh toán"
-                )}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
-  );
-};
+//               <Button
+//                 type={currentStep < STEPS.REVIEW ? "button" : "submit"}
+//                 onClick={
+//                   currentStep < STEPS.REVIEW ? handleContinue : undefined
+//                 }
+//                 disabled={isProcessing || isContinueButtonDisabled()}
+//                 className="min-w-[180px]"
+//               >
+//                 {isProcessing ? (
+//                   <>
+//                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                     Đang xử lý...
+//                   </>
+//                 ) : currentStep < STEPS.REVIEW ? (
+//                   "Tiếp theo"
+//                 ) : (
+//                   "Xác nhận và thanh toán"
+//                 )}
+//               </Button>
+//             </CardFooter>
+//           </form>
+//         </Form>
+//       </Card>
+//     </div>
+//   );
+// };
 
-export default AppointmentFormStep;
+// export default AppointmentFormStep;

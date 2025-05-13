@@ -1,47 +1,48 @@
+// /features/appointment/utils/appointment-form-config.ts
+
 import { z } from "zod";
 
-// Steps
+// Cập nhật thứ tự các bước
 export const STEPS = {
   PET: 0,
-  DATE: 1,
-  TIME: 2,
-  EMPLOYEE: 3,
+  EMPLOYEE: 1, // Di chuyển bước chọn nhân viên lên trước
+  DATE: 2,     // Ngày hẹn sau khi chọn nhân viên
+  TIME: 3,     // Giờ hẹn sau khi chọn ngày
   NOTES: 4,
   PAYMENT: 5,
-  REVIEW: 6,
+  REVIEW: 6
 };
 
-// Form schema
+// Schema validation của form
 export const formSchema = z.object({
-  petId: z.string().min(1, { message: "Vui lòng chọn thú cưng" }),
-  scheduledDate: z.date({
-    required_error: "Vui lòng chọn ngày hẹn",
-  }),
-  timeSlot: z.object(
-    {
-      start: z.string().min(1, { message: "Vui lòng chọn khung giờ" }),
-      end: z.string().min(1, { message: "Vui lòng chọn khung giờ" }),
-      originalSlotIndexes: z.array(z.number()).optional(),
-    },
-    {
-      required_error: "Vui lòng chọn khung giờ",
-    }
-  ),
-  employeeId: z.string().optional(),
+  petId: z.string({ required_error: "Vui lòng chọn thú cưng" }),
+  employeeId: z.string().optional(), // Không bắt buộc chọn nhân viên
+  scheduledDate: z.date({ required_error: "Vui lòng chọn ngày" }),
+  timeSlot: z.object({
+    start: z.string({ required_error: "Vui lòng chọn khung giờ" }),
+    end: z.string({ required_error: "Vui lòng chọn khung giờ" }),
+    originalSlotIndexes: z.array(z.number()).optional()
+  }, { required_error: "Vui lòng chọn khung giờ" }),
   notes: z.string().optional(),
-  paymentMethod: z.enum(["card", "cash", "bank_transfer"])
+  paymentMethod: z.enum(["card", "cash", "bank_transfer"], {
+    required_error: "Vui lòng chọn phương thức thanh toán"
+  })
 });
 
 export type FormValues = z.infer<typeof formSchema>;
 
-// Format duration display
+// Hàm định dạng thời gian
 export const formatDuration = (minutes: number): string => {
   if (minutes < 60) {
     return `${minutes} phút`;
   }
   
   const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+  const remainingMinutes = minutes % 60;
   
-  return mins > 0 ? `${hours} giờ ${mins} phút` : `${hours} giờ`;
+  if (remainingMinutes === 0) {
+    return `${hours} giờ`;
+  }
+  
+  return `${hours} giờ ${remainingMinutes} phút`;
 };

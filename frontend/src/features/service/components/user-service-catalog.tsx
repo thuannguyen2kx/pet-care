@@ -28,7 +28,6 @@ const ServiceCatalog: React.FC = () => {
   const [petType, setPetType] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  console.log("category", category);
   const { data, isLoading, isError } = useGetServices({
     category: category === "ALL" ? undefined : category,
     petType: petType === "ALL" ? undefined : petType,

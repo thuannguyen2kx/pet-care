@@ -31,5 +31,7 @@ export const getTimeSlotsSchema = z.object({
   serviceId: z.string().optional(),
   serviceType: z.nativeEnum(ServiceType, {
     errorMap: () => ({ message: "Loại dịch vụ không hợp lệ" })
-  }).optional()
+  }).optional(),
+  employeeId: z.string().optional(),
+  petId: z.string().optional()
 });

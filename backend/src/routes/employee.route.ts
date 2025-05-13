@@ -104,7 +104,7 @@ employeeRoutes.get(
 // Get employee schedule range
 employeeRoutes.get(
   "/:id/schedule-range",
-  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE, Roles.CUSTOMER]),
   getEmployeeScheduleRangeController
 );
 

@@ -20,6 +20,7 @@ export interface Slot {
 export interface ITimeSlot extends Document {
   date: Date;
   slots: Slot[];
+  
 }
 
 const TimeSlotSchema = new Schema<ITimeSlot>(

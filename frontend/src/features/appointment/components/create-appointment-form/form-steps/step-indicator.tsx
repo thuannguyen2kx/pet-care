@@ -40,11 +40,11 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, steps }) => 
                   {step === 0
                     ? "Thú cưng"
                     : step === 1
-                      ? "Ngày"
+                      ? "Nhân viên"
                       : step === 2
-                        ? "Giờ"
+                        ? "Ngày"
                         : step === 3
-                          ? "Nhân viên"
+                          ? "Giờ"
                           : step === 4
                             ? "Ghi chú"
                             : step === 5

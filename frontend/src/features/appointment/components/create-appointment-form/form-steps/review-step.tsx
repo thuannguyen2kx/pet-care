@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { ServiceType } from "@/features/service/types/api.types"
 import type { PetType } from "@/features/pet/types/api.types"
 import { type FormValues, formatDuration } from "@/features/appointment/utils/appointment-form-config"
-import { useGetAvailableEmployeesForService } from "@/features/employee/hooks/queries/get-available-employee-for-service"
+import { useGetEmployeesForService } from "@/features/employee/hooks/queries/get-available-employee-for-service"
 import type { EmployeeType } from "@/features/employee/types/api.types"
 import { CreditCard, Building, Banknote, CalendarDays, Clock, User, Pencil, DollarSign, PawPrint } from "lucide-react"
 import { motion } from "framer-motion"
@@ -37,26 +37,21 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
   const employeeId = form.watch("employeeId")
 
-  // Fetch employee details if needed
-  const { data: fetchedEmployeesData } = useGetAvailableEmployeesForService({
+  // Fetch employee details using the new hook
+  const { data: employeesData } = useGetEmployeesForService({
     serviceId: service?._id || "",
-    serviceType: serviceType,
-    date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : undefined,
-    timeSlot:
-      form.watch("timeSlot").start && form.watch("timeSlot").end
-        ? `${form.watch("timeSlot").start}-${form.watch("timeSlot").end}`
-        : undefined,
-  })
+    serviceType: serviceType
+  });
 
   // Update selected employee when data changes
   useEffect(() => {
-    if (employeeId) {
-      const employee = fetchedEmployeesData?.employees?.find((emp) => emp._id === employeeId)
+    if (employeeId && employeesData?.employees) {
+      const employee = employeesData.employees.find((emp) => emp._id === employeeId);
       if (employee) {
-        setSelectedEmployee(employee)
+        setSelectedEmployee(employee);
       }
     }
-  }, [employeeId, fetchedEmployeesData])
+  }, [employeeId, employeesData]);
 
   // Get payment method icon
   const getPaymentMethodIcon = () => {
@@ -101,6 +96,20 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     show: { opacity: 1, y: 0 },
   }
 
+  // Format thông tin ca làm việc của nhân viên cho ngày đã chọn (nếu có)
+  const formatEmployeeWorkingInfo = () => {
+    if (!selectedEmployee || !selectedDate) return null;
+
+    // Thêm thông tin này nếu có thông tin ca làm việc cụ thể
+    return (
+      <div className="mt-2 text-xs border-t border-primary/5 pt-2">
+        <span className="text-primary/70">
+          Làm việc vào {format(selectedDate, "dd/MM/yyyy")}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <motion.div className="space-y-6" variants={container} initial="hidden" animate="show">
       <h3 className="text-lg font-medium">Xác nhận thông tin đặt lịch</h3>
@@ -134,6 +143,52 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                 </p>
               </div>
             </div>
+          </motion.div>
+
+          <Separator />
+
+          {/* Employee Information - Moved before service and time */}
+          <motion.div variants={item} className="space-y-2">
+            <div className="flex items-center gap-2 text-primary">
+              <User className="h-5 w-5" />
+              <h4 className="font-medium">Thông tin nhân viên</h4>
+            </div>
+
+            {selectedEmployee ? (
+              <div className="bg-muted/30 p-3 rounded-md flex items-center gap-3">
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                  {selectedEmployee.profilePicture ? (
+                    <AvatarImage src={selectedEmployee.profilePicture.url || ""} alt={selectedEmployee.fullName} />
+                  ) : (
+                    <AvatarFallback>{selectedEmployee.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  )}
+                </Avatar>
+                <div>
+                  <p className="font-medium">{selectedEmployee.fullName}</p>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                    <div className="flex items-center">
+                      <svg className="h-3 w-3 mr-1 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                      </svg>
+                      <span>
+                        {selectedEmployee.employeeInfo?.performance.rating.toFixed(1)}/5
+                      </span>
+                    </div>
+                    
+                    {selectedEmployee.employeeInfo?.specialties && selectedEmployee.employeeInfo.specialties.length > 0 && (
+                      <span className="border-l border-muted pl-2">
+                        {selectedEmployee.employeeInfo.specialties.length} chuyên môn
+                      </span>
+                    )}
+                  </div>
+                  {formatEmployeeWorkingInfo()}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-muted/30 p-3 rounded-md">
+                <p className="text-muted-foreground">Hệ thống sẽ tự động phân bổ nhân viên phù hợp</p>
+              </div>
+            )}
           </motion.div>
 
           <Separator />
@@ -178,38 +233,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                 <p className="font-medium">{service?.duration ? formatDuration(service.duration) : "N/A"}</p>
               </div>
             </div>
-          </motion.div>
-
-          <Separator />
-
-          {/* Employee Information */}
-          <motion.div variants={item} className="space-y-2">
-            <div className="flex items-center gap-2 text-primary">
-              <User className="h-5 w-5" />
-              <h4 className="font-medium">Thông tin nhân viên</h4>
-            </div>
-
-            {selectedEmployee ? (
-              <div className="bg-muted/30 p-3 rounded-md flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-primary/20">
-                  {selectedEmployee.profilePicture ? (
-                    <AvatarImage src={selectedEmployee.profilePicture.url || ""} alt={selectedEmployee.fullName} />
-                  ) : (
-                    <AvatarFallback>{selectedEmployee.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <p className="font-medium">{selectedEmployee.fullName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Đánh giá: {selectedEmployee.employeeInfo?.performance.rating}/5
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-muted/30 p-3 rounded-md">
-                <p className="text-muted-foreground">Hệ thống sẽ tự động phân bổ nhân viên phù hợp</p>
-              </div>
-            )}
           </motion.div>
 
           {/* Notes Information */}

@@ -16,7 +16,7 @@ serviceRoutes.get("/", getServicesController);
 serviceRoutes.get("/:id", getServiceByIdController);
 
 // Admin routes - protected with auth and admin middleware
-serviceRoutes.post("/", authorizeRoles([Roles.ADMIN]), createServiceController);
+serviceRoutes.post("/", authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), createServiceController);
 serviceRoutes.put(
   "/:id",
   authorizeRoles([Roles.ADMIN]),
