@@ -26,6 +26,7 @@ export const ADMIN_ROUTES = {
   EMPLOYEE_DETAILS: "/admin/employees/:employeeId",
   EMPLOYEE_EDIT: "/admin/employees/:employeeId/edit",
   EMPLOYEE_SCHEDULE: "/admin/employees/:employeeId/schedule",
+  EMPLOYEE_DETAILS_MANAGEMENT: "/admin/employees/:id/management",
   DASHBOARD: "/admin/dashboard",
   APPOINTMENT: "/admin/appointments",
   APPOINTMENT_CALENDAR: "/admin/appointments/calendar",
@@ -35,6 +36,7 @@ export const EMPLOYEE_ROUTES = {
   HOME: "/employee/home",
   PROFILE: "/employee/profile",
   REPORT: "/employee/report",
+  SCHEDULE: "/employee/schedule",
 };
 
 export const MANAGER_ROUTES = {

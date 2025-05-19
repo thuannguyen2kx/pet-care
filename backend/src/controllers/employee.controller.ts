@@ -34,6 +34,11 @@ import {
   scheduleIdSchema,
   scheduleRangeSchema,
 } from "../validation/employee.validation";
+import AppointmentModel, { AppointmentStatus } from "../models/appointment.model";
+import EmployeeScheduleModel from "../models/employee-schedule.model";
+import UserModel from "../models/user.model";
+import { BadRequestException, NotFoundException } from "../utils/app-error";
+import { Roles } from "../enums/role.enum";
 
 // Get all employees with optional filtering
 export const getAllEmployeesController = asyncHandler(
@@ -169,6 +174,112 @@ export const getEmployeePerformanceController = asyncHandler(
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy thông tin hiệu suất thành công",
       ...performanceData,
+    });
+  }
+);
+
+/**
+ * Get employee schedule statistics
+ */
+const getEmployeeScheduleStats = async (
+  employeeId: string, 
+  startDate: Date, 
+  endDate: Date
+) => {
+  // Get all schedule entries for this period
+  const schedules = await EmployeeScheduleModel.find({
+    employeeId,
+    date: { $gte: startDate, $lte: endDate }
+  });
+
+  // Calculate working days percentage
+  const totalDays = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const workingDays = schedules.filter(schedule => schedule.isWorking).length;
+  const workingDaysPercentage = (workingDays / totalDays) * 100;
+
+  // Calculate total working hours
+  let totalWorkingHours = 0;
+  
+  for (const schedule of schedules) {
+    if (!schedule.isWorking) continue;
+    
+    for (const workHour of schedule.workHours) {
+      const [startHour, startMinute] = workHour.start.split(':').map(Number);
+      const [endHour, endMinute] = workHour.end.split(':').map(Number);
+      
+      const startMinutes = startHour * 60 + startMinute;
+      const endMinutes = endHour * 60 + endMinute;
+      
+      totalWorkingHours += (endMinutes - startMinutes) / 60;
+    }
+  }
+
+  // Calculate average hours per working day
+  const averageHoursPerWorkingDay = workingDays > 0 ? totalWorkingHours / workingDays : 0;
+
+  // Calculate utilization rate (appointments / working hours)
+  const appointmentsCount = await AppointmentModel.countDocuments({
+    employeeId,
+    scheduledDate: { $gte: startDate, $lte: endDate },
+    status: { $ne: AppointmentStatus.CANCELLED }
+  });
+
+  const utilizationRate = totalWorkingHours > 0 ? (appointmentsCount / totalWorkingHours) * 100 : 0;
+
+  return {
+    workingDays,
+    totalDays,
+    workingDaysPercentage,
+    totalWorkingHours,
+    averageHoursPerWorkingDay,
+    appointmentsPerWorkingHour: totalWorkingHours > 0 ? appointmentsCount / totalWorkingHours : 0,
+    utilizationRate
+  };
+};
+/**
+ * Update employee performance ratings
+ */
+export const updateEmployeePerformanceController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const employeeId = employeeIdSchema.parse(req.params.id);
+    
+    // Validate required fields
+    const { rating } = req.body;
+    if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+      throw new BadRequestException("Rating phải là số từ 0 đến 5");
+    }
+    
+    // Find employee
+    const employee = await UserModel.findOne({
+      _id: employeeId,
+      role: Roles.EMPLOYEE,
+    });
+    
+    if (!employee) {
+      throw new NotFoundException("Không tìm thấy nhân viên");
+    }
+    
+    // Get the completed services count
+    const completedServices = await AppointmentModel.countDocuments({
+      employeeId: employee._id,
+      status: AppointmentStatus.COMPLETED
+    });
+    
+    // Update employee performance data
+    await UserModel.updateOne(
+      { _id: employeeId },
+      { 
+        $set: { 
+          "employeeInfo.performance.rating": rating,
+          "employeeInfo.performance.completedServices": completedServices
+        } 
+      }
+    );
+    
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Cập nhật hiệu suất nhân viên thành công",
+      rating,
+      completedServices
     });
   }
 );

@@ -41,6 +41,8 @@ import PostDetailsManagerPage from "@/pages/manager/post-details";
 import EmployeeSchedulePage from "@/pages/employee/appointment";
 import EmployeeProfile from "@/features/employee/components/employee-profile";
 import PetDetailPage from "@/pages/manager/pet-detail";
+import EmployeeDetailsManagementPage from "@/pages/admin/employee-details-management";
+import EmployeeTimeSlotPage from "@/pages/employee/schedule";
 
 export const authenticationRoutePaths = [
   { path: AUTH_ROUTES.SIGN_IN, element: <SignIn /> },
@@ -107,6 +109,7 @@ export const adminRoutesPaths = [
   { path: ADMIN_ROUTES.EMPLOYEE_DETAILS, element: <EmployeeDetailsPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE_EDIT, element: <EmployeeEditionPage /> },
   { path: ADMIN_ROUTES.EMPLOYEE_SCHEDULE, element: <EmployeeCalendarPage /> },
+  {path: ADMIN_ROUTES.EMPLOYEE_DETAILS_MANAGEMENT, element: <EmployeeDetailsManagementPage />},
   
   { path: ADMIN_ROUTES.PAYMENT, element: <AdminPaymentManagement /> },
 ];
@@ -115,6 +118,7 @@ export const employeeRoutesPaths = [
   { path: EMPLOYEE_ROUTES.HOME, element: <EmployeeSchedulePage /> },
   { path: EMPLOYEE_ROUTES.PROFILE, element: <EmployeeProfile /> },
   { path: EMPLOYEE_ROUTES.REPORT, element: <DashboardPage /> },
+  { path: EMPLOYEE_ROUTES.SCHEDULE, element: <EmployeeTimeSlotPage /> },
 ];
 
 export const managerRoutesPaths = [

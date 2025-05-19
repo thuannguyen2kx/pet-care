@@ -34,7 +34,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useGetEmployee } from "../hooks/queries/get-employee";
-import { useEmployeePerformance } from "../hooks/queries/get-employee-performance";
 import { useGetEmployeeSchedule } from "../hooks/queries/get-employee-schedule";
 import { useDeleteEmployee } from "../hooks/mutations/delete-employee";
 import { useResetPassword } from "../hooks/mutations/reset-password";
@@ -42,6 +41,8 @@ import { useUploadProfilePicture } from "../hooks/mutations/upload-profile-pictu
 import { specialtyTranslations, StatusUser, StatusUserType, weekdays } from "@/constants";
 import { useConfirm } from "@/hooks/use-confirm";
 import { cn } from "@/lib/utils";
+import EmployeePerformanceDashboard from "./employee-dashboard";
+import EmployeeScheduleManager from "./employee-schedule-management";
 
 export default function EmployeeDetails() {
   const { employeeId } = useParams();
@@ -57,9 +58,6 @@ export default function EmployeeDetails() {
 
   // Fetch data using React Query hooks
   const { data, isLoading: isLoadingEmployee } = useGetEmployee(employeeId as string);
-  const { data: performanceData, isLoading: isLoadingPerformance } = useEmployeePerformance(
-    employeeId as string
-  );
   const { data: scheduleData, isLoading: isLoadingSchedule } = useGetEmployeeSchedule(employeeId as string);
 
   // Mutation hooks
@@ -406,7 +404,13 @@ export default function EmployeeDetails() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium">Lịch trình làm việc</h3>
-                    <Link className={cn(buttonVariants({ size: "sm", variant: "outline" }), "border-primary text-primary")} to={`/admin/employees/${employee._id}/schedule`}>
+                    <Link
+                      className={cn(
+                        buttonVariants({ size: "sm", variant: "outline" }),
+                        "border-primary text-primary"
+                      )}
+                      to={`/admin/employees/${employee._id}/schedule`}
+                    >
                       Xem chi tiết
                     </Link>
                   </div>
@@ -430,7 +434,8 @@ export default function EmployeeDetails() {
                                   {employee.employeeInfo?.schedule?.workDays
                                     .map(
                                       (day) =>
-                                       weekdays.find((w) => w.id === day)?.label 
+                                        weekdays.find((w) => w.id === day)
+                                          ?.label
                                     )
                                     .join(", ") || "Chưa thiết lập"}
                                 </p>
@@ -456,146 +461,12 @@ export default function EmployeeDetails() {
                     </div>
                   )}
                 </div>
+                <EmployeeScheduleManager />
               </TabsContent>
 
               {/* Performance Tab Content */}
               <TabsContent value="performance" className="p-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Hiệu suất làm việc</h3>
-                  {isLoadingPerformance ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Đang tải số liệu hiệu suất...
-                    </div>
-                  ) : performanceData ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm text-center">
-                              Đánh giá trung bình
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-center">
-                            <div className="text-3xl font-bold">
-                              {employee.employeeInfo?.performance?.rating?.toFixed(
-                                1
-                              ) || "N/A"}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              trong số 5.0
-                            </p>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm text-center">
-                              Hiệu suất hàng tháng
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-center">
-                            <div className="text-3xl font-bold">
-                              {performanceData?.monthlyPerformance &&
-                              performanceData.monthlyPerformance.length > 0
-                                ? performanceData.monthlyPerformance[
-                                    performanceData.monthlyPerformance.length -
-                                      1
-                                  ].count
-                                : 0}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              dịch vụ trong tháng này
-                            </p>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm text-center">
-                              Tổng số dịch vụ
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-center">
-                            <div className="text-3xl font-bold">
-                              {performanceData?.completedServices || 0}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              đã hoàn thành
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {performanceData?.serviceBreakdown && (
-                        <div>
-                          <h4 className="font-medium mb-2">
-                            Phân tích dịch vụ
-                          </h4>
-                          <Card>
-                            <CardContent className="p-4">
-                              <div className="space-y-4">
-                                {Object.entries(
-                                  performanceData.serviceBreakdown
-                                ).map(([serviceId, count], idx) => (
-                                  <div
-                                    key={serviceId}
-                                    className="flex justify-between items-center"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline">{idx + 1}</Badge>
-                                      <span>{serviceId}</span>
-                                    </div>
-                                    <div>
-                                      <Badge variant="secondary">
-                                        {count} hoàn thành
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
-
-                      {performanceData?.monthlyPerformance &&
-                        performanceData.monthlyPerformance.length > 0 && (
-                          <div>
-                            <h4 className="font-medium mb-2">
-                              Hiệu suất hàng tháng
-                            </h4>
-                            <Card>
-                              <CardContent className="p-4">
-                                <div className="space-y-2">
-                                  {performanceData.monthlyPerformance
-                                    .slice()
-                                    .reverse()
-                                    .map((item) => (
-                                      <div
-                                        key={`${item.year}-${item.month}`}
-                                        className="flex justify-between items-center"
-                                      >
-                                        <span>
-                                          {format(
-                                            new Date(item.year, item.month - 1),
-                                            "MMMM yyyy"
-                                          )}
-                                        </span>
-                                        <Badge>{item.count} dịch vụ</Badge>
-                                      </div>
-                                    ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Không có dữ liệu hiệu suất
-                    </div>
-                  )}
-                </div>
+                <EmployeePerformanceDashboard />
               </TabsContent>
             </Tabs>
           </Card>

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ChartSpline, Home, Newspaper, Package, User } from "lucide-react";
+import { CalendarSync, ChartSpline, Home, Newspaper, Package, User } from "lucide-react";
 import { EMPLOYEE_ROUTES, MANAGER_ROUTES } from "@/routes/common/routePaths";
 import { UserButton } from "@/features/user/components/user-button";
 
@@ -37,6 +37,11 @@ const navItems = [
     path: MANAGER_ROUTES.POST,
     name: "Bài viết",
     icon: <Newspaper size={18} />,
+  },
+  {
+    path: EMPLOYEE_ROUTES.SCHEDULE,
+    name: "Lịch làm việc",
+    icon: <CalendarSync  size={18} />,
   },
 ];
 const Header = () => {

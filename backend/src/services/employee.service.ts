@@ -561,75 +561,216 @@ export const resetEmployeePasswordService = async ({
 
 // Get employee performance metrics
 export const getEmployeePerformanceService = async (employeeId: string) => {
+  // Validate and find employee
   const employee = await UserModel.findOne({
     _id: employeeId,
     role: Roles.EMPLOYEE,
   }).select("-password");
-
+  
   if (!employee) {
     throw new NotFoundException("Không tìm thấy nhân viên");
   }
-
-  // Get completed appointments
-  const completedAppointments = await AppointmentModel.find({
-    employeeId: employee._id,
-    status: "completed",
-  }).populate("serviceId");
-
-  // Calculate service breakdown
-  const serviceBreakdown: Record<string, number> = {};
-
-  for (const appointment of completedAppointments) {
-    const serviceId = appointment.serviceId.toString();
-    if (!serviceBreakdown[serviceId]) {
-      serviceBreakdown[serviceId] = 0;
-    }
-    serviceBreakdown[serviceId] += 1;
-  }
-
-  // Get monthly appointment count for last 6 months
+  
+  // Get current date information for time-based queries
   const now = new Date();
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(now.getMonth() - 6);
-
-  const monthlyAppointments = await AppointmentModel.aggregate([
+  
+  // Get current month start and end dates for monthly metrics
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  
+  // Get all appointments for this employee
+  const allAppointments = await AppointmentModel.find({
+    employeeId: employee._id,
+    scheduledDate: { $gte: sixMonthsAgo }
+  }).populate("serviceId petId customerId");
+  
+  // Get current month appointments
+  const currentMonthAppointments = allAppointments.filter(app => 
+    app.scheduledDate >= currentMonthStart && app.scheduledDate <= currentMonthEnd
+  );
+  
+  // Calculate completion rate
+  const completedAppointments = allAppointments.filter(app => app.status === AppointmentStatus.COMPLETED);
+  const completionRate = allAppointments.length > 0 
+    ? (completedAppointments.length / allAppointments.length * 100).toFixed(2) 
+    : 0;
+  
+  // Calculate cancellation rate
+  const cancelledAppointments = allAppointments.filter(app => app.status === AppointmentStatus.CANCELLED);
+  const cancellationRate = allAppointments.length > 0 
+    ? (cancelledAppointments.length / allAppointments.length * 100).toFixed(2) 
+    : 0;
+  
+  // Calculate service breakdown
+  const serviceBreakdown: Record<string, { count: number, name: string }> = {};
+  for (const appointment of completedAppointments) {
+    const service = appointment.serviceId as any;
+    const serviceId = service._id.toString();
+    
+    if (!serviceBreakdown[serviceId]) {
+      serviceBreakdown[serviceId] = {
+        count: 0,
+        name: service.name || 'Unknown Service'
+      };
+    }
+    serviceBreakdown[serviceId].count += 1;
+  }
+  
+  // Get monthly appointment statistics by status for last 6 months
+  const monthlyStats = await AppointmentModel.aggregate([
     {
       $match: {
-        employeeId: employee._id,
-        status: "completed",
-        completedAt: { $gte: sixMonthsAgo, $lte: now },
-      },
+        employeeId: new mongoose.Types.ObjectId(employeeId),
+        scheduledDate: { $gte: sixMonthsAgo, $lte: now }
+      }
     },
     {
       $group: {
         _id: {
-          year: { $year: "$completedAt" },
-          month: { $month: "$completedAt" },
+          year: { $year: "$scheduledDate" },
+          month: { $month: "$scheduledDate" },
+          status: "$status"
         },
         count: { $sum: 1 },
-      },
+        revenue: { $sum: "$totalAmount" }
+      }
     },
     {
       $sort: {
         "_id.year": 1,
-        "_id.month": 1,
-      },
-    },
+        "_id.month": 1
+      }
+    }
   ]);
-
-  const monthlyPerformance = monthlyAppointments.map((item) => ({
-    year: item._id.year,
-    month: item._id.month,
-    count: item.count,
-  }));
-
+  
+  // Process monthly stats into a more usable format
+  const monthlyPerformance = [];
+  const months = new Set(monthlyStats.map(item => `${item._id.year}-${item._id.month}`));
+  
+  for (const monthKey of months) {
+    const [year, month] = monthKey.split('-').map(Number);
+    const monthData = {
+      year,
+      month,
+      total: 0,
+      completed: 0,
+      pending: 0,
+      cancelled: 0,
+      inProgress: 0,
+      revenue: 0
+    };
+    
+    // Fill in the counts for each status
+    monthlyStats
+      .filter(item => item._id.year === year && item._id.month === month)
+      .forEach(item => {
+        monthData.total += item.count;
+        monthData.revenue += item.revenue;
+        
+        switch (item._id.status) {
+          case AppointmentStatus.COMPLETED:
+            monthData.completed = item.count;
+            break;
+          case AppointmentStatus.PENDING:
+            monthData.pending = item.count;
+            break;
+          case AppointmentStatus.CANCELLED:
+            monthData.cancelled = item.count;
+            break;
+          case AppointmentStatus.IN_PROGRESS:
+            monthData.inProgress = item.count;
+            break;
+        }
+      });
+    
+    monthlyPerformance.push(monthData);
+  }
+  
+  // Calculate average service duration
+  const serviceDurations = await ServiceModel.find({
+    _id: { $in: completedAppointments.map(app => (app.serviceId as any)._id) }
+  }).select('duration');
+  
+  const averageServiceDuration = serviceDurations.length > 0 
+    ? serviceDurations.reduce((sum, service) => sum + service.duration, 0) / serviceDurations.length 
+    : 0;
+  
+  // Calculate busy days and hours
+  const appointmentDays = completedAppointments.map(app => {
+    const date = new Date(app.scheduledDate);
+    return date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  });
+  
+  const dayCount = [0, 0, 0, 0, 0, 0, 0]; // Sun, Mon, Tue, Wed, Thu, Fri, Sat
+  appointmentDays.forEach(day => {
+    dayCount[day]++;
+  });
+  
+  const busiestDay = dayCount.indexOf(Math.max(...dayCount));
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  // Get upcoming appointments
+  const upcomingAppointments = allAppointments.filter(app => 
+    app.scheduledDate > now && 
+    app.status !== AppointmentStatus.CANCELLED && 
+    app.status !== AppointmentStatus.COMPLETED
+  );
+  
+  // Current month status breakdown
+  const currentMonthStatusBreakdown = {
+    total: currentMonthAppointments.length,
+    completed: currentMonthAppointments.filter(app => app.status === AppointmentStatus.COMPLETED).length,
+    pending: currentMonthAppointments.filter(app => app.status === AppointmentStatus.PENDING).length,
+    inProgress: currentMonthAppointments.filter(app => app.status === AppointmentStatus.IN_PROGRESS).length,
+    cancelled: currentMonthAppointments.filter(app => app.status === AppointmentStatus.CANCELLED).length
+  };
+  
+  // Calculate revenue statistics
+  const totalRevenue = completedAppointments.reduce((sum, app) => sum + app.totalAmount, 0);
+  const currentMonthRevenue = currentMonthAppointments
+    .filter(app => app.status === AppointmentStatus.COMPLETED)
+    .reduce((sum, app) => sum + app.totalAmount, 0);
+  
   return {
-    totalAppointments: completedAppointments.length,
+    // Basic metrics
+    totalAppointments: allAppointments.length,
+    completedAppointments: completedAppointments.length,
+    cancelledAppointments: cancelledAppointments.length,
+    upcomingAppointments: upcomingAppointments.length,
+    
+    // Performance metrics
+    completionRate: parseFloat(completionRate as string),
+    cancellationRate: parseFloat(cancellationRate as string),
+    averageServiceDuration,
+    
+    // Current ratings from database
+    rating: employee.employeeInfo?.performance?.rating || 0,
+    completedServices: employee.employeeInfo?.performance?.completedServices || 0,
+    
+    // Time-based metrics
+    busiestDay: {
+      day: daysOfWeek[busiestDay],
+      count: dayCount[busiestDay]
+    },
+    
+    // Financial metrics
+    totalRevenue,
+    currentMonthRevenue,
+    
+    // Detailed breakdowns
     serviceBreakdown,
     monthlyPerformance,
-    completedServices:
-      employee.employeeInfo?.performance?.completedServices || 0,
-    rating: employee.employeeInfo?.performance?.rating || 0,
+    currentMonthStatusBreakdown,
+    
+    // Employee details
+    employeeDetails: {
+      id: employee._id,
+      name: employee.fullName,
+      specialties: employee.employeeInfo?.specialties || [],
+      profilePicture: employee.profilePicture?.url || null
+    }
   };
 };
 
@@ -1066,11 +1207,10 @@ export const getEmployeeScheduleRangeService = async ({
     _id: employeeId,
     role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] }
   });
-
   if (!employee) {
     throw new NotFoundException("Không tìm thấy nhân viên");
   }
-
+  
   // Parse dates
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -1079,17 +1219,17 @@ export const getEmployeeScheduleRangeService = async ({
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     throw new BadRequestException("Ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD");
   }
-
+  
   // Set time to start/end of day for consistent date comparison
   start.setHours(0, 0, 0, 0);
   end.setHours(23, 59, 59, 999);
-
+  
   // Get all schedule entries in the date range
   const schedules = await EmployeeScheduleModel.find({
     employeeId,
     date: { $gte: start, $lte: end }
   }).sort({ date: 1 });
-
+  
   // Get all appointments in the date range
   const appointments = await AppointmentModel.find({
     employeeId,
@@ -1103,20 +1243,24 @@ export const getEmployeeScheduleRangeService = async ({
       select: "name description price duration"
     })
     .sort({ scheduledDate: 1, "scheduledTimeSlot.start": 1 });
-
-  // Get default work hours from employee profile if available
-  const defaultWorkHours = employee.employeeInfo?.schedule?.workHours || {
-    start: "09:00",
-    end: "17:00"
-  };
-
+  
+  // Get default work hours from employee profile and normalize to array format
+  const defaultWorkHours = employee.employeeInfo?.schedule?.workHours;
+  const normalizedDefaultWorkHours = Array.isArray(defaultWorkHours) 
+    ? defaultWorkHours 
+    : [{ start: defaultWorkHours?.start || "09:00", end: defaultWorkHours?.end || "17:00" }];
+  
   // Create a map of date to schedule for easy lookup
   const scheduleMap = new Map();
   schedules.forEach(schedule => {
     const dateStr = schedule.date.toISOString().split('T')[0];
+    // Ensure workHours is always in array format
+    if (schedule.workHours && !Array.isArray(schedule.workHours)) {
+      schedule.workHours = [schedule.workHours];
+    }
     scheduleMap.set(dateStr, schedule);
   });
-
+  
   // Generate a complete schedule for each day in the range
   const completeSchedule = [];
   const currentDate = new Date(start);
@@ -1134,7 +1278,7 @@ export const getEmployeeScheduleRangeService = async ({
         date: new Date(currentDate),
         employeeId,
         isWorking: true, // Default to working
-        workHours: defaultWorkHours,
+        workHours: normalizedDefaultWorkHours, // Always an array now
         isDefault: true // Flag to indicate this is a default entry, not a saved one
       });
     }
@@ -1142,7 +1286,7 @@ export const getEmployeeScheduleRangeService = async ({
     // Move to the next day
     currentDate.setDate(currentDate.getDate() + 1);
   }
-
+  
   return {
     schedules: completeSchedule,
     appointments

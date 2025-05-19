@@ -37,6 +37,7 @@ import { StatusIndicator } from '@/features/appointment/components/admin-appoint
 import { useGetAppointmentById } from '@/features/appointment/hooks/queries/get-appointment';
 import AppointmentStatusActions from '@/features/appointment/components/admin-appointment-details/appointment-status-action';
 import PaymentManagement from '@/features/payment/components/payment-management';
+import Renderer from '@/components/shared/renderer';
 
 const AppointmentDetailsPage = () => {
   const { appointmentId } = useParams<{ appointmentId: string }>();
@@ -172,9 +173,9 @@ const getPaymentStatusColor = (status: string) => {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Button 
-                    variant="ghost" 
-                    className="mb-2 p-0 h-auto" 
+                  <Button
+                    variant="ghost"
+                    className="mb-2 p-0 h-auto"
                     onClick={handleBack}
                   >
                     <ArrowLeft className="h-4 w-4 mr-1" />
@@ -184,11 +185,10 @@ const getPaymentStatusColor = (status: string) => {
                     {isLoading ? (
                       <Skeleton className="h-8 w-64" />
                     ) : (
-                      appointment?.serviceId.name || 'Chi tiết lịch hẹn'
+                      appointment?.serviceId.name || "Chi tiết lịch hẹn"
                     )}
                   </CardTitle>
                 </div>
-                
               </div>
               <div className="flex flex-wrap gap-3 mt-2">
                 {isLoading ? (
@@ -198,16 +198,21 @@ const getPaymentStatusColor = (status: string) => {
                   </>
                 ) : (
                   <>
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={getStatusColor(appointment?.status)}
                     >
-                      <StatusIndicator status={appointment?.status || ''} size="sm" />
+                      <StatusIndicator
+                        status={appointment?.status || ""}
+                        size="sm"
+                      />
                       {getStatusLabel(appointment?.status)}
                     </Badge>
-                    <Badge 
+                    <Badge
                       variant="outline"
-                      className={getPaymentStatusColor(appointment?.paymentStatus)}
+                      className={getPaymentStatusColor(
+                        appointment?.paymentStatus
+                      )}
                     >
                       <CreditCard className="h-3.5 w-3.5 mr-1.5" />
                       {getPaymentStatusLabel(appointment?.paymentStatus)}
@@ -237,7 +242,8 @@ const getPaymentStatusColor = (status: string) => {
                       <Skeleton className="h-5 w-32 mt-1" />
                     ) : (
                       <div className="text-sm text-gray-500">
-                        {appointment?.scheduledTimeSlot.start} - {appointment?.scheduledTimeSlot.end}
+                        {appointment?.scheduledTimeSlot.start} -{" "}
+                        {appointment?.scheduledTimeSlot.end}
                       </div>
                     )}
                   </div>
@@ -266,7 +272,9 @@ const getPaymentStatusColor = (status: string) => {
                         </div>
                         <div className="text-sm text-gray-500 mt-0.5">
                           <CreditCard className="h-3.5 w-3.5 inline mr-1" />
-                          {appointment?.serviceId?.price?.toLocaleString() || 0} VNĐ
+                          {appointment?.serviceId?.price?.toLocaleString() ||
+                            0}{" "}
+                          VNĐ
                         </div>
                       </>
                     )}
@@ -288,17 +296,23 @@ const getPaymentStatusColor = (status: string) => {
                     ) : (
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage 
-                            src={appointment?.employeeId?.profilePicture?.url || ''} 
-                            alt={appointment?.employeeId?.fullName || 'Employee'} 
+                          <AvatarImage
+                            src={
+                              appointment?.employeeId?.profilePicture?.url || ""
+                            }
+                            alt={
+                              appointment?.employeeId?.fullName || "Employee"
+                            }
                           />
                           <AvatarFallback>
-                            {appointment?.employeeId?.fullName?.charAt(0) || 'E'}
+                            {appointment?.employeeId?.fullName?.charAt(0) ||
+                              "E"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-medium">
-                            {appointment?.employeeId?.fullName || 'Chưa phân công'}
+                            {appointment?.employeeId?.fullName ||
+                              "Chưa phân công"}
                           </div>
                         </div>
                       </div>
@@ -324,12 +338,17 @@ const getPaymentStatusColor = (status: string) => {
                     ) : (
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage 
-                            src={appointment?.customerId?.profilePicture?.url || ''} 
-                            alt={appointment?.customerId?.fullName || 'Customer'} 
+                          <AvatarImage
+                            src={
+                              appointment?.customerId?.profilePicture?.url || ""
+                            }
+                            alt={
+                              appointment?.customerId?.fullName || "Customer"
+                            }
                           />
                           <AvatarFallback>
-                            {appointment?.customerId?.fullName?.charAt(0) || 'C'}
+                            {appointment?.customerId?.fullName?.charAt(0) ||
+                              "C"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -337,7 +356,8 @@ const getPaymentStatusColor = (status: string) => {
                             {appointment?.customerId?.fullName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {appointment?.customerId?.email} • {appointment?.customerId?.phoneNumber}
+                            {appointment?.customerId?.email} •{" "}
+                            {appointment?.customerId?.phoneNumber}
                           </div>
                         </div>
                       </div>
@@ -362,20 +382,24 @@ const getPaymentStatusColor = (status: string) => {
                     ) : (
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage 
-                            src={appointment?.petId?.profilePicture?.url || ''} 
-                            alt={appointment?.petId?.name || 'Pet'} 
+                          <AvatarImage
+                            src={appointment?.petId?.profilePicture?.url || ""}
+                            alt={appointment?.petId?.name || "Pet"}
                           />
                           <AvatarFallback>
-                            {appointment?.petId?.name?.charAt(0) || 'P'}
+                            {appointment?.petId?.name?.charAt(0) || "P"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <Link to={`/manager/pets/${appointment?.petId?._id}`} className="font-medium hover:underline hover:text-primary">
+                          <Link
+                            to={`/manager/pets/${appointment?.petId?._id}`}
+                            className="font-medium hover:underline hover:text-primary"
+                          >
                             {appointment?.petId?.name}
                           </Link>
                           <div className="text-sm text-gray-500">
-                            {appointment?.petId?.species} • {appointment?.petId?.breed}
+                            {appointment?.petId?.species} •{" "}
+                            {appointment?.petId?.breed}
                           </div>
                         </div>
                       </div>
@@ -424,7 +448,7 @@ const getPaymentStatusColor = (status: string) => {
                     </>
                   ) : (
                     <div className="text-sm">
-                      {appointment?.notes || 'Không có ghi chú'}
+                      {appointment?.notes || "Không có ghi chú"}
                     </div>
                   )}
                 </div>
@@ -443,7 +467,7 @@ const getPaymentStatusColor = (status: string) => {
                     </>
                   ) : (
                     <div className="text-sm">
-                      {appointment?.serviceNotes || 'Không có ghi chú dịch vụ'}
+                      {appointment?.serviceNotes || "Không có ghi chú dịch vụ"}
                     </div>
                   )}
                 </div>
@@ -465,36 +489,47 @@ const getPaymentStatusColor = (status: string) => {
                 </div>
               ) : (
                 <div>
-                  <p className="text-sm text-gray-600">
-                    {appointment?.serviceId?.description || 'Không có mô tả chi tiết dịch vụ.'}
-                  </p>
-                  
-                  {appointment?.serviceId?.images && appointment.serviceId.images.length > 0 && (
-                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                      {appointment.serviceId.images
-                        .filter(img => img.url)
-                        .map((image, index) => (
-                          <div key={index} className="rounded-md overflow-hidden">
-                            <img 
-                              src={image.url || ''} 
-                              alt={`Service ${index + 1}`} 
-                              className="h-24 w-full object-cover"
-                            />
-                          </div>
-                        ))}
-                    </div>
-                  )}
+                  <Renderer
+                    value={
+                      appointment?.serviceId?.description ||
+                      "Không có mô tả chi tiết dịch vụ"
+                    }
+                  />
+
+                  {appointment?.serviceId?.images &&
+                    appointment.serviceId.images.length > 0 && (
+                      <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {appointment.serviceId.images
+                          .filter((img) => img.url)
+                          .map((image, index) => (
+                            <div
+                              key={index}
+                              className="rounded-md overflow-hidden"
+                            >
+                              <img
+                                src={image.url || ""}
+                                alt={`Service ${index + 1}`}
+                                className="h-24 w-full object-cover"
+                              />
+                            </div>
+                          ))}
+                      </div>
+                    )}
                 </div>
               )}
             </CardContent>
           </Card>
-        </div> 
+        </div>
         <div className="w-full md:w-80">
-          <AppointmentStatusActions 
+          <AppointmentStatusActions
             appointment={appointment}
             isLoading={isLoading}
           />
-          <PaymentManagement appointment={appointment} isLoading={isLoading} isAdmin />
+          <PaymentManagement
+            appointment={appointment}
+            isLoading={isLoading}
+            isAdmin
+          />
         </div>
       </div>
     </div>
