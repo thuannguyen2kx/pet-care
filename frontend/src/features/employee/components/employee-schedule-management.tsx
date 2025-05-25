@@ -43,7 +43,7 @@ const EmployeeScheduleManager: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"calendar" | "grid">("calendar");
 
-  // Use the employee schedule hook
+  // Use the employee schedule hook - pass currentDate vào đây
   const {
     schedules,
     appointments,
@@ -57,8 +57,9 @@ const EmployeeScheduleManager: React.FC = () => {
     monthlyWorkingHours,
     isSaving,
     isDeleting,
-  } = useEmployeeSchedule(employeeId || user?._id || "");
+  } = useEmployeeSchedule(employeeId || user?._id || "", currentDate); // Thêm currentDate parameter
 
+  console.log("selectedData", selectedDate)
 
   // Handle clicking on a day
   const handleDayClick = (date: Date) => {

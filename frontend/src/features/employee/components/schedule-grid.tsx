@@ -136,7 +136,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   // Create week days header
   const weekDays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((day) => (
-    <div key={day} className="text-center p-2 border-b font-medium bg-gray-50">
+    <div key={day} className="text-center p-2 border-b border-gray-200 font-medium bg-gray-50">
       {day}
     </div>
   ));
@@ -186,7 +186,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
         </div>
 
         {/* Grid calendar */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
           <div className="grid grid-cols-7">{weekDays}</div>
           {renderGridCalendarDays()}
         </div>

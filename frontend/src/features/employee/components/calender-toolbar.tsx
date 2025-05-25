@@ -68,13 +68,12 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           </Button>
         </div>
         
-        {setViewMode && (
           <div className="flex md:hidden">
             <Button 
               variant={viewMode === "calendar" ? "default" : "outline"} 
               size="sm" 
               className="rounded-r-none"
-              onClick={() => setViewMode("calendar")}
+              onClick={() => setViewMode?.("calendar")}
             >
               <CalendarDays className="h-4 w-4" />
             </Button>
@@ -82,12 +81,11 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
               variant={viewMode === "grid" ? "default" : "outline"} 
               size="sm" 
               className="rounded-l-none"
-              onClick={() => setViewMode("grid")}
+              onClick={() => setViewMode?.("grid")}
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
           </div>
-        )}
       </div>
 
       <h2 className="text-sm font-semibold hidden md:block">

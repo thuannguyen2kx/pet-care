@@ -23,10 +23,16 @@ interface UseEmployeeScheduleReturn {
   isDeleting: boolean;
 }
 
-export const useEmployeeSchedule = (employeeId: string): UseEmployeeScheduleReturn => {
+// Thêm currentDate như một parameter
+export const useEmployeeSchedule = (
+  employeeId: string, 
+  currentDate: Date = new Date() // Thêm parameter này
+): UseEmployeeScheduleReturn => {
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const currentMonth = selectedDate ? new Date(selectedDate) : new Date();
+  
+  // Sử dụng currentDate thay vì selectedDate để tính toán date range
+  const currentMonth = currentDate;
   
   // Calculate date range for fetching
   const startDate = format(startOfMonth(currentMonth), "yyyy-MM-dd");
