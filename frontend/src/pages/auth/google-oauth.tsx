@@ -12,14 +12,13 @@ const GoogleOAuth = () => {
   const { setAccessToken } = useStore();
 
   const accessToken = params.get("access_token");
-  const currentWorkspace = params.get("current_workspace");
 
   React.useEffect(() => {
     if (accessToken) {
       setAccessToken(accessToken);
       navigate(CUSTOMER_ROUTES.HOME);
     }
-  }, [accessToken, currentWorkspace, navigate, setAccessToken]);
+  }, [accessToken , navigate, setAccessToken]);
 
   return (
     <div className="flex flex-col items-center justify-center gap-6 p-6 min-h-svh bg-muted md:p-10">

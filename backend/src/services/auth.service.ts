@@ -43,8 +43,7 @@ export const loginOrCreateAccountService = async (data: {
       await account.save({ session });
     }
     await session.commitTransaction();
-    session.endSession();
-
+    session.endSession(); 
     console.log("End session...");
     return { user };
   } catch (error) {

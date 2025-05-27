@@ -10,6 +10,9 @@ export const getCurrentUserService = async (userId: string) => {
   if (!user) {
     throw new BadRequestException("User not found");
   }
+  if(user.status === StatusUser.BLOCKED) {
+    throw new BadRequestException("Your account is blocked. Please contact support.");
+  }
 
   return { user };
 };

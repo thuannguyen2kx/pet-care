@@ -16,8 +16,9 @@ export const useLogin = () => {
       toast.success("Đăng nhập thành công");
       queriesClient.invalidateQueries({ queryKey: ["current"] });
     },
-    onError: () => {
-      toast.error("Đăng nhập thất bại");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Đăng nhập thất bại");
     },
   });
 

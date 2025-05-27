@@ -13,15 +13,15 @@ import { specialtyTranslations } from "@/constants";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface EmployeeSelectionStepProps {
   form: UseFormReturn<FormValues>;
   serviceId: string;
   serviceType: string;
-  selectedDate?: Date; // Tùy chọn, không cần thiết trong luồng mới
+  selectedDate?: Date;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  selectedTimeSlotData?: any; // Tùy chọn, không cần thiết trong luồng mới
+  selectedTimeSlotData?: any;
 }
 
 const EmployeeSelectionStep: React.FC<EmployeeSelectionStepProps> = ({
@@ -29,14 +29,22 @@ const EmployeeSelectionStep: React.FC<EmployeeSelectionStepProps> = ({
   serviceId,
   serviceType
 }) => {
-  // State để lưu từ khóa tìm kiếm
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Lấy danh sách nhân viên dựa trên dịch vụ - không cần lọc theo date và time slot
+  // Lấy danh sách nhân viên dựa trên dịch vụ
   const { data: employeesData, isLoading: isEmployeesLoading } = useGetEmployeesForService({
     serviceId,
     serviceType
   });
+
+  // FIX: Đảm bảo form field có giá trị mặc định là empty string
+  useEffect(() => {
+    const currentValue = form.getValues("employeeId");
+    if (currentValue === undefined || currentValue === null) {
+      // Đặt giá trị mặc định là empty string (không chọn ai)
+      form.setValue("employeeId", "", { shouldValidate: false });
+    }
+  }, [form]);
 
   // Lọc nhân viên theo từ khóa tìm kiếm
   const filteredEmployees = employeesData?.employees?.filter(employee => 
@@ -88,12 +96,43 @@ const EmployeeSelectionStep: React.FC<EmployeeSelectionStepProps> = ({
 
           <FormControl>
             <div className="space-y-4">
+              {/* FIX: Nút "Để hệ thống tự chọn" đặt lên đầu và mặc định được chọn */}
+              {!isEmployeesLoading && filteredEmployees.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                  className="pb-4 border-b border-muted"
+                >
+                  <Button
+                    type="button"
+                    variant={!field.value || field.value === "" ? "default" : "outline"}
+                    className={cn(
+                      "w-full", 
+                      !field.value || field.value === "" 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                        : "hover:bg-muted"
+                    )}
+                    onClick={() => {
+                      field.onChange("");
+                      console.log("Selected: Auto-assign employee");
+                    }}
+                  >
+                    <CalendarRange className="h-4 w-4 mr-2" />
+                    {!field.value || field.value === ""
+                      ? "✓ Hệ thống sẽ tự chọn nhân viên phù hợp" 
+                      : "Để hệ thống tự chọn nhân viên phù hợp"
+                    }
+                  </Button>
+                </motion.div>
+              )}
+
               {/* Tìm kiếm nhân viên */}
               {employeesData?.employees && employeesData.employees.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
                 >
                   <div className="relative mb-4">
                     <Input
@@ -125,10 +164,14 @@ const EmployeeSelectionStep: React.FC<EmployeeSelectionStepProps> = ({
                   initial="hidden"
                   animate="show"
                 >
+                  {/* FIX: Đặt value rõ ràng cho RadioGroup và không cho defaultValue */}
                   <RadioGroup
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      console.log("Selected employee:", value);
+                    }}
                     className="space-y-4"
-                    value={field.value}
+                    value={field.value || ""} // FIX: Đảm bảo value luôn có giá trị
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {filteredEmployees.map((employee, index) => (
@@ -137,11 +180,15 @@ const EmployeeSelectionStep: React.FC<EmployeeSelectionStepProps> = ({
                           variants={item}
                           transition={{ delay: index * 0.05 }}
                           className={cn(
-                            "relative flex items-center space-x-3 rounded-lg border p-4 transition-all hover:bg-muted/10",
+                            "relative flex items-center space-x-3 rounded-lg border p-4 transition-all hover:bg-muted/10 cursor-pointer",
                             field.value === employee._id
-                              ? "border-primary bg-primary/5"
-                              : "border-border"
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                              : "border-border hover:border-primary/30"
                           )}
+                          onClick={() => {
+                            field.onChange(employee._id);
+                            console.log("Selected employee:", employee._id, employee.fullName);
+                          }}
                         >
                           <RadioGroupItem
                             value={employee._id}
@@ -231,36 +278,13 @@ const EmployeeSelectionStep: React.FC<EmployeeSelectionStepProps> = ({
                   <p>Không có nhân viên nào khả dụng cho dịch vụ này.</p>
                 </motion.div>
               )}
-
-              {/* Nút Để hệ thống tự chọn */}
-              {!isEmployeesLoading && filteredEmployees.length > 0 && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ duration: 0.3, delay: 0.3 }}
-                  className="pt-4"
-                >
-                  <Button
-                    type="button"
-                    variant={!field.value ? "default" : "outline"}
-                    className={cn(
-                      "w-full", 
-                      !field.value ? "bg-primary/10 text-primary hover:bg-primary/20 border-primary/30" : ""
-                    )}
-                    onClick={() => field.onChange("")}
-                  >
-                    <CalendarRange className="h-4 w-4 mr-2" />
-                    {!field.value 
-                      ? "Hệ thống sẽ tự chọn nhân viên phù hợp (đã chọn)" 
-                      : "Để hệ thống tự chọn nhân viên phù hợp"
-                    }
-                  </Button>
-                </motion.div>
-              )}
             </div>
           </FormControl>
           <FormDescription className="mt-3">
-            Chọn nhân viên sẽ giúp hiển thị các ngày và khung giờ phù hợp với lịch làm việc của họ.
+            {field.value && field.value !== "" 
+              ? `Đã chọn nhân viên: ${filteredEmployees.find(emp => emp._id === field.value)?.fullName || "Không xác định"}`
+              : "Hệ thống sẽ tự động chọn nhân viên phù hợp nhất cho bạn."
+            }
           </FormDescription>
           <FormMessage />
         </FormItem>

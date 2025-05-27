@@ -10,7 +10,6 @@ import {
   Bookmark,
   MoreHorizontal,
   Trash2,
-  Edit,
   AlertTriangle,
 } from "lucide-react";
 import {
@@ -42,7 +41,6 @@ interface PostCardProps {
 export const PostCard: React.FC<PostCardProps> = ({
   post,
   showActions = true,
-  onEdit,
 }) => {
   const { user } = useAuthContext();
   const [DeleteDialog, confirmDelete] = useConfirm(
@@ -126,17 +124,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {canModify && (
-                  <>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => onEdit(post)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                    )}
-
+                  <> 
                     <DropdownMenuItem
                       className="text-red-500 cursor-pointer"
                       onClick={handleDelete}
@@ -253,13 +241,12 @@ export const PostCard: React.FC<PostCardProps> = ({
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {post.tags.map((tag, index) => (
-                <Link
-                  key={index}
-                  to={`/tags/${tag}`}
+                <span
+                  key={index} 
                   className="text-sm text-blue-500 hover:underline"
                 >
                   #{tag}
-                </Link>
+                </span>
               ))}
             </div>
           )}

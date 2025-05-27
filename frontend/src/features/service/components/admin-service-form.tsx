@@ -30,7 +30,6 @@ import {
 import { 
   Loader2, 
   ArrowLeft, 
-  ImagePlus, 
   X, 
   Upload, 
   Sparkles 
@@ -113,7 +112,6 @@ const ServiceForm: React.FC = () => {
 
   const [imageUrls, setImageUrls] = useState<ImageType[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [newImageUrl, setNewImageUrl] = useState("");
 
   // Set form values when service data is loaded
   useEffect(() => {
@@ -163,7 +161,7 @@ const ServiceForm: React.FC = () => {
       updateServiceMutation.mutate(servicePayload, {
         onSuccess: () => {
           toast.success("Cập nhật dịch vụ thành công");
-          navigate("/admin/services");
+          navigate("/manager/services");
         },
         onError: (error) => {
           toast.error("Cập nhật dịch vụ thất bại");
@@ -226,17 +224,17 @@ const ServiceForm: React.FC = () => {
   };
 
   // Thêm hình ảnh từ URL
-  const addImageUrl = () => {
-    if (newImageUrl && !imageUrls.some((img) => img.url === newImageUrl)) {
-      // Tạo một ID công khai tạm thời nếu không có
-      const newImage: ImageType = {
-        url: newImageUrl,
-        publicId: `temp_${Date.now()}`, // ID tạm thời
-      };
-      setImageUrls([...imageUrls, newImage]);
-      setNewImageUrl("");
-    }
-  };
+  // const addImageUrl = () => {
+  //   if (newImageUrl && !imageUrls.some((img) => img.url === newImageUrl)) {
+  //     // Tạo một ID công khai tạm thời nếu không có
+  //     const newImage: ImageType = {
+  //       url: newImageUrl,
+  //       publicId: `temp_${Date.now()}`, // ID tạm thời
+  //     };
+  //     setImageUrls([...imageUrls, newImage]);
+  //     setNewImageUrl("");
+  //   }
+  // };
 
   // Xử lý upload file
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -716,22 +714,7 @@ const ServiceForm: React.FC = () => {
               )}
 
               {/* Input thêm URL hình ảnh */}
-              <div className="flex gap-2">
-                <Input
-                  type="url"
-                  placeholder="Nhập URL hình ảnh"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  onClick={addImageUrl}
-                  disabled={!newImageUrl}
-                >
-                  <ImagePlus className="h-4 w-4 mr-2" />
-                  Thêm URL
-                </Button>
-              </div>
+             
 
               {/* Upload file */}
               {!isEditMode && (

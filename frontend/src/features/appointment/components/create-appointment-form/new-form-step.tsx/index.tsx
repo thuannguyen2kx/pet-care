@@ -58,7 +58,7 @@ export const AppointmentFormStep: React.FC = () => {
     string | null
   >(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Track if date needs to be reset due to employee change
   const [shouldResetDate, setShouldResetDate] = useState(false);
   const [previousEmployeeId, setPreviousEmployeeId] = useState<string>("");
@@ -78,15 +78,29 @@ export const AppointmentFormStep: React.FC = () => {
   }, [serviceId, navigate]);
 
   // Form setup
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      petId: "",
-      employeeId: "",
-      notes: "",
-      paymentMethod: "card",
-    },
+const form = useForm<FormValues>({
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    petId: "",
+    employeeId: "", // FIX: Mặc định là empty string
+    notes: "",
+    paymentMethod: "card",
+    timeSlot: {
+      start: "",
+      end: "",
+      originalSlotIndexes: []
+    }
+  },
+  mode: "onChange", // FIX: Thêm mode để validate real-time
+});
+useEffect(() => {
+  const subscription = form.watch((value, { name }) => {
+    if (name === "employeeId") {
+      console.log("Employee ID changed:", value.employeeId);
+    }
   });
+  return () => subscription.unsubscribe();
+}, [form]);
 
   // Fetch queries
   const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId);
@@ -103,31 +117,29 @@ export const AppointmentFormStep: React.FC = () => {
   const currentEmployeeId = form.watch("employeeId");
 
   // Check for employee changes and manage date reset
-  useEffect(() => {
-    if (previousEmployeeId && currentEmployeeId !== previousEmployeeId) {
-      // Employee has changed, flag that we need to reset date
-      setShouldResetDate(true);
-    }
-    
-    // Always update previous employee ID
-    if (currentEmployeeId) {
-      setPreviousEmployeeId(currentEmployeeId);
-    }
-  }, [currentEmployeeId, previousEmployeeId]);
+useEffect(() => {
+  if (previousEmployeeId && currentEmployeeId !== previousEmployeeId) {
+    console.log(`Employee changed from ${previousEmployeeId} to ${currentEmployeeId}`);
+    setShouldResetDate(true);
+  }
+  
+  // Cập nhật previous employee ID, bao gồm cả empty string
+  setPreviousEmployeeId(currentEmployeeId || "");
+}, [currentEmployeeId, previousEmployeeId]);
 
   // Reset date and time when employee changes
   useEffect(() => {
     if (shouldResetDate) {
       // Reset date
       setSelectedDate(undefined);
-      
+
       // Reset time slot
       form.setValue(
         "timeSlot",
         { start: "", end: "", originalSlotIndexes: [] },
         { shouldValidate: false }
       );
-      
+
       // Reset the flag
       setShouldResetDate(false);
     }
@@ -154,7 +166,7 @@ export const AppointmentFormStep: React.FC = () => {
 
   // Calculate progress percentage
   const progressPercentage = useMemo(() => {
-    const totalSteps = Object.keys(STEPS).length / 2;
+    const totalSteps = Object.keys(STEPS).length;
     return ((currentStep + 1) / totalSteps) * 100;
   }, [currentStep]);
 
@@ -201,36 +213,39 @@ export const AppointmentFormStep: React.FC = () => {
     }
   };
 
-  const processPayment = useCallback((appointmentId: string, data: FormValues) => {
-    const paymentMethod = data.paymentMethod;
+  const processPayment = useCallback(
+    (appointmentId: string, data: FormValues) => {
+      const paymentMethod = data.paymentMethod;
 
-    if (paymentMethod === "card") {
-      // For card payments, redirect to Stripe checkout
-      createCheckoutSessionMutation.mutate(appointmentId, {
-        onError: () => {
-          setIsSubmitting(false);
-        },
-      });
-    } else {
-      // For cash or bank transfer, use the regular payment endpoint
-      processPaymentMutation.mutate(
-        {
-          appointmentId,
-          paymentMethod,
-        },
-        {
-          onSuccess: () => {
-            navigate("/appointments", {
-              state: { paymentSuccess: true, appointmentId },
-            });
-          },
+      if (paymentMethod === "card") {
+        // For card payments, redirect to Stripe checkout
+        createCheckoutSessionMutation.mutate(appointmentId, {
           onError: () => {
             setIsSubmitting(false);
           },
-        }
-      );
-    }
-  }, [createCheckoutSessionMutation, navigate, processPaymentMutation]);
+        });
+      } else {
+        // For cash or bank transfer, use the regular payment endpoint
+        processPaymentMutation.mutate(
+          {
+            appointmentId,
+            paymentMethod,
+          },
+          {
+            onSuccess: () => {
+              navigate("/appointments", {
+                state: { paymentSuccess: true, appointmentId },
+              });
+            },
+            onError: () => {
+              setIsSubmitting(false);
+            },
+          }
+        );
+      }
+    },
+    [createCheckoutSessionMutation, navigate, processPaymentMutation]
+  );
 
   // Handle back button
   const handleBack = useCallback(() => {
@@ -303,7 +318,7 @@ export const AppointmentFormStep: React.FC = () => {
         );
       case STEPS.DATE:
         return (
-          <DateSelectionStep form={form}  setSelectedDate={setSelectedDate} />
+          <DateSelectionStep form={form} setSelectedDate={setSelectedDate} />
         );
       case STEPS.TIME:
         return (
@@ -409,7 +424,7 @@ export const AppointmentFormStep: React.FC = () => {
             {currentStep === STEPS.PET ? "Quay lại" : "Trước đó"}
           </Button>
           <div className="text-sm font-medium bg-primary/10 px-3 py-1 rounded-full">
-            Bước {currentStep + 1}/{Object.keys(STEPS).length/2}: {getStepTitle()}
+            Bước {currentStep + 1}/{Object.keys(STEPS).length}: {getStepTitle()}
           </div>
         </div>
       </div>

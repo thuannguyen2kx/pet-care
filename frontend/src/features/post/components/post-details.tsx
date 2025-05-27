@@ -13,7 +13,6 @@ import {
   Smile,
   Loader2,
   Trash2,
-  Edit,
   AlertTriangle,
 } from 'lucide-react';
 import { 
@@ -148,14 +147,7 @@ const PostDetails = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {canModify && (
-                <>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/posts/${postId}/edit`)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Chỉnh sửa bài viết
-                  </DropdownMenuItem>
+                <> 
                   <DropdownMenuItem
                     className="text-red-500 cursor-pointer"
                     onClick={handleDeletePost}
@@ -256,13 +248,12 @@ const PostDetails = () => {
                   {post.tags && post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-4">
                       {post.tags.map((tag, index) => (
-                        <Link
+                        <span
                           key={index}
-                          to={`/tags/${tag}`}
                           className="text-sm bg-blue-50 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-100"
                         >
                           #{tag}
-                        </Link>
+                        </span>
                       ))}
                     </div>
                   )}

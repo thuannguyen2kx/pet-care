@@ -567,12 +567,10 @@ export const getDashboardStatisticsService = async () => {
     totalAppointments,
     completedAppointments,
     revenueAggregate,
-    // Thêm các truy vấn mới
     serviceBreakdown,
     employeePerformance,
     appointmentStatusCounts,
     customerStats,
-    // Lấy dữ liệu weekly và monthly từ các service riêng
     weeklyData,
     monthlyTrendData
   ] = await Promise.all([
@@ -587,11 +585,22 @@ export const getDashboardStatisticsService = async () => {
       status: AppointmentStatus.COMPLETED
     }),
     
-    // Tổng doanh thu tháng này
+    // Tổng doanh thu tháng này - FIX: Join với appointment để đảm bảo chỉ lấy payment của tháng này
     PaymentModel.aggregate([
       {
+        $lookup: {
+          from: 'appointments',
+          localField: 'appointmentId',
+          foreignField: '_id',
+          as: 'appointment'
+        }
+      },
+      {
+        $unwind: '$appointment'
+      },
+      {
         $match: {
-          createdAt: { $gte: thisMonth, $lte: today },
+          'appointment.scheduledDate': { $gte: thisMonth, $lte: today },
           status: PaymentStatusEnum.COMPLETED
         }
       },
@@ -603,7 +612,7 @@ export const getDashboardStatisticsService = async () => {
       }
     ]),
     
-    // Phân tích dịch vụ
+    // Phân tích dịch vụ - FIX: Thêm error handling cho lookup
     AppointmentModel.aggregate([
       {
         $match: {
@@ -619,7 +628,15 @@ export const getDashboardStatisticsService = async () => {
         }
       },
       {
-        $unwind: '$service'
+        $addFields: {
+          service: {
+            $cond: {
+              if: { $eq: [{ $size: '$service' }, 0] },
+              then: { name: 'Unknown Service' },
+              else: { $arrayElemAt: ['$service', 0] }
+            }
+          }
+        }
       },
       {
         $group: {
@@ -636,6 +653,21 @@ export const getDashboardStatisticsService = async () => {
             $sum: {
               $cond: [{ $eq: ['$status', AppointmentStatus.CANCELLED] }, 1, 0]
             }
+          },
+          pendingCount: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.PENDING] }, 1, 0]
+            }
+          },
+          confirmedCount: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.CONFIRMED] }, 1, 0]
+            }
+          },
+          inProgressCount: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.IN_PROGRESS] }, 1, 0]
+            }
           }
         }
       },
@@ -647,7 +679,17 @@ export const getDashboardStatisticsService = async () => {
           count: 1,
           revenue: 1,
           completedCount: 1,
-          cancelledCount: 1
+          cancelledCount: 1,
+          pendingCount: 1,
+          confirmedCount: 1,
+          inProgressCount: 1,
+          completionRate: {
+            $cond: {
+              if: { $eq: ['$count', 0] },
+              then: 0,
+              else: { $multiply: [{ $divide: ['$completedCount', '$count'] }, 100] }
+            }
+          }
         }
       },
       {
@@ -655,7 +697,7 @@ export const getDashboardStatisticsService = async () => {
       }
     ]),
     
-    // Hiệu suất nhân viên
+    // Hiệu suất nhân viên - FIX: Thêm error handling cho lookup
     AppointmentModel.aggregate([
       {
         $match: {
@@ -672,7 +714,15 @@ export const getDashboardStatisticsService = async () => {
         }
       },
       {
-        $unwind: '$employee'
+        $addFields: {
+          employee: {
+            $cond: {
+              if: { $eq: [{ $size: '$employee' }, 0] },
+              then: { fullName: 'Unknown Employee' },
+              else: { $arrayElemAt: ['$employee', 0] }
+            }
+          }
+        }
       },
       {
         $group: {
@@ -687,6 +737,11 @@ export const getDashboardStatisticsService = async () => {
           cancelledAppointments: {
             $sum: {
               $cond: [{ $eq: ['$status', AppointmentStatus.CANCELLED] }, 1, 0]
+            }
+          },
+          pendingAppointments: {
+            $sum: {
+              $cond: [{ $eq: ['$status', AppointmentStatus.PENDING] }, 1, 0]
             }
           },
           revenue: {
@@ -704,7 +759,15 @@ export const getDashboardStatisticsService = async () => {
           totalAppointments: 1,
           completedAppointments: 1,
           cancelledAppointments: 1,
-          revenue: 1
+          pendingAppointments: 1,
+          revenue: 1,
+          completionRate: {
+            $cond: {
+              if: { $eq: ['$totalAppointments', 0] },
+              then: 0,
+              else: { $multiply: [{ $divide: ['$completedAppointments', '$totalAppointments'] }, 100] }
+            }
+          }
         }
       },
       {
@@ -712,7 +775,7 @@ export const getDashboardStatisticsService = async () => {
       }
     ]),
     
-    // Số lượng theo trạng thái lịch hẹn
+    // Số lượng theo trạng thái lịch hẹn - FIX: Đảm bảo có đầy đủ các status
     AppointmentModel.aggregate([
       {
         $match: {
@@ -724,53 +787,64 @@ export const getDashboardStatisticsService = async () => {
           _id: '$status',
           count: { $sum: 1 }
         }
+      },
+      {
+        $sort: { _id: 1 }
       }
     ]),
     
-    // Thống kê khách hàng
-    Promise.all([
-      // Tổng số khách hàng
-      UserModel.countDocuments({
-        role: Roles.CUSTOMER,
-        createdAt: { $lte: today }
-      }),
-      // Khách hàng mới
-      UserModel.countDocuments({
-        role: Roles.CUSTOMER,
-        createdAt: { $gte: thisMonth, $lte: today }
-      }),
-      // Khách hàng quay lại (có nhiều hơn 1 lịch hẹn)
-      AppointmentModel.aggregate([
-        {
-          $match: {
-            scheduledDate: { $gte: thisMonth, $lte: today }
+    // Thống kê khách hàng - FIX: Sử dụng cách gọi đúng
+    (async () => {
+      const [totalCustomers, newCustomers, recurringCustomersResult] = await Promise.all([
+        // Tổng số khách hàng
+        UserModel.countDocuments({
+          role: Roles.CUSTOMER,
+          createdAt: { $lte: today }
+        }),
+        // Khách hàng mới
+        UserModel.countDocuments({
+          role: Roles.CUSTOMER,
+          createdAt: { $gte: thisMonth, $lte: today }
+        }),
+        // Khách hàng quay lại (có nhiều hơn 1 lịch hẹn)
+        AppointmentModel.aggregate([
+          {
+            $match: {
+              scheduledDate: { $gte: thisMonth, $lte: today }
+            }
+          },
+          {
+            $group: {
+              _id: '$customerId',
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $match: {
+              count: { $gt: 1 }
+            }
+          },
+          {
+            $count: 'recurring'
           }
-        },
-        {
-          $group: {
-            _id: '$customerId',
-            count: { $sum: 1 }
-          }
-        },
-        {
-          $match: {
-            count: { $gt: 1 }
-          }
-        },
-        {
-          $count: 'recurring'
-        }
-      ])
-    ]),
+        ])
+      ]);
+      
+      return {
+        total: totalCustomers,
+        new: newCustomers,
+        recurring: recurringCustomersResult.length > 0 ? recurringCustomersResult[0].recurring : 0
+      };
+    })(),
     
-    // Dữ liệu theo tuần - sử dụng service mới
-    getWeeklyDataService().then(result => result.weeklyData),
+    // Dữ liệu theo tuần
+    getWeeklyDataService().then(result => result.weeklyData).catch(() => []),
     
-    // Dữ liệu xu hướng theo tháng - sử dụng service mới
-    getMonthlyTrendService().then(result => result.monthlyTrendData)
+    // Dữ liệu xu hướng theo tháng
+    getMonthlyTrendService().then(result => result.monthlyTrendData).catch(() => [])
   ]);
   
-  // Thống kê tháng trước để so sánh
+  // Thống kê tháng trước để so sánh - FIX: Cải thiện query cho payment
   const previousMonthStats = await Promise.all([
     // Tổng số lịch hẹn tháng trước
     AppointmentModel.countDocuments({
@@ -783,11 +857,22 @@ export const getDashboardStatisticsService = async () => {
       status: AppointmentStatus.COMPLETED
     }),
     
-    // Tổng doanh thu tháng trước
+    // Tổng doanh thu tháng trước - FIX: Join với appointment
     PaymentModel.aggregate([
       {
+        $lookup: {
+          from: 'appointments',
+          localField: 'appointmentId',
+          foreignField: '_id',
+          as: 'appointment'
+        }
+      },
+      {
+        $unwind: '$appointment'
+      },
+      {
         $match: {
-          createdAt: { $gte: lastMonth, $lt: thisMonth },
+          'appointment.scheduledDate': { $gte: lastMonth, $lt: thisMonth },
           status: PaymentStatusEnum.COMPLETED
         }
       },
@@ -800,7 +885,7 @@ export const getDashboardStatisticsService = async () => {
     ])
   ]);
   
-  // Xử lý dữ liệu lịch hẹn theo trạng thái
+  // FIX: Xử lý dữ liệu lịch hẹn theo trạng thái một cách đúng đắn
   const statusCounts = {
     total: totalAppointments,
     completed: completedAppointments,
@@ -810,18 +895,35 @@ export const getDashboardStatisticsService = async () => {
     inProgress: 0
   };
   
+  // Map tất cả các status từ aggregate result
   appointmentStatusCounts.forEach(statusCount => {
-    const status = statusCount._id.toLowerCase();
-    if (statusCounts.hasOwnProperty(status)) {
-      statusCounts[status as keyof typeof statusCounts] = statusCount.count;
+    const status = statusCount._id;
+    switch(status) {
+      case AppointmentStatus.COMPLETED:
+        statusCounts.completed = statusCount.count;
+        break;
+      case AppointmentStatus.CANCELLED:
+        statusCounts.cancelled = statusCount.count;
+        break;
+      case AppointmentStatus.PENDING:
+        statusCounts.pending = statusCount.count;
+        break;
+      case AppointmentStatus.CONFIRMED:
+        statusCounts.confirmed = statusCount.count;
+        break;
+      case AppointmentStatus.IN_PROGRESS:
+        statusCounts.inProgress = statusCount.count;
+        break;
     }
   });
   
-  // Xử lý dữ liệu khách hàng
-  const customers = {
-    total: customerStats[0],
-    new: customerStats[1],
-    recurring: customerStats[2].length > 0 ? customerStats[2][0].recurring : 0
+  // FIX: customerStats đã được xử lý trong Promise.all ở trên
+  const customers = customerStats;
+  
+  // Helper function để tính toán phần trăm thay đổi
+  const calculatePercentChange = (oldValue: number, newValue: number): number => {
+    if (oldValue === 0) return newValue > 0 ? 100 : 0;
+    return ((newValue - oldValue) / oldValue * 100);
   };
   
   // Tạo đối tượng phản hồi
@@ -831,11 +933,11 @@ export const getDashboardStatisticsService = async () => {
       completedAppointments,
       revenue: revenueAggregate.length > 0 ? revenueAggregate[0].total : 0,
       appointments: statusCounts,
-      serviceBreakdown,
-      employeePerformance,
+      serviceBreakdown: serviceBreakdown || [],
+      employeePerformance: employeePerformance || [],
       customers,
-      weeklyData, 
-      monthlyTrendData,
+      weeklyData: weeklyData || [], 
+      monthlyTrendData: monthlyTrendData || [],
       period: {
         start: thisMonth,
         end: today

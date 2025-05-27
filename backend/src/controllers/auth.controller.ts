@@ -52,6 +52,11 @@ export const loginUserController = asyncHandler(
             message: info?.message || "Invalid email or password",
           });
         }
+        if (user.status === "BLOCKED") {
+          return res.status(HTTPSTATUS.FORBIDDEN).json({
+            message: "Your account is blocked. Please contact support.",
+          });
+        }
         const access_token = signJwtToken({
           userId: user._id,
           role: user.role,

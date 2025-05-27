@@ -42,7 +42,7 @@ passport.use(
           displayName: profile.displayName,
           providerId: googleId,
           picture: picture,
-        });
+        }); 
         const jwt = signJwtToken({ userId: user._id, role: user.role });
         req.jwt = jwt;
         done(null, user);
