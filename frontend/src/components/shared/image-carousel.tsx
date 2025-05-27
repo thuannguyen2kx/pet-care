@@ -47,7 +47,7 @@ const SimpleImageCarousel: React.FC<ImageCarouselProps> = ({
 
   return (
     <Carousel
-      className={cn(`w-full ${aspectRatio} overflow-hidden`, className)}
+      className={cn(`flex items-center justify-center w-full bg-gray-100 h-full ${aspectRatio} overflow-hidden`, className)}
     >
       <CarouselContent>
         {media.map((item, index) => (

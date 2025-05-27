@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { AppointmentStatus, ServiceType } from "../models/appointment.model";
+import { employeeIdSchema } from "./employee.validation";
 
 export const appointmentIdSchema = z.string().min(1, "ID cuộc hẹn không được để trống");
 
 export const timeSlotSchema = z.object({
   start: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Định dạng thời gian không hợp lệ"),
-  end: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Định dạng thời gian không hợp lệ")
+  end: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Định dạng thời gian không hợp lệ"),
+  // originalSlotIndexes: z.array(z.number()).optional()
 });
 
 export const createAppointmentSchema = z.object({
@@ -13,6 +15,7 @@ export const createAppointmentSchema = z.object({
   serviceType: z.nativeEnum(ServiceType, {
     errorMap: () => ({ message: "Loại dịch vụ không hợp lệ" })
   }),
+  employeeId: employeeIdSchema.optional(),
   serviceId: z.string().min(1, "ID dịch vụ không được để trống"),
   scheduledDate: z.string().min(1, "Ngày hẹn không được để trống"),
   scheduledTimeSlot: timeSlotSchema,

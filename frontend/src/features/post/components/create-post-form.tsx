@@ -1,56 +1,74 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Camera, 
-  X, 
-  Tag, 
-  Globe, 
-  Lock, 
+import {
+  Camera,
+  X,
+  Tag,
+  Globe,
+  Lock,
   Loader2,
   Image as ImageIcon,
   TrashIcon,
   Tags,
-} from 'lucide-react';
-import { useCreatePost } from '../hooks/mutations/use-create-post';
-import { Tag as TagBadge } from './tag'
-import { useAuthContext } from '@/context/auth-provider';
-import { 
+} from "lucide-react";
+import { useCreatePost } from "../hooks/mutations/use-create-post";
+import { Tag as TagBadge } from "./tag";
+import { useAuthContext } from "@/context/auth-provider";
+import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselPrevious,
-  CarouselNext
-} from '@/components/ui/carousel';
-import { useUserPets } from '@/features/pet/hooks/queries/get-pets';
-import { toast } from 'sonner';
+  CarouselNext,
+} from "@/components/ui/carousel";
+import { useUserPets } from "@/features/pet/hooks/queries/get-pets";
+import { toast } from "sonner";
 
-import ReactQuill from "react-quill-new"
+import ReactQuill from "react-quill-new";
 
 import "react-quill-new/dist/quill.snow.css";
-import AIAssistantModal from '@/features/ai-assitant/components/ai';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import AIAssistantModal from "@/features/ai-assitant/components/ai";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 
 // Form validation schema
 const postFormSchema = z.object({
   title: z.string().optional(),
-  content: z.string().min(1, 'Content is required'),
+  content: z.string().min(1, "Content is required"),
   tags: z.string().optional(),
   petIds: z.string().optional(),
-  visibility: z.enum(['public', 'private']).default('public'),
+  visibility: z.enum(["public", "private"]).default("public"),
 });
 
 type PostFormValues = z.infer<typeof postFormSchema>;
-type FieldName = keyof z.infer<typeof postFormSchema>
+type FieldName = keyof z.infer<typeof postFormSchema>;
 
 // Media item interface
 interface MediaItem {
@@ -79,24 +97,24 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
   const userId = user?._id || "";
   const mutation = useCreatePost();
 
-  const {data} = useUserPets(userId)
+  const { data } = useUserPets(userId);
   const pets = data?.pets || [];
-  
+
   // Form with React Hook Form
   const methods = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
     defaultValues: {
-      title: '',
-      content: '',
-      tags: '',
-      petIds: '',
-      visibility: 'public',
+      title: "",
+      content: "",
+      tags: "",
+      petIds: "",
+      visibility: "public",
     },
   });
-  
+
   // UI state
   const [activeStep, setActiveStep] = useState(0);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
   const [tagArray, setTagArray] = useState<string[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,21 +124,28 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
   const [selectedText, setSelectedText] = useState("");
   const [documentContext, setDocumentContext] = useState("");
   const quillRef = useRef<ReactQuill | null>(null);
-  const [selectionRange, setSelectionRange] = useState<{index: number, length: number} | null>(null);
+  const [selectionRange, setSelectionRange] = useState<{
+    index: number;
+    length: number;
+  } | null>(null);
 
-  const steps = useMemo(() => ['Upload', 'Details'], []);
- 
+  const steps = useMemo(() => ["Upload", "Details"], []);
+
   const formValues = methods.watch();
   const descriptionValue = methods.watch("content");
 
   // Update document context for AI whenever form values change
   useEffect(() => {
-    setDocumentContext(`Title: ${formValues.title || ''}\nDescription: ${formValues.content || ''}`);
+    setDocumentContext(
+      `Title: ${formValues.title || ""}\nDescription: ${
+        formValues.content || ""
+      }`
+    );
   }, [formValues]);
 
   // When tags change, update the form value
   useEffect(() => {
-    methods.setValue('tags', tagArray.join(','));
+    methods.setValue("tags", tagArray.join(","));
   }, [tagArray, methods]);
 
   // Handle opening the AI assistant modal
@@ -128,7 +153,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
     if (quillRef.current) {
       const editor = quillRef.current.getEditor();
       const selection = editor.getSelection();
-      
+
       if (selection) {
         // Store the selection range for later use when inserting content
         setSelectionRange(selection);
@@ -143,30 +168,35 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
   }, []);
 
   // Insert AI-generated content into the editor
-  const insertAIContent = useCallback((content: string) => {
-    if (quillRef.current) {
-      const editor = quillRef.current.getEditor();
-      
-      if (selectionRange) {
-        // Replace selected text with AI content
-        editor.deleteText(selectionRange.index, selectionRange.length);
-        editor.insertText(selectionRange.index, content);
-        editor.setSelection(selectionRange.index + content.length, 0);
-      } else {
-        // If no selection, insert at current cursor position or at the end
-        const currentSelection = editor.getSelection();
-        const insertIndex = currentSelection ? currentSelection.index : editor.getLength();
-        editor.insertText(insertIndex, content);
-        editor.setSelection(insertIndex + content.length, 0);
+  const insertAIContent = useCallback(
+    (content: string) => {
+      if (quillRef.current) {
+        const editor = quillRef.current.getEditor();
+
+        if (selectionRange) {
+          // Replace selected text with AI content
+          editor.deleteText(selectionRange.index, selectionRange.length);
+          editor.insertText(selectionRange.index, content);
+          editor.setSelection(selectionRange.index + content.length, 0);
+        } else {
+          // If no selection, insert at current cursor position or at the end
+          const currentSelection = editor.getSelection();
+          const insertIndex = currentSelection
+            ? currentSelection.index
+            : editor.getLength();
+          editor.insertText(insertIndex, content);
+          editor.setSelection(insertIndex + content.length, 0);
+        }
+
+        // Update form value with new editor content
+        const html = editor.root.innerHTML;
+        methods.setValue("content", html);
       }
-      
-      // Update form value with new editor content
-      const html = editor.root.innerHTML;
-      methods.setValue("content", html);
-    }
-    
-    setIsAIMenuOpen(false);
-  }, [methods, selectionRange]);
+
+      setIsAIMenuOpen(false);
+    },
+    [methods, selectionRange]
+  );
 
   // Keyboard shortcut for AI assistant
   useEffect(() => {
@@ -174,7 +204,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
       if ((e.ctrlKey || e.metaKey) && e.key === " ") {
         const activeElement = document.activeElement as HTMLElement;
         const name = activeElement?.getAttribute("name") as FieldName;
-        
+
         // Check if we're in the editor or an input field
         if (name || activeElement.className.includes("ql-editor")) {
           e.preventDefault();
@@ -182,183 +212,205 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
         }
       }
     };
-    
+
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleOpenAI]);
-  
+
   // Handle tag input
-  const handleAddTag = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (tagInput.trim() && !tagArray.includes(tagInput.trim())) {
-      setTagArray(prev => [...prev, tagInput.trim()]);
-      setTagInput('');
-    }
-  }, [tagInput, tagArray]);
-  
+  const handleAddTag = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (tagInput.trim() && !tagArray.includes(tagInput.trim())) {
+        setTagArray((prev) => [...prev, tagInput.trim()]);
+        setTagInput("");
+      }
+    },
+    [tagInput, tagArray]
+  );
+
   const handleRemoveTag = useCallback((tagToRemove: string) => {
-    setTagArray(prev => prev.filter(tag => tag !== tagToRemove));
+    setTagArray((prev) => prev.filter((tag) => tag !== tagToRemove));
   }, []);
-  
+
   // Handle image upload
-  const handleImageUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) return;
-    
-    const files = Array.from(event.target.files);
-    
-    try {
-      const mediaFiles = await Promise.all(
-        files.map(async (file) => {
-          const dataUrl = await fileToDataURL(file);
-          return {
-            file,
-            preview: dataUrl,
-          };
-        })
-      );
-      
-      setMedia(prev => [...prev, ...mediaFiles]);
-      
-      if (activeStep === 0 && media.length === 0) {
-        setActiveStep(1); // Move to details step if this is the first image
+  const handleImageUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (!event.target.files || event.target.files.length === 0) return;
+
+      const files = Array.from(event.target.files);
+
+      try {
+        const mediaFiles = await Promise.all(
+          files.map(async (file) => {
+            const dataUrl = await fileToDataURL(file);
+            return {
+              file,
+              preview: dataUrl,
+            };
+          })
+        );
+
+        setMedia((prev) => [...prev, ...mediaFiles]);
+
+        if (activeStep === 0 && media.length === 0) {
+          setActiveStep(1); // Move to details step if this is the first image
+        }
+      } catch {
+        toast("Có lỗi xảy ra", {
+          description: "Có lỗi xảy ra trong quá trình tải ảnh",
+        });
       }
-    } catch {
-      toast("Có lỗi xảy ra", {
-        description: 'Có lỗi xảy ra trong quá trình tải ảnh',
-      });
-    }
-  }, [activeStep, media.length]);
-  
+    },
+    [activeStep, media.length]
+  );
+
   // Handle image drop
-  const handleDrop = useCallback(async (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    
-    if (!event.dataTransfer.files || event.dataTransfer.files.length === 0) return;
-    
-    const files = Array.from(event.dataTransfer.files);
-    
-    try {
-      const mediaFiles = await Promise.all(
-        files.map(async (file) => {
-          const dataUrl = await fileToDataURL(file);
-          return {
-            file,
-            preview: dataUrl,
-          };
-        })
-      );
-      
-      setMedia(prev => [...prev, ...mediaFiles]);
-      
-      if (activeStep === 0) {
-        setActiveStep(1); // Move to details step
+  const handleDrop = useCallback(
+    async (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+
+      if (!event.dataTransfer.files || event.dataTransfer.files.length === 0)
+        return;
+
+      const files = Array.from(event.dataTransfer.files);
+
+      try {
+        const mediaFiles = await Promise.all(
+          files.map(async (file) => {
+            const dataUrl = await fileToDataURL(file);
+            return {
+              file,
+              preview: dataUrl,
+            };
+          })
+        );
+
+        setMedia((prev) => [...prev, ...mediaFiles]);
+
+        if (activeStep === 0) {
+          setActiveStep(1); // Move to details step
+        }
+      } catch {
+        toast("Có lỗi", {
+          description: "Có lỗi khi tải ảnh",
+        });
       }
-    } catch {
-      toast("Có lỗi", {
-        description: 'Có lỗi khi tải ảnh',
-      });
-    }
-  }, [activeStep]);
-  
-  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  }, []);
-  
+    },
+    [activeStep]
+  );
+
+  const handleDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+    },
+    []
+  );
+
   // Handle removing an image
-  const handleRemoveImage = useCallback((index: number) => {
-    setMedia(prev => {
-      const newMedia = [...prev];
-      newMedia.splice(index, 1);
-      return newMedia;
-    });
-    
-    // Update preview index if needed
-    setPreviewIndex(prev => prev >= media.length - 1 ? Math.max(0, media.length - 2) : prev);
-  }, [media.length]);
-  
+  const handleRemoveImage = useCallback(
+    (index: number) => {
+      setMedia((prev) => {
+        const newMedia = [...prev];
+        newMedia.splice(index, 1);
+        return newMedia;
+      });
+
+      // Update preview index if needed
+      setPreviewIndex((prev) =>
+        prev >= media.length - 1 ? Math.max(0, media.length - 2) : prev
+      );
+    },
+    [media.length]
+  );
+
   // Handle navigation between steps
   const nextStep = useCallback(() => {
-    setActiveStep(prev => Math.min(prev + 1, steps.length - 1));
+    setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
   }, [steps.length]);
-  
+
   const prevStep = useCallback(() => {
-    setActiveStep(prev => Math.max(prev - 1, 0));
+    setActiveStep((prev) => Math.max(prev - 1, 0));
   }, []);
-    
+
   // Handle form submission
-  const onSubmit = useCallback(async (values: PostFormValues) => {
-    if (!values.content.trim()) {
-      toast("Vui lòng nhập nội dung bài viết");
-      return;
-    }
-    
-    if (media.length === 0) {
-      toast("Cảnh báo", {
-        description: "Bạn có chắn chắn muốn tạo bài viết mà không có ảnh nào?",
-      });
-      // You could add a confirmation step here if needed
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
-      // Create FormData for multipart/form-data submission
-      const submitData = new FormData();
-      
-      // Add text fields
-      submitData.append('title', values.title || '');
-      submitData.append('content', values.content);
-      submitData.append('tags', values.tags || '');
-      submitData.append('petIds', values.petIds || '');
-      submitData.append('visibility', values.visibility);
-      
-      // Add media files
-      media.forEach(item => {
-        submitData.append('media', item.file);
-      });
-      
-      // Submit the form
-      await mutation.mutateAsync(submitData);
-      
-      toast("Thành công", {
-        description: "Bạn đã tạo bài viết thành công",
-      });
-      
-      // Close modal or redirect
-      if (onClose) {
-        onClose();
-      } else {
-        navigate('/');
+  const onSubmit = useCallback(
+    async (values: PostFormValues) => {
+      if (!values.content.trim()) {
+        toast("Vui lòng nhập nội dung bài viết");
+        return;
       }
-    } catch  {
-      toast("Có lỗi tạo bài viết");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [media, mutation, navigate, onClose]);
-  
+
+      if (media.length === 0) {
+        toast("Cảnh báo", {
+          description:
+            "Bạn có chắn chắn muốn tạo bài viết mà không có ảnh nào?",
+        });
+        // You could add a confirmation step here if needed
+      }
+
+      setIsSubmitting(true);
+
+      try {
+        // Create FormData for multipart/form-data submission
+        const submitData = new FormData();
+
+        // Add text fields
+        submitData.append("title", values.title || "");
+        submitData.append("content", values.content);
+        submitData.append("tags", values.tags || "");
+        submitData.append("petIds", values.petIds || "");
+        submitData.append("visibility", values.visibility);
+
+        // Add media files
+        media.forEach((item) => {
+          submitData.append("media", item.file);
+        });
+
+        // Submit the form
+        await mutation.mutateAsync(submitData);
+
+        toast("Thành công", {
+          description: "Bạn đã tạo bài viết thành công",
+        });
+
+        // Close modal or redirect
+        if (onClose) {
+          onClose();
+        } else {
+          navigate("/");
+        }
+      } catch {
+        toast("Có lỗi tạo bài viết");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [media, mutation, navigate, onClose]
+  );
+
   // Action button based on step
   const ActionButton = useMemo(() => {
     if (activeStep === steps.length - 1) {
       return (
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           className="text-primary font-medium"
           onClick={methods.handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Đang tạo bài viết...' : 'Tạo bài viết'}
+          {isSubmitting ? "Đang tạo bài viết..." : "Tạo bài viết"}
         </Button>
       );
     }
-    
+
     return (
-      <Button 
-        type="button" 
-        variant="ghost" 
-        size="sm" 
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
         className="text-primary font-medium"
         onClick={nextStep}
         disabled={media.length === 0}
@@ -366,8 +418,16 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
         Tiếp tục
       </Button>
     );
-  }, [activeStep, steps.length, methods, onSubmit, isSubmitting, nextStep, media.length]);
-  
+  }, [
+    activeStep,
+    steps.length,
+    methods,
+    onSubmit,
+    isSubmitting,
+    nextStep,
+    media.length,
+  ]);
+
   // Render current media preview
   const CurrentMediaPreview = useMemo(() => {
     if (media.length === 0) {
@@ -377,10 +437,10 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
           <p className="text-sm">No media selected</p>
           <label className="mt-4 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded cursor-pointer">
             Tải lên ảnh hoặc video
-            <input 
-              type="file" 
-              className="hidden" 
-              accept="image/* video/*" 
+            <input
+              type="file"
+              className="hidden"
+              accept="image/* video/*"
               multiple
               onChange={handleImageUpload}
             />
@@ -388,17 +448,26 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
         </div>
       );
     }
-    
+
     if (media.length === 1) {
       return (
-        <img 
-          src={media[0].preview} 
-          alt="Preview" 
-          className="w-full h-full object-contain"
-        />
+        <>
+          {media[0].file.type.startsWith("video/") ? (
+            <video controls className="max-w-full max-h-full object-contain">
+              <source src={media[0].preview} type={media[0].file.type} />
+              Trình duyệt của bạn không hỗ trợ video.
+            </video>
+          ) : (
+            <img
+              src={media[0].preview}
+              alt="Preview"
+              className="w-full h-full object-contain"
+            />
+          )}
+        </>
       );
     }
-    
+
     return (
       <div className="relative w-full h-full">
         <Carousel className="w-full aspect-square owflow-hidden">
@@ -406,11 +475,21 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
             {media.map((item, index) => (
               <CarouselItem key={index} className="h-full">
                 <div className="h-full flex items-center justify-center">
-                  <img 
-                    src={item.preview} 
-                    alt={`Preview ${index + 1}`} 
-                    className="max-w-full max-h-full object-contain"
-                  />
+                  {item.file.type.startsWith("video/") ? (
+                    <video
+                      controls
+                      className="max-w-full max-h-full object-contain"
+                    >
+                      <source src={item.preview} type={item.file.type} />
+                      Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                  ) : (
+                    <img
+                      src={item.preview}
+                      alt={`Preview ${index + 1}`}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  )}
                 </div>
               </CarouselItem>
             ))}
@@ -424,7 +503,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
       </div>
     );
   }, [media, previewIndex, handleImageUpload]);
-  
+
   return (
     <FormProvider {...methods}>
       <div>
@@ -456,7 +535,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                 <p className="text-lg font-medium text-gray-700 mb-2">
                   Kéo thả ảnh của bạn vào đây
                 </p>
-                <p className="text-gray-500 text-sm mb-4 text-center">Chia sẻ ảnh thú cưng, hoạt động hoặc trải nghiệm của bạn</p>
+                <p className="text-gray-500 text-sm mb-4 text-center">
+                  Chia sẻ ảnh thú cưng, hoạt động hoặc trải nghiệm của bạn
+                </p>
                 <label className="inline-flex items-center px-4 py-2.5 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg cursor-pointer">
                   Tải ảnh hoặc video từ thiết bị
                   <input
@@ -472,7 +553,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
               {/* Show already uploaded images if any */}
               {media.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="text-sm font-medium mb-2">Tải lên ảnh/video:</h3>
+                  <h3 className="text-sm font-medium mb-2">
+                    Tải lên ảnh/video:
+                  </h3>
                   <div className="grid grid-cols-3 gap-2">
                     {media.map((item, index) => (
                       <div
@@ -552,12 +635,16 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
 
                     {/* Content */}
                     <div className="relative">
-                      <Label htmlFor="content" className="text-gray-700">Nội dung</Label>
+                      <Label htmlFor="content" className="text-gray-700">
+                        Nội dung
+                      </Label>
                       <div className="relative">
                         <ReactQuill
                           ref={quillRef}
                           value={descriptionValue}
-                          onChange={(value) => methods.setValue("content", value)}
+                          onChange={(value) =>
+                            methods.setValue("content", value)
+                          }
                           placeholder="Write something..."
                           theme="snow"
                         />
@@ -571,7 +658,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                           <span className="mr-1">✨</span> AI
                         </Button>
                       </div>
-                      
+
                       {methods.formState.errors.content && (
                         <p className="text-sm text-red-500 mt-1">
                           {methods.formState.errors.content.message}
@@ -582,10 +669,15 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                     {/* Media Display */}
                     {media.length > 0 && (
                       <div>
-                        <Label className="text-gray-700">Tải lên ảnh/video</Label>
+                        <Label className="text-gray-700">
+                          Tải lên ảnh/video
+                        </Label>
                         <div className="space-y-3 mt-2">
                           {media.map((item, index) => (
-                            <div key={index} className="flex items-center gap-3">
+                            <div
+                              key={index}
+                              className="flex items-center gap-3"
+                            >
                               <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0">
                                 <img
                                   src={item.preview}
@@ -616,11 +708,14 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                         htmlFor="tags"
                         className="text-gray-700 flex items-center"
                       >
-                        <Tags className="h-4 w-4 mr-1" /> Từ khoá 
+                        <Tags className="h-4 w-4 mr-1" /> Từ khoá
                       </Label>
                       <div className="mt-1 flex flex-wrap gap-2 mb-2">
                         {tagArray.map((tag) => (
-                          <TagBadge key={tag} onClose={() => handleRemoveTag(tag)}>
+                          <TagBadge
+                            key={tag}
+                            onClose={() => handleRemoveTag(tag)}
+                          >
                             #{tag}
                           </TagBadge>
                         ))}
@@ -657,7 +752,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-gray-700 flex items-center">
-                            <Tag className="h-4 w-4 mr-1" /> Gắn thẻ thú cưng của bạn
+                            <Tag className="h-4 w-4 mr-1" /> Gắn thẻ thú cưng
+                            của bạn
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -686,13 +782,20 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                       name="visibility"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700">Chế độ hiển thị</FormLabel>
+                          <FormLabel className="text-gray-700">
+                            Chế độ hiển thị
+                          </FormLabel>
                           <div>
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex items-center">
-                                <Globe size={18} className="mr-2 text-gray-600" />
+                                <Globe
+                                  size={18}
+                                  className="mr-2 text-gray-600"
+                                />
                                 <div>
-                                  <p className="text-sm font-medium">Công khai</p>
+                                  <p className="text-sm font-medium">
+                                    Công khai
+                                  </p>
                                   <p className="text-xs text-gray-500">
                                     Mọi người có thể xem
                                   </p>
@@ -702,7 +805,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                                 <Switch
                                   checked={field.value === "public"}
                                   onCheckedChange={(checked) =>
-                                    field.onChange(checked ? "public" : "private")
+                                    field.onChange(
+                                      checked ? "public" : "private"
+                                    )
                                   }
                                 />
                               </FormControl>
@@ -710,9 +815,14 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
 
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex items-center">
-                                <Lock size={18} className="mr-2 text-gray-600" />
+                                <Lock
+                                  size={18}
+                                  className="mr-2 text-gray-600"
+                                />
                                 <div>
-                                  <p className="text-sm font-medium">Riêng tư</p>
+                                  <p className="text-sm font-medium">
+                                    Riêng tư
+                                  </p>
                                   <p className="text-xs text-gray-500">
                                     Chỉ mình bạn có thể xem
                                   </p>
@@ -722,7 +832,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onClose }) => {
                                 <Switch
                                   checked={field.value === "private"}
                                   onCheckedChange={(checked) =>
-                                    field.onChange(checked ? "private" : "public")
+                                    field.onChange(
+                                      checked ? "private" : "public"
+                                    )
                                   }
                                 />
                               </FormControl>

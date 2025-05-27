@@ -93,14 +93,6 @@ const form = useForm<FormValues>({
   },
   mode: "onChange", // FIX: Thêm mode để validate real-time
 });
-useEffect(() => {
-  const subscription = form.watch((value, { name }) => {
-    if (name === "employeeId") {
-      console.log("Employee ID changed:", value.employeeId);
-    }
-  });
-  return () => subscription.unsubscribe();
-}, [form]);
 
   // Fetch queries
   const { data: petsData, isLoading: isPetsLoading } = useUserPets(userId);
@@ -119,7 +111,6 @@ useEffect(() => {
   // Check for employee changes and manage date reset
 useEffect(() => {
   if (previousEmployeeId && currentEmployeeId !== previousEmployeeId) {
-    console.log(`Employee changed from ${previousEmployeeId} to ${currentEmployeeId}`);
     setShouldResetDate(true);
   }
   
@@ -184,7 +175,7 @@ useEffect(() => {
             serviceId,
             scheduledDate: format(data.scheduledDate, "yyyy-MM-dd"),
             scheduledTimeSlot: data.timeSlot,
-            employeeId: data.employeeId,
+            employeeId: currentEmployeeId || data.employeeId,
             notes: data.notes,
           },
           {

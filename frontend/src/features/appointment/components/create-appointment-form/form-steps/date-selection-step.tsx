@@ -356,6 +356,7 @@ const DateSelectionStep: React.FC<DateSelectionStepProps> = ({
                       return (
                         <Button
                           key={index}
+                          type="button"
                           variant={isDateSelected(date) ? "default" : "outline"}
                           size="sm"
                           className={cn(
