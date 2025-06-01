@@ -75,7 +75,61 @@ export const getAppointmentByIdService = async (
   return { appointment };
 };
 
-// Tạo một cuộc hẹn mới
+// Debug function để kiểm tra trạng thái time slot
+export const debugTimeSlotService = async (date: string, employeeId?: string) => {
+  const selectedDate = dateUtils.parseDate(date);
+  const selectedStartDay = dateUtils.getStartOfDay(selectedDate);
+  const selectedEndDay = dateUtils.getEndOfDay(selectedDate);
+
+  const timeSlotDoc = await TimeSlotModel.findOne({
+    date: {
+      $gte: selectedStartDay,
+      $lt: selectedEndDay,
+    },
+  });
+
+  if (!timeSlotDoc) {
+    return { message: "Không tìm thấy time slot", date };
+  }
+
+  console.log("=== DEBUG TIME SLOT ===");
+  console.log("Date:", date);
+  console.log("Total slots:", timeSlotDoc.slots.length);
+
+  timeSlotDoc.slots.slice(0, 5).forEach((slot, index) => {
+    console.log(`\n--- Slot ${index} (${slot.startTime}-${slot.endTime}) ---`);
+    console.log("Slot isAvailable:", slot.isAvailable);
+    console.log("AppointmentId:", slot.appointmentId);
+    console.log("Employee availability:");
+    
+    slot.employeeAvailability.forEach((emp, empIndex) => {
+      console.log(`  Employee ${empIndex}:`, {
+        employeeId: emp.employeeId.toString(),
+        isAvailable: emp.isAvailable,
+        appointmentId: emp.appointmentId?.toString()
+      });
+    });
+
+    if (employeeId) {
+      const specificEmp = slot.employeeAvailability.find(
+        emp => emp.employeeId.toString() === employeeId
+      );
+      console.log(`Specific employee (${employeeId}) status:`, specificEmp);
+    }
+  });
+
+  return {
+    totalSlots: timeSlotDoc.slots.length,
+    sampleSlots: timeSlotDoc.slots.slice(0, 5).map(slot => ({
+      time: `${slot.startTime}-${slot.endTime}`,
+      isAvailable: slot.isAvailable,
+      appointmentId: slot.appointmentId,
+      employeeCount: slot.employeeAvailability.length,
+      availableEmployees: slot.employeeAvailability.filter(emp => emp.isAvailable).length
+    }))
+  };
+};
+
 export const createAppointmentService = async (
   data: {
     petId: string;
@@ -87,19 +141,18 @@ export const createAppointmentService = async (
       end: string;
       originalSlotIndexes?: number[];
     };
-    employeeId?: string; // Người dùng có thể chọn nhân viên cụ thể
+    employeeId?: string; 
     notes?: string;
   },
   userId: string,
   userEmail: string
 ) => {
-  // Kiểm tra thú cưng thuộc về người dùng
+
   const pet = await PetModel.findById(data.petId);
   if (!pet || pet.ownerId.toString() !== userId.toString()) {
     throw new BadRequestException("Thú cưng không hợp lệ");
   }
 
-  // Kiểm tra dịch vụ
   let service;
   let duration;
   let totalAmount;
@@ -127,7 +180,6 @@ export const createAppointmentService = async (
     throw new BadRequestException("Loại dịch vụ không hợp lệ");
   }
 
-  // Kiểm tra thú cưng có phù hợp với dịch vụ không
   if (
     service.applicablePetTypes &&
     service.applicablePetTypes.length > 0 &&
@@ -138,14 +190,12 @@ export const createAppointmentService = async (
     );
   }
 
-  // Phân tích ngày và thời gian
   const appointmentDate = dateUtils.parseDate(data.scheduledDate);
   const appointmentStartDay = dateUtils.getStartOfDay(appointmentDate);
   const appointmentEndDay = dateUtils.getEndOfDay(appointmentDate);
   const startTime = data.scheduledTimeSlot.start;
   const endTime = data.scheduledTimeSlot.end;
 
-  // Tìm time slot
   const timeSlotDoc = await TimeSlotModel.findOne({
     date: {
       $gte: appointmentStartDay,
@@ -157,38 +207,27 @@ export const createAppointmentService = async (
     throw new BadRequestException("Không có khung giờ khả dụng cho ngày này");
   }
 
-  // Mảng chứa các chỉ số của các slot cần cập nhật
   let slotIndexesToUpdate = [];
 
-  // Nếu có originalSlotIndexes, sử dụng chúng
   if (
     data.scheduledTimeSlot.originalSlotIndexes &&
     data.scheduledTimeSlot.originalSlotIndexes.length > 0
   ) {
     slotIndexesToUpdate = data.scheduledTimeSlot.originalSlotIndexes;
 
-    // Kiểm tra tính hợp lệ của các chỉ số slot
     for (const index of slotIndexesToUpdate) {
-      if (
-        index < 0 ||
-        index >= timeSlotDoc.slots.length ||
-        !timeSlotDoc.slots[index].isAvailable
-      ) {
-        throw new BadRequestException(
-          "Khung giờ này không khả dụng hoặc đã được đặt"
-        );
+      if (index < 0 || index >= timeSlotDoc.slots.length) {
+        throw new BadRequestException("Chỉ số slot không hợp lệ");
       }
     }
   } else {
-    // Tìm khung giờ theo thời gian bắt đầu và kết thúc
     const requiredSlotCount = Math.ceil(duration / 30);
-
     const startSlotIndex = timeSlotDoc.slots.findIndex(
-      (slot) => slot.startTime === startTime && slot.isAvailable
+      (slot) => slot.startTime === startTime
     );
 
     if (startSlotIndex === -1) {
-      throw new BadRequestException("Khung giờ bắt đầu không khả dụng");
+      throw new BadRequestException("Khung giờ bắt đầu không tìm thấy");
     }
 
     for (let i = 0; i < requiredSlotCount; i++) {
@@ -199,7 +238,6 @@ export const createAppointmentService = async (
   // Tìm nhân viên có thể phục vụ tất cả các slot
   let assignedEmployeeId: mongoose.Types.ObjectId | null = null;
 
-  // Nếu người dùng chỉ định nhân viên cụ thể
   if (data.employeeId) {
     const employee = await EmployeeModel.findOne({
       _id: data.employeeId,
@@ -296,38 +334,44 @@ export const createAppointmentService = async (
     totalAmount,
   });
 
-  // Cập nhật trạng thái khả dụng của nhân viên trong tất cả các slot
-// Trong createAppointmentService, thay đổi phần cập nhật slot:
-for (const slotIndex of slotIndexesToUpdate) {
-    // Tìm vị trí của nhân viên được chỉ định trong mảng employeeAvailability
-    const empIndex = timeSlotDoc.slots[slotIndex].employeeAvailability.findIndex(
-        (emp) => emp.employeeId.toString() === assignedEmployeeId.toString()
+  // FIX: Cập nhật trạng thái khả dụng của nhân viên - KHÔNG tạo duplicate
+  for (const slotIndex of slotIndexesToUpdate) {
+    const slot = timeSlotDoc.slots[slotIndex];
+    
+    // Tìm index của nhân viên trong employeeAvailability
+    const empIndex = slot.employeeAvailability.findIndex(
+      (emp) => emp.employeeId.toString() === assignedEmployeeId.toString()
     );
 
     if (empIndex !== -1) {
-        // Chỉ cập nhật availability cho nhân viên được chỉ định
-        timeSlotDoc.slots[slotIndex].employeeAvailability[empIndex] = {
-            ...timeSlotDoc.slots[slotIndex].employeeAvailability[empIndex],
-            isAvailable: false,
-            employeeId: assignedEmployeeId,
-            appointmentId: appointment._id as mongoose.Types.ObjectId
-        };
+      // FIX: Cập nhật trực tiếp element có sẵn, KHÔNG tạo mới
+      slot.employeeAvailability[empIndex].isAvailable = false;
+      slot.employeeAvailability[empIndex].appointmentId = appointment._id as mongoose.Types.ObjectId;
+      
+      console.log(`Updated existing employee at index ${empIndex} in slot ${slotIndex}`);
+    } else {
+      // Nếu vì lý do gì đó nhân viên không có trong slot, thêm mới
+      slot.employeeAvailability.push({
+        employeeId: assignedEmployeeId,
+        isAvailable: false,
+        appointmentId: appointment._id as mongoose.Types.ObjectId
+      });
+      
+      console.warn(`Employee ${assignedEmployeeId} not found in slot ${slotIndex}, added new entry`);
     }
 
-    // Kiểm tra xem còn nhân viên nào khả dụng không
-    const hasAvailableEmployee = timeSlotDoc.slots[slotIndex].employeeAvailability.some(
-        (emp) => emp.isAvailable && emp.employeeId.toString() !== assignedEmployeeId.toString()
+    // Cập nhật trạng thái slot dựa trên việc có nhân viên nào khả dụng không
+    const hasAvailableEmployee = slot.employeeAvailability.some(
+      (emp) => emp.isAvailable
     );
+    
+    slot.isAvailable = hasAvailableEmployee;
+  }
 
-    // Chỉ đánh dấu slot là không khả dụng nếu không còn nhân viên nào khả dụng
-    if (!hasAvailableEmployee) {
-        timeSlotDoc.slots[slotIndex].isAvailable = false;
-    }
-}
-
+  // FIX: Sử dụng markModified để đảm bảo Mongoose biết rằng nested array đã thay đổi
+  timeSlotDoc.markModified('slots');
   await timeSlotDoc.save();
 
-  // Gửi email xác nhận
   try {
     const displayDate = dateUtils.formatDate(appointmentDate);
     const employee = await EmployeeModel.findById(assignedEmployeeId);
@@ -487,7 +531,7 @@ export const cancelAppointmentService = async (
     );
   }
 
-  // FIX: Sử dụng transaction để đảm bảo consistency
+  // Sử dụng transaction để đảm bảo consistency
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -509,34 +553,23 @@ export const cancelAppointmentService = async (
     }).session(session);
 
     if (timeSlot && employeeId) {
-      // FIX: Tìm và cập nhật tất cả slots liên quan đến appointment này
       let slotsUpdated = 0;
       
       for (let i = 0; i < timeSlot.slots.length; i++) {
         const slot = timeSlot.slots[i];
         
-        // FIX: Kiểm tra cả appointmentId của slot chính và của employee
-        const isSlotForThisAppointment = 
-          slot.appointmentId?.toString() === (appointment._id as mongoose.Types.ObjectId).toString();
-        
+        // Tìm nhân viên trong slot này với appointmentId khớp
         const empIndex = slot.employeeAvailability.findIndex(
           (emp) =>
             emp.employeeId.toString() === employeeId &&
             emp.appointmentId?.toString() === (appointment._id as mongoose.Types.ObjectId).toString()
         );
 
-        // Nếu slot này thuộc về appointment đang hủy
-        if (isSlotForThisAppointment || empIndex !== -1) {
-          // FIX: Xóa appointmentId khỏi slot chính
-          if (isSlotForThisAppointment) {
-            timeSlot.slots[i].appointmentId = undefined;
-          }
-
-          // Cập nhật trạng thái nhân viên
-          if (empIndex !== -1) {
-            timeSlot.slots[i].employeeAvailability[empIndex].isAvailable = true;
-            timeSlot.slots[i].employeeAvailability[empIndex].appointmentId = undefined;
-          }
+        // Nếu tìm thấy nhân viên với appointment này
+        if (empIndex !== -1) {
+          // Cập nhật trạng thái nhân viên - trả lại khả dụng
+          timeSlot.slots[i].employeeAvailability[empIndex].isAvailable = true;
+          timeSlot.slots[i].employeeAvailability[empIndex].appointmentId = undefined;
 
           // FIX: Cập nhật trạng thái slot - slot khả dụng nếu có ít nhất một nhân viên khả dụng
           const hasAvailableEmployee = timeSlot.slots[i].employeeAvailability.some(
@@ -559,7 +592,7 @@ export const cancelAppointmentService = async (
     // Commit transaction
     await session.commitTransaction();
 
-    // FIX: Gửi email hủy (bên ngoài transaction)
+    // Gửi email hủy (bên ngoài transaction)
     try {
       const [customer, pet] = await Promise.all([
         UserModel.findById(appointment.customerId),
@@ -635,11 +668,13 @@ const initializeTimeSlotWithEmployees = async (date: Date, employees: UserDocume
         ? `${(hour + 1).toString().padStart(2, '0')}:00`
         : `${hour.toString().padStart(2, '0')}:30`;
       
-      // Tạo employeeAvailability cho tất cả nhân viên
-      const employeeAvailability: EmployeeAvailability[] = employees.map(employee => ({
-        employeeId: employee._id as mongoose.Types.ObjectId,
-        isAvailable: true
-      }));
+      // Tạo employeeAvailability cho tất cả nhân viên 
+      const employeeAvailability: EmployeeAvailability[] = employees
+        .filter(employee => employee && employee._id) // Lọc bỏ employee null/undefined
+        .map(employee => ({
+          employeeId: employee._id as mongoose.Types.ObjectId,
+          isAvailable: true
+        }));
       
       baseSlots.push({
         startTime,
@@ -779,7 +814,7 @@ export const getAvailableTimeSlotsService = async (query: {
     },
   });
 
-  // FIX: Nếu không có time slot, tạo mới với TẤT CẢ nhân viên phù hợp
+  // Nếu không có time slot, tạo mới với TẤT CẢ nhân viên phù hợp
   if (!timeSlotDoc) {
     let employees;
     
@@ -795,7 +830,7 @@ export const getAvailableTimeSlotsService = async (query: {
         ]
       });
     } else {
-      // FIX: Lấy TẤT CẢ nhân viên có chuyên môn phù hợp
+      // Lấy TẤT CẢ nhân viên có chuyên môn phù hợp
       const specialtyFilter = requiredSpecialties.length > 0 
         ? { "employeeInfo.specialties": { $in: requiredSpecialties } }
         : { "employeeInfo.specialties": { $exists: true, $ne: [] } };
@@ -815,7 +850,7 @@ export const getAvailableTimeSlotsService = async (query: {
       );
     }
 
-    // FIX: Khởi tạo time slot với TẤT CẢ nhân viên
+    // Khởi tạo time slot với TẤT CẢ nhân viên
     timeSlotDoc = await initializeTimeSlotWithEmployees(selectedDate, employees);
   } else {
     // FIX: Kiểm tra và bổ sung nhân viên thiếu vào slots hiện có
@@ -831,29 +866,52 @@ export const getAvailableTimeSlotsService = async (query: {
     // Cập nhật slots để đảm bảo tất cả nhân viên phù hợp đều có mặt
     let hasUpdated = false;
     
-    timeSlotDoc.slots.forEach(slot => {
-      allQualifiedEmployees.forEach(employee => {
-        const employeeExists = slot.employeeAvailability.some(
-          emp => emp.employeeId.toString() === (employee._id as mongoose.Types.ObjectId).toString()
-        );
-        
-        if (!employeeExists) {
-          slot.employeeAvailability.push({
-            employeeId: employee._id as mongoose.Types.ObjectId,
-            isAvailable: true
-          });
-          hasUpdated = true;
+   
+    if (timeSlotDoc.slots && Array.isArray(timeSlotDoc.slots)) {
+      timeSlotDoc.slots.forEach(slot => {
+        // Đảm bảo slot.employeeAvailability tồn tại và là array
+        if (!slot.employeeAvailability || !Array.isArray(slot.employeeAvailability)) {
+          slot.employeeAvailability = [];
         }
-      });
-    });
 
-    // Lưu lại nếu có cập nhật
-    if (hasUpdated) {
-      await timeSlotDoc.save();
+        allQualifiedEmployees.forEach(employee => {
+          // Kiểm tra employee._id tồn tại
+          if (!employee._id) {
+            console.warn('Employee without _id found:', employee);
+            return;
+          }
+
+          const employeeExists = slot.employeeAvailability.some(emp => {
+            // FIX: Kiểm tra emp và emp.employeeId tồn tại trước khi gọi toString()
+            if (!emp || !emp.employeeId) {
+              console.warn('Invalid employee availability entry:', emp);
+              return false;
+            }
+            return emp.employeeId.toString() === (employee._id as mongoose.Types.ObjectId).toString();
+          });
+          
+          if (!employeeExists) {
+            slot.employeeAvailability.push({
+              employeeId: employee._id as mongoose.Types.ObjectId,
+              isAvailable: true
+            });
+            hasUpdated = true;
+          }
+        });
+      });
+
+      // Lưu lại nếu có cập nhật
+      if (hasUpdated) {
+        await timeSlotDoc.save();
+      }
+    } else {
+      console.warn('TimeSlotDoc slots is not valid:', timeSlotDoc.slots);
+      // Tạo lại slots nếu bị lỗi
+      timeSlotDoc = await initializeTimeSlotWithEmployees(selectedDate, allQualifiedEmployees);
     }
   }
 
-  let slots = timeSlotDoc.slots;
+  let slots = timeSlotDoc.slots || [];
   const allOriginalSlots = [...slots];
 
   // Hàm kiểm tra slot trong giờ làm việc
@@ -891,12 +949,15 @@ export const getAvailableTimeSlotsService = async (query: {
       if (!isInWorkHours(slot)) {
         slot.isAvailable = false;
         
-        const employeeIndex = slot.employeeAvailability.findIndex(
-          emp => emp.employeeId.toString() === query.employeeId
-        );
-        
-        if (employeeIndex >= 0) {
-          slot.employeeAvailability[employeeIndex].isAvailable = false;
+        // FIX: Thêm kiểm tra null safety
+        if (slot.employeeAvailability && Array.isArray(slot.employeeAvailability)) {
+          const employeeIndex = slot.employeeAvailability.findIndex(
+            emp => emp && emp.employeeId && emp.employeeId.toString() === query.employeeId
+          );
+          
+          if (employeeIndex >= 0) {
+            slot.employeeAvailability[employeeIndex].isAvailable = false;
+          }
         }
       }
     });
@@ -908,10 +969,32 @@ export const getAvailableTimeSlotsService = async (query: {
   if (!query.serviceId || !query.serviceType) {
     if (query.employeeId) {
       allOriginalSlots.forEach(slot => {
-        const employeeAvailable = slot.employeeAvailability.some(
-          (emp) => emp.employeeId.toString() === query.employeeId && emp.isAvailable
-        );
-        slot.isAvailable = slot.isAvailable && employeeAvailable;
+        // Đảm bảo slot.employeeAvailability tồn tại
+        if (slot.employeeAvailability && Array.isArray(slot.employeeAvailability)) {
+          const specificEmployeeAvailable = slot.employeeAvailability.find(
+            (emp) => emp && emp.employeeId && emp.employeeId.toString() === query.employeeId
+          );
+          
+          // Chỉ hiển thị không khả dụng nếu nhân viên cụ thể này không khả dụng
+          // Không thay đổi slot.isAvailable vì điều đó ảnh hưởng đến tất cả nhân viên khác
+          if (specificEmployeeAvailable) {
+            // Tạo một bản sao của slot với thông tin cụ thể cho nhân viên này
+            slot.employeeAvailability = [specificEmployeeAvailable];
+            slot.isAvailable = specificEmployeeAvailable.isAvailable;
+          } else {
+            slot.isAvailable = false;
+            slot.employeeAvailability = [{
+              employeeId: new mongoose.Types.ObjectId(query.employeeId),
+              isAvailable: false
+            }];
+          }
+        } else {
+          slot.isAvailable = false;
+          slot.employeeAvailability = [{
+            employeeId: new mongoose.Types.ObjectId(query.employeeId),
+            isAvailable: false
+          }];
+        }
       });
 
       const timeSlotResponse: TimeSlotResponse = {
@@ -922,6 +1005,16 @@ export const getAvailableTimeSlotsService = async (query: {
 
       return { timeSlot: timeSlotResponse };
     }
+
+    allOriginalSlots.forEach(slot => {
+      // Kiểm tra xem có ít nhất một nhân viên khả dụng không
+      if (slot.employeeAvailability && Array.isArray(slot.employeeAvailability)) {
+        const hasAnyAvailableEmployee = slot.employeeAvailability.some(
+          emp => emp && emp.isAvailable
+        );
+        slot.isAvailable = hasAnyAvailableEmployee;
+      }
+    });
 
     const timeSlotResponse: TimeSlotResponse = {
       date: selectedDate,
@@ -940,7 +1033,7 @@ export const getAvailableTimeSlotsService = async (query: {
     let consecutiveSlots: Slot[] = [];
     let availableEmployeeIds: string[] = [];
 
-    // FIX: Lấy tất cả nhân viên phù hợp thay vì chỉ một nhóm cố định
+    // Lấy tất cả nhân viên phù hợp
     const employeesToCheck = query.employeeId 
       ? [query.employeeId] 
       : await UserModel.find({
@@ -960,11 +1053,13 @@ export const getAvailableTimeSlotsService = async (query: {
       for (let j = 0; j < requiredSlotCount; j++) {
         const currentSlot = slots[i + j];
         
-        if (!currentSlot || !currentSlot.isAvailable) {
+        // Kiểm tra slot tồn tại
+        if (!currentSlot) {
           canServeAllSlots = false;
           break;
         }
 
+        // Kiểm tra tính liên tục của slots
         if (j > 0) {
           const previousSlot = slots[i + j - 1];
           if (previousSlot.endTime !== currentSlot.startTime) {
@@ -973,11 +1068,15 @@ export const getAvailableTimeSlotsService = async (query: {
           }
         }
 
-        const employeeAvailability = currentSlot.employeeAvailability?.find(
-          (emp) => emp.employeeId.toString() === employeeId
-        );
+        let employeeAvailability;
+        if (currentSlot.employeeAvailability && Array.isArray(currentSlot.employeeAvailability)) {
+          employeeAvailability = currentSlot.employeeAvailability.find(
+            (emp) => emp && emp.employeeId && emp.employeeId.toString() === employeeId
+          );
+        }
 
-        if (!employeeAvailability || !employeeAvailability.isAvailable) {
+        // Kiểm tra nhân viên có khả dụng và không bị đặt lịch
+        if (!employeeAvailability || !employeeAvailability.isAvailable || employeeAvailability.appointmentId) {
           canServeAllSlots = false;
           break;
         }

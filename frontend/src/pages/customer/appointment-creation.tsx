@@ -1,4 +1,4 @@
-import AppointmentFormStep from "@/features/appointment/components/create-appointment-form/new-form-step.tsx";
+import AppointmentFormStep from "@/features/appointment/components/create-appointment-form";
 import React from "react";
 
 const AppointmentCreationPage: React.FC = () => {
