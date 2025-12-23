@@ -1,0 +1,70 @@
+[data-theme="admin"] {
+  /* ---------- BACKGROUND ---------- */
+  --color-background: oklch(0.975 0 0);
+  --color-foreground: oklch(0.17 0 0);
+
+  /* ---------- PRIMARY (Cold Blue) ---------- */
+  --color-primary: oklch(0.55 0.12 255);
+  --color-primary-foreground: oklch(0.98 0 0);
+
+  /* ---------- ACCENT ---------- */
+  --color-accent: oklch(0.92 0.02 255);
+  --color-accent-foreground: oklch(0.25 0 0);
+
+  /* ---------- SIDEBAR ---------- */
+  --color-sidebar: oklch(0.16 0 0);
+  --color-sidebar-foreground: oklch(0.92 0 0);
+
+  --color-sidebar-primary: oklch(0.62 0.14 255);
+  --color-sidebar-primary-foreground: oklch(0.98 0 0);
+
+  --color-sidebar-accent: oklch(0.22 0 0);
+  --color-sidebar-accent-foreground: oklch(0.95 0 0);
+
+  --color-sidebar-border: oklch(1 0 0 / 12%);
+  --color-sidebar-ring: oklch(0.62 0.14 255);
+}
+[data-theme="admin"].dark {
+  /* ---------- BACKGROUND ---------- */
+  --color-background: oklch(0.16 0.01 260);
+  --color-foreground: oklch(0.95 0.01 260);
+
+  /* Card */
+  --color-card: oklch(0.2 0.01 260);
+  --color-card-foreground: oklch(0.95 0.01 260);
+
+  /* Popover */
+  --color-popover: oklch(0.2 0.01 260);
+  --color-popover-foreground: oklch(0.95 0.01 260);
+
+  /* Primary */
+  --color-primary: oklch(0.62 0.14 255);
+  --color-primary-foreground: oklch(0.98 0 0);
+
+  /* Secondary */
+  --color-secondary: oklch(0.26 0.01 260);
+  --color-secondary-foreground: oklch(0.95 0.01 260);
+
+  /* Muted */
+  --color-muted: oklch(0.26 0.01 260);
+  --color-muted-foreground: oklch(0.7 0.01 260);
+
+  /* Accent */
+  --color-accent: oklch(0.3 0.02 260);
+  --color-accent-foreground: oklch(0.95 0.01 260);
+
+  /* Border / Input */
+  --color-border: oklch(1 0 0 / 12%);
+  --color-input: oklch(1 0 0 / 16%);
+  --color-ring: oklch(0.62 0.14 255);
+
+  /* Sidebar */
+  --color-sidebar: oklch(0.18 0.01 260);
+  --color-sidebar-foreground: oklch(0.85 0.01 260);
+  --color-sidebar-primary: oklch(0.62 0.14 255);
+  --color-sidebar-primary-foreground: oklch(0.98 0 0);
+  --color-sidebar-accent: oklch(0.26 0.01 260);
+  --color-sidebar-accent-foreground: oklch(0.95 0.01 260);
+  --color-sidebar-border: oklch(1 0 0 / 10%);
+  --color-sidebar-ring: oklch(0.62 0.14 255);
+}
