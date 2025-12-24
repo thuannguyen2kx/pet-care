@@ -17,6 +17,11 @@ export const paths = {
       getHref: (redirectTo?: string | null) =>
         `/auth/register${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
     },
+    googleOauth: {
+      path: '/google/oauth/callback',
+      getHref: (redirectTo?: string | null) =>
+        `/google/oauth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
+    },
     forgotPassword: {
       path: '/auth/forgot-password',
       getHref: () => '/auth/forgot-password',
@@ -52,6 +57,10 @@ export const paths = {
     profile: {
       path: '/app/profile',
       getHref: () => '/app/profile',
+    },
+    settings: {
+      path: '/app/settings',
+      getHref: () => '/app/settings',
     },
   },
 

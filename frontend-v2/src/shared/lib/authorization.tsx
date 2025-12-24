@@ -1,32 +1,28 @@
 import React from 'react';
 import { Outlet } from 'react-router';
 
-export const ROLES = {
-  ADMIN: 'admin',
-  EMPLOYEE: 'employee',
-  CUSTOMER: 'customer',
-} as const;
+import { useUser } from './auth';
+import { type TRole } from '../constant/roles';
 
-type TRole = (typeof ROLES)[keyof typeof ROLES];
-
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuthrization = () => {
-  const user = { role: ROLES.CUSTOMER };
+  const user = useUser();
 
-  if (!user) {
+  if (!user.data) {
     throw Error('User doest not exist');
   }
 
   const checkAccess = React.useCallback(
     ({ allowedRoles }: { allowedRoles: TRole[] }) => {
-      if (allowedRoles && allowedRoles.length > 0 && user) {
-        return allowedRoles.includes(user.role);
+      if (allowedRoles && allowedRoles.length > 0 && user.data) {
+        return allowedRoles.includes(user.data.role);
       }
       return true;
     },
     [user],
   );
 
-  return { checkAccess, role: user.role };
+  return { checkAccess, role: user.data?.role };
 };
 type AuthorizationProps = {
   forbiddenFallback?: React.ReactNode;

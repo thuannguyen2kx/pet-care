@@ -1,3 +1,6 @@
+import { STORAGE_KEYS } from '../constant';
+
+export const LocalStorageEventTarget = new EventTarget();
 export const storage = {
   get<T>(key: string): T | null {
     try {
@@ -16,5 +19,10 @@ export const storage = {
   },
   removeItem(key: string): void {
     localStorage.removeItem(key);
+  },
+
+  clearToken: () => {
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    LocalStorageEventTarget.dispatchEvent(new Event('tokenCleared'));
   },
 };

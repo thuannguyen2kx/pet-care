@@ -2,12 +2,13 @@ import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 
-import { default as AppRoot } from '@/routes/root';
+import { default as AppRoot, ErrorBoundary as AppErrorBoundary } from '@/routes/root';
 import { MainErrorFallback } from '@/shared/components/errors/main';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
+import { ROLES } from '@/shared/constant/roles';
 import { ProtectedRoute } from '@/shared/lib/auth';
-import { ROLES, Authorization } from '@/shared/lib/authorization';
+import { Authorization } from '@/shared/lib/authorization';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convert = (queryClient: QueryClient) => (m: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = m;
@@ -41,12 +42,13 @@ const createAppRouter = (queryClient: QueryClient) => {
           lazy: () => import('@/routes/auth/register').then(convert(queryClient)),
         },
         {
+          path: paths.auth.googleOauth.path,
+          lazy: () => import('@/routes/auth/google-oauth').then(convert(queryClient)),
+        },
+        {
           path: '',
-          element: (
-            <ProtectedRoute>
-              <AppRoot />
-            </ProtectedRoute>
-          ),
+          element: <AppRoot />,
+          ErrorBoundary: AppErrorBoundary,
           children: [
             /* ================= CUSTOMER ================= */
             {

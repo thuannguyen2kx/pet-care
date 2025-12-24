@@ -24,7 +24,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
           {children}
-          <Toaster />
+          <Toaster position="top-right" />
         </QueryClientProvider>
       </ErrorBoundary>
     </React.Suspense>

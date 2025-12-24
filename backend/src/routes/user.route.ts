@@ -13,14 +13,24 @@ import { Roles } from "../enums/role.enum";
 
 const userRoutes = Router();
 
-userRoutes.get("/current", getCurrentUserController);
-
 userRoutes.put("/profile", updateProfileController);
 userRoutes.put("/profile/picture", updateProfilePictureController);
 userRoutes.get("/profile/:id", getProfileByController);
 
-userRoutes.get("/", authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getAllCustomersController);
-userRoutes.get("/:id",authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getCustomerByIdController);
-userRoutes.patch("/:id/status",authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), changeCustomerStatusController);
+userRoutes.get(
+  "/",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getAllCustomersController
+);
+userRoutes.get(
+  "/:id",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getCustomerByIdController
+);
+userRoutes.patch(
+  "/:id/status",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  changeCustomerStatusController
+);
 
 export default userRoutes;

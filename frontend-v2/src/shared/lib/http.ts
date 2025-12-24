@@ -52,7 +52,7 @@ class Http {
 
         if (url === AUTH_ENDPOINTS.LOGIN) {
           const data = response.data;
-          this.accessToken = data.access_token;
+          this.accessToken = data.data.access_token;
           storage.set(STORAGE_KEYS.ACCESS_TOKEN, this.accessToken);
         } else if (url === AUTH_ENDPOINTS.LOGOUT) {
           this.accessToken = '';
@@ -71,13 +71,25 @@ class Http {
           error.response?.status || HTTPSTATUS.INTERNAL_SERVER_ERROR,
         );
 
+        // if (apiError.status === HTTPSTATUS.UNAUTHORIZED) {
+        //   this.accessToken = '';
+        //   storage.clearToken();
+        // }
+
         if (apiError.status !== HTTPSTATUS.UNAUTHORIZED) {
           toast.error(apiError.message);
         }
+
         return Promise.reject(apiError);
       },
     );
   }
+  setAccessToken(token: string) {
+    this.accessToken = token;
+  }
 }
 
-export const http = new Http().instance;
+const httpClient = new Http();
+
+export const http = httpClient.instance;
+export const setAccessToken = httpClient.setAccessToken.bind(httpClient);

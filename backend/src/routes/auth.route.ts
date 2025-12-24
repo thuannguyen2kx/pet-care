@@ -7,6 +7,8 @@ import {
   registerUserController,
 } from "../controllers/auth.controller";
 import { config } from "../config/app.config";
+import { getCurrentUserController } from "../controllers/user.controller";
+import { passportAuthenticateJWT } from "../config/passport.config";
 
 const authRoutes = Router();
 
@@ -31,5 +33,6 @@ authRoutes.get(
   }),
   googleLoginCallback
 );
+authRoutes.get("/me", passportAuthenticateJWT, getCurrentUserController);
 
 export default authRoutes;

@@ -1,5 +1,5 @@
 /* ================= BASE ================= */
-const API_VERSION = '/v1';
+const API_VERSION = '';
 
 export const API_BASE = {
   AUTH: `${API_VERSION}/auth`,
@@ -15,6 +15,7 @@ export const API_BASE = {
 /* ================= AUTH ================= */
 export const AUTH_ENDPOINTS = {
   LOGIN: `${API_BASE.AUTH}/login`,
+  GOOGLE_OAUTH: `${API_BASE.AUTH}/google`,
   REGISTER: `${API_BASE.AUTH}/register`,
   LOGOUT: `${API_BASE.AUTH}/logout`,
   REFRESH_TOKEN: `${API_BASE.AUTH}/refresh`,

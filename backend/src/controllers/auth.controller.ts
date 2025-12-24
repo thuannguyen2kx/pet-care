@@ -63,8 +63,10 @@ export const loginUserController = asyncHandler(
         });
         return res.status(HTTPSTATUS.OK).json({
           message: "User login successfully",
-          access_token,
-          user,
+          data: {
+            access_token,
+            user,
+          },
         });
       }
     )(req, res, next);

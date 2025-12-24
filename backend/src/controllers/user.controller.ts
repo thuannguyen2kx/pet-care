@@ -11,7 +11,12 @@ import {
 } from "../services/user.service";
 import { HTTPSTATUS } from "../config/http.config";
 import { uploadProfilePicture } from "../utils/file-uploade";
-import { changeUserStatusSchema, getAllCustomersSchema, updateProfileSchema, userIdSchema } from "../validation/user.validation";
+import {
+  changeUserStatusSchema,
+  getAllCustomersSchema,
+  updateProfileSchema,
+  userIdSchema,
+} from "../validation/user.validation";
 
 export const getCurrentUserController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -21,7 +26,9 @@ export const getCurrentUserController = asyncHandler(
 
     return res.status(HTTPSTATUS.OK).json({
       message: "User fetch successfully",
-      user,
+      data: {
+        user,
+      },
     });
   }
 );
@@ -36,20 +43,23 @@ export const getProfileByController = asyncHandler(
       user,
     });
   }
-)
+);
 export const updateProfileController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req?.user?._id 
-    const body =  updateProfileSchema.parse({ ...req.body });
+    const userId = req?.user?._id;
+    const body = updateProfileSchema.parse({ ...req.body });
 
-    const { updatedUser } = await updateProfileService({ userId: userId, body });
+    const { updatedUser } = await updateProfileService({
+      userId: userId,
+      body,
+    });
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Profile updated successfully",
       user: updatedUser,
-    })
+    });
   }
-)
+);
 
 export const updateProfilePictureController = [
   uploadProfilePicture.single("profilePicture"),
@@ -65,13 +75,14 @@ export const updateProfilePictureController = [
   }),
 ];
 
-
 // Get all customers with filtering options
 export const getAllCustomersController = asyncHandler(
   async (req: Request, res: Response) => {
     const filters = getAllCustomersSchema.parse(req.query);
 
-    const { users, totalUsers, totalPages } = await getAllCustomersService(filters);
+    const { users, totalUsers, totalPages } = await getAllCustomersService(
+      filters
+    );
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Customers fetched successfully",
