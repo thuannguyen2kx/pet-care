@@ -116,11 +116,14 @@ export const verifyUserService = async ({
   password: string;
   provider?: string;
 }) => {
-  const account = await AccountModel.findOne({ provider, providerId: email });
+  const account = await AccountModel.findOne({
+    provider,
+    providerId: email,
+  });
   if (!account) {
     throw new NotFoundException("Thông tin tài khoản không tồn tại");
   }
-  const user = await UserModel.findById(account.userId);
+  const user = await UserModel.findById(account.userId).select("+password");
   if (!user) {
     throw new NotFoundException("Tài khoản không tồn tại");
   }

@@ -11,6 +11,7 @@ type TApiResponseError = {
   status: number;
   message: string;
   errorCode: string;
+  errors?: unknown;
 };
 export type { TApiResponseSuccess, TApiResponseError };
 

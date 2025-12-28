@@ -209,7 +209,6 @@ const userSchema = new Schema<UserDocument>(
         hasOutstandingBalance: { type: Boolean, default: false },
         internalNotes: { type: String, select: false },
       },
-      required: true,
       _id: false,
     },
 

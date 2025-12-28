@@ -9,14 +9,16 @@ import { ErrorCodeEnum } from '../constant/error-code';
 import type { TApiResponseError } from '../types/api-response';
 
 import { env } from '@/shared/config/env';
-class ApiError extends Error {
+export class ApiError extends Error {
   public errorCode: string;
   public status: number;
-  constructor(errorCode: string, message: string, status: number) {
+  public data?: unknown;
+
+  constructor(errorCode: string, message: string, status: number, data: unknown) {
     super(message);
     this.errorCode = errorCode;
     this.status = status;
-
+    this.data = data;
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
@@ -69,6 +71,7 @@ class Http {
           errorCode,
           message,
           error.response?.status || HTTPSTATUS.INTERNAL_SERVER_ERROR,
+          data.errors,
         );
 
         // if (apiError.status === HTTPSTATUS.UNAUTHORIZED) {

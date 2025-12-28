@@ -6,12 +6,14 @@ import { toast } from 'sonner';
 import { GoogleOauthButton } from './google-oauth-button';
 
 import { paths } from '@/shared/config/paths';
+import { HTTPSTATUS } from '@/shared/constant';
 import {
   registerInputSchema,
   useRegister,
   type TRegisterInput,
   type TRegisterPayload,
 } from '@/shared/lib/auth';
+import { ApiError } from '@/shared/lib/http';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/shared/ui/field';
@@ -31,7 +33,6 @@ export const RegisterForm = () => {
     },
   });
   function onSubmit(data: TRegisterInput) {
-    console.log(data);
     const payload: TRegisterPayload = {
       fullName: data.fullName,
       email: data.email,
@@ -42,6 +43,20 @@ export const RegisterForm = () => {
       onSuccess: () => {
         toast.success('Đăng ký thành công');
         navigate(paths.auth.login.path);
+      },
+      onError: (error) => {
+        if (error instanceof ApiError && error.status === HTTPSTATUS.UNPROCESSABLE_ENTITY) {
+          const formError = error.data as TRegisterPayload;
+          console.log(formError);
+          if (formError) {
+            Object.keys(formError).forEach((key) => {
+              form.setError(key as keyof TRegisterPayload, {
+                message: formError[key as keyof TRegisterPayload],
+                type: error.errorCode,
+              });
+            });
+          }
+        }
       },
     });
   }

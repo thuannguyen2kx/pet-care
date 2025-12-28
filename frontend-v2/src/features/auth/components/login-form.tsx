@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { GoogleOauthButton } from './google-oauth-button';
 
 import { paths } from '@/shared/config/paths';
+import { HTTPSTATUS } from '@/shared/constant';
 import { ROLES } from '@/shared/constant/roles';
 import {
   loginInputSchema,
@@ -12,6 +13,7 @@ import {
   type TLoginInput,
   type TLoginPayload,
 } from '@/shared/lib/auth';
+import { ApiError } from '@/shared/lib/http';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/shared/ui/field';
@@ -49,6 +51,20 @@ export const LoginForm = () => {
           navigate(paths.admin.root.path);
         } else if (data && data.role === ROLES.EMPLOYEE) {
           navigate(paths.employee.root.path);
+        }
+      },
+      onError: (error) => {
+        if (error instanceof ApiError && error.status === HTTPSTATUS.UNPROCESSABLE_ENTITY) {
+          const formError = error.data as TLoginPayload;
+          console.log(formError);
+          if (formError) {
+            Object.keys(formError).forEach((key) => {
+              form.setError(key as keyof TLoginPayload, {
+                message: formError[key as keyof TLoginPayload],
+                type: error.errorCode,
+              });
+            });
+          }
         }
       },
     });

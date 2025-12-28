@@ -1,6 +1,7 @@
 import { ErrorRequestHandler } from "express";
 import { HTTPSTATUS } from "../config/http.config";
 import { AppError } from "../utils/app-error";
+import { ZodError } from "zod";
 export const errorHandler: ErrorRequestHandler = (
   error,
   req,
@@ -15,7 +16,8 @@ export const errorHandler: ErrorRequestHandler = (
 
   if (error instanceof SyntaxError) {
     return res.status(400).json({
-      message: "Invalid JSON format. Please check your request body",
+      message:
+        "Định dạng JSON không hợp lệ. Vui lòng kiểm tra nội dung yêu cầu của bạn.",
     });
   }
 
@@ -25,8 +27,23 @@ export const errorHandler: ErrorRequestHandler = (
       errorCode: error.errorCode,
     });
   }
+  if (error instanceof ZodError) {
+    const formattedErrors: Record<string, string> = {};
+
+    error.errors.forEach((err) => {
+      const field = err.path.join(".");
+      if (!formattedErrors[field]) {
+        formattedErrors[field] = err.message;
+      }
+    });
+
+    return res.status(HTTPSTATUS.UNPROCESSABLE_ENTITY).json({
+      message: "Dữ liệu không hợp lệ",
+      errors: formattedErrors,
+    });
+  }
 
   return res.status(500).json({
-    message: "Internal Server Error",
+    message: "Lỗi máy chủ",
   });
 };
