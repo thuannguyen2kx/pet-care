@@ -1,13 +1,22 @@
-export const StatusUser = {
+export const UserStatus = {
   ACTIVE: "ACTIVE",
   INACTIVE: "INACTIVE",
-  BLOCKED: "BLOCKED"
-} as const
-export type StatusUserType = keyof typeof StatusUser;
+  SUSPENDED: "SUSPENDED",
+  DELETED: "DELETED",
+} as const;
+export type UserStatusType = (typeof UserStatus)[keyof typeof UserStatus];
 
-export const GENDER = {
+export const Gender = {
   MALE: "MALE",
   FEMALE: "FEMALE",
-  OTHER: "OTHER"
-} as const
-export type GenderType = keyof typeof GENDER
+} as const;
+export type GenderType = (typeof Gender)[keyof typeof Gender];
+
+export const MemberShipTier = {
+  BRONZE: "BRONZE",
+  SILVER: "SILVER",
+  GOLD: "GOLD",
+  PLATINUM: "PLATINUM",
+} as const;
+export type MemberShipTierType =
+  (typeof MemberShipTier)[keyof typeof MemberShipTier];

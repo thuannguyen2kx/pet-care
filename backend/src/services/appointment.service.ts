@@ -19,7 +19,7 @@ import {
   ForbiddenException,
 } from "../utils/app-error";
 import emailService from "../utils/send-email";
-import { StatusUser } from "../enums/status-user.enum";
+import { UserStatus } from "../enums/status-user.enum";
 
 import { dateUtils } from "../utils/date-fns";
 import { Roles } from "../enums/role.enum";
@@ -251,7 +251,7 @@ export const createAppointmentService = async (
   if (data.employeeId) {
     const employee = await EmployeeModel.findOne({
       _id: data.employeeId,
-      status: StatusUser.ACTIVE,
+      status: UserStatus.ACTIVE,
       "employeeInfo.specialties": { $in: specialties },
     });
 
@@ -286,7 +286,7 @@ export const createAppointmentService = async (
   } else {
     // Tìm nhân viên có chuyên môn phù hợp
     const employees = await EmployeeModel.find({
-      status: StatusUser.ACTIVE,
+      status: UserStatus.ACTIVE,
       "employeeInfo.specialties": { $in: specialties },
     });
 
@@ -465,13 +465,13 @@ export const updateAppointmentStatusService = async (
     appointment.completedAt = new Date();
 
     // Cập nhật số liệu thống kê của nhân viên
-    if (appointment.employeeId) {
-      const employee = await EmployeeModel.findById(appointment.employeeId);
-      if (employee && employee.employeeInfo?.performance) {
-        employee.employeeInfo.performance.completedServices += 1;
-        await employee.save();
-      }
-    }
+    // if (appointment.employeeId) {
+    //   const employee = await EmployeeModel.findById(appointment.employeeId);
+    //   if (employee && employee.employeeInfo?.performance) {
+    //     employee.employeeInfo.performance.completedServices += 1;
+    //     await employee.save();
+    //   }
+    // }
   }
 
   const updatedAppointment = await appointment.save();
@@ -774,78 +774,78 @@ export const getAvailableTimeSlotsService = async (query: {
   }
 
   // Kiểm tra lịch làm việc của nhân viên nếu có chỉ định
-  if (query.employeeId) {
-    const employeeSchedule = await EmployeeScheduleModel.findOne({
-      employeeId: query.employeeId,
-      date: {
-        $gte: selectedStartDay,
-        $lt: selectedEndDay,
-      },
-    });
+  // if (query.employeeId) {
+  //   const employeeSchedule = await EmployeeScheduleModel.findOne({
+  //     employeeId: query.employeeId,
+  //     date: {
+  //       $gte: selectedStartDay,
+  //       $lt: selectedEndDay,
+  //     },
+  //   });
 
-    if (employeeSchedule) {
-      if (!employeeSchedule.isWorking) {
-        const response: TimeSlotResponse = {
-          date: selectedDate,
-          slots: [],
-          employeeNotWorking: true,
-        };
-        return { timeSlot: response };
-      }
-      employeeWorkHours = employeeSchedule.workHours;
-    } else {
-      // Kiểm tra lịch mặc định
-      const employee = await UserModel.findById(query.employeeId);
-      if (employee?.employeeInfo?.schedule) {
-        const dayOfWeek = selectedDate
-          .toLocaleDateString("en-US", { weekday: "long" })
-          .toLowerCase();
+  //   if (employeeSchedule) {
+  //     if (!employeeSchedule.isWorking) {
+  //       const response: TimeSlotResponse = {
+  //         date: selectedDate,
+  //         slots: [],
+  //         employeeNotWorking: true,
+  //       };
+  //       return { timeSlot: response };
+  //     }
+  //     employeeWorkHours = employeeSchedule.workHours;
+  //   } else {
+  //     // Kiểm tra lịch mặc định
+  //     const employee = await UserModel.findById(query.employeeId);
+  //     if (employee?.employeeInfo?.schedule) {
+  //       const dayOfWeek = selectedDate
+  //         .toLocaleDateString("en-US", { weekday: "long" })
+  //         .toLowerCase();
 
-        if (!employee.employeeInfo.schedule.workDays.includes(dayOfWeek)) {
-          const response: TimeSlotResponse = {
-            date: selectedDate,
-            slots: [],
-            employeeNotWorking: true,
-          };
-          return { timeSlot: response };
-        }
+  //       if (!employee.employeeInfo.schedule.workDays.includes(dayOfWeek)) {
+  //         const response: TimeSlotResponse = {
+  //           date: selectedDate,
+  //           slots: [],
+  //           employeeNotWorking: true,
+  //         };
+  //         return { timeSlot: response };
+  //       }
 
-        if (employee.employeeInfo.schedule.workHours) {
-          employeeWorkHours = [
-            {
-              start: employee.employeeInfo.schedule.workHours.start,
-              end: employee.employeeInfo.schedule.workHours.end,
-            },
-          ];
-        }
+  //       if (employee.employeeInfo.schedule.workHours) {
+  //         employeeWorkHours = [
+  //           {
+  //             start: employee.employeeInfo.schedule.workHours.start,
+  //             end: employee.employeeInfo.schedule.workHours.end,
+  //           },
+  //         ];
+  //       }
 
-        // Kiểm tra nghỉ phép
-        if (
-          employee.employeeInfo.schedule.vacation &&
-          employee.employeeInfo.schedule.vacation.length > 0
-        ) {
-          const isOnVacation = employee.employeeInfo.schedule.vacation.some(
-            (vacation) => {
-              const vacationStart = new Date(vacation.start);
-              const vacationEnd = new Date(vacation.end);
-              return (
-                selectedDate >= vacationStart && selectedDate <= vacationEnd
-              );
-            }
-          );
+  //       // Kiểm tra nghỉ phép
+  //       if (
+  //         employee.employeeInfo.schedule.vacation &&
+  //         employee.employeeInfo.schedule.vacation.length > 0
+  //       ) {
+  //         const isOnVacation = employee.employeeInfo.schedule.vacation.some(
+  //           (vacation) => {
+  //             const vacationStart = new Date(vacation.start);
+  //             const vacationEnd = new Date(vacation.end);
+  //             return (
+  //               selectedDate >= vacationStart && selectedDate <= vacationEnd
+  //             );
+  //           }
+  //         );
 
-          if (isOnVacation) {
-            const response: TimeSlotResponse = {
-              date: selectedDate,
-              slots: [],
-              employeeOnVacation: true,
-            };
-            return { timeSlot: response };
-          }
-        }
-      }
-    }
-  }
+  //         if (isOnVacation) {
+  //           const response: TimeSlotResponse = {
+  //             date: selectedDate,
+  //             slots: [],
+  //             employeeOnVacation: true,
+  //           };
+  //           return { timeSlot: response };
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   // Tìm time slot document
   let timeSlotDoc = await TimeSlotModel.findOne({
@@ -864,7 +864,7 @@ export const getAvailableTimeSlotsService = async (query: {
       employees = await UserModel.find({
         _id: query.employeeId,
         role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
-        status: StatusUser.ACTIVE,
+        status: UserStatus.ACTIVE,
         $or: [
           { "employeeInfo.specialties": { $in: requiredSpecialties } },
           { "employeeInfo.specialties": { $exists: true, $ne: [] } },
@@ -879,7 +879,7 @@ export const getAvailableTimeSlotsService = async (query: {
 
       employees = await UserModel.find({
         role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
-        status: StatusUser.ACTIVE,
+        status: UserStatus.ACTIVE,
         ...specialtyFilter,
       });
     }
@@ -901,7 +901,7 @@ export const getAvailableTimeSlotsService = async (query: {
     // FIX: Kiểm tra và bổ sung nhân viên thiếu vào slots hiện có
     const allQualifiedEmployees = await UserModel.find({
       role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
-      status: StatusUser.ACTIVE,
+      status: UserStatus.ACTIVE,
       $or: [
         { "employeeInfo.specialties": { $in: requiredSpecialties } },
         { "employeeInfo.specialties": { $exists: true, $ne: [] } },
@@ -1110,7 +1110,7 @@ export const getAvailableTimeSlotsService = async (query: {
       ? [query.employeeId]
       : await UserModel.find({
           role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
-          status: StatusUser.ACTIVE,
+          status: UserStatus.ACTIVE,
           $or: [
             { "employeeInfo.specialties": { $in: requiredSpecialties } },
             { "employeeInfo.specialties": { $exists: true, $ne: [] } },

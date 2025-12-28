@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import * as paymentService from "../services/payment.service";
 import * as stripeService from "../services/stripe.service";
-import { BadRequestException, UnauthorizedException, NotFoundException } from "../utils/app-error";
+import {
+  BadRequestException,
+  UnauthorizedException,
+  NotFoundException,
+} from "../utils/app-error";
 import { Roles } from "../enums/role.enum";
 import { refundSchema } from "../validation/payment-validation";
 import AppointmentModel, { ServiceType } from "../models/appointment.model";
@@ -14,7 +18,6 @@ import { PaymentMethodEnum, PaymentStatusEnum } from "../enums/payment.enum";
 import { Types } from "mongoose";
 import Stripe from "stripe";
 import { config } from "../config/app.config";
-import { appointmentIdSchema } from "../validation/employee.validation";
 
 const stripe = new Stripe(config.STRIPE_SECRET_KEY);
 /**
@@ -61,7 +64,7 @@ export const createCheckoutSession = asyncHandler(
       }
       serviceDetails = {
         name: service.name,
-        price: service.price
+        price: service.price,
       };
     } else {
       const servicePackage = await ServicePackageModel.findById(
@@ -72,7 +75,7 @@ export const createCheckoutSession = asyncHandler(
       }
       serviceDetails = {
         name: servicePackage.name,
-        price: servicePackage.discountedPrice || servicePackage.price
+        price: servicePackage.discountedPrice || servicePackage.price,
       };
     }
 
@@ -89,7 +92,7 @@ export const createCheckoutSession = asyncHandler(
       email: user.email,
       name: user.fullName,
       petName: pet.name,
-      petId: (pet._id as Types.ObjectId).toString()
+      petId: (pet._id as Types.ObjectId).toString(),
     };
 
     // Create Stripe checkout session
@@ -97,7 +100,7 @@ export const createCheckoutSession = asyncHandler(
       appointmentId: appointment._id as string,
       userId: user._id as string,
       serviceDetails,
-      customerDetails
+      customerDetails,
     });
 
     res.status(200).json(result);
@@ -111,8 +114,8 @@ export const createCheckoutSession = asyncHandler(
  */
 export const stripeWebhook = asyncHandler(
   async (req: Request, res: Response) => {
-    const signature = req.headers['stripe-signature'] as string;
-   
+    const signature = req.headers["stripe-signature"] as string;
+
     if (!signature) {
       throw new BadRequestException("Stripe signature is missing");
     }
@@ -121,7 +124,7 @@ export const stripeWebhook = asyncHandler(
       // Verify the webhook signature
       const event = stripeService.verifyStripeWebhookSignature(
         req.body,
-        signature,
+        signature
       );
 
       // Process the webhook event
@@ -166,7 +169,7 @@ export const processPayment = asyncHandler(
       appointmentId,
       role: req.user?.role,
       userId: req.user?._id,
-      paymentMethod
+      paymentMethod,
     });
 
     res.status(200).json(result);
@@ -191,7 +194,7 @@ export const getUserPayments = asyncHandler(
  */
 export const getPaymentByAppointment = asyncHandler(
   async (req: Request, res: Response) => {
-    const appointmentId = appointmentIdSchema.parse(req.params.appointmentId);
+    const appointmentId = req.params.appointmentId;
     const payment = await paymentService.getPaymentByAppointmentService(
       appointmentId,
       req.user?._id,
@@ -224,7 +227,7 @@ export const getPaymentById = asyncHandler(
       isAdmin
     );
 
-    res.status(200).json({payment});
+    res.status(200).json({ payment });
   }
 );
 
@@ -327,25 +330,27 @@ export const getPaymentsSummary = asyncHandler(
 export const handleSuccessfulPayment = asyncHandler(
   async (req: Request, res: Response) => {
     const { session_id } = req.query;
-    
+
     if (!session_id) {
       throw new BadRequestException("Session ID is required");
     }
-    
+
     // Verify the session
     try {
-      const session = await stripe.checkout.sessions.retrieve(session_id as string);
-      
+      const session = await stripe.checkout.sessions.retrieve(
+        session_id as string
+      );
+
       if (session.payment_status === "paid") {
         return res.status(200).json({
           success: true,
           message: "Payment successful",
-          appointmentId: session.metadata?.appointmentId
+          appointmentId: session.metadata?.appointmentId,
         });
       } else {
         return res.status(400).json({
           success: false,
-          message: "Payment not completed"
+          message: "Payment not completed",
         });
       }
     } catch (error) {

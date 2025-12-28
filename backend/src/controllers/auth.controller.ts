@@ -3,10 +3,24 @@ import passport from "passport";
 
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { config } from "../config/app.config";
-import { registerSchema } from "../validation/auth.validation";
-import { registerUserService } from "../services/auth.service";
+import {
+  changePasswordSchema,
+  forgotPasswordSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "../validation/auth.validation";
+import {
+  changePasswordService,
+  forgotPasswordService,
+  getMeService,
+  registerUserService,
+  resetPasswordService,
+  verifyEmailService,
+} from "../services/auth.service";
 import { HTTPSTATUS } from "../config/http.config";
 import { signJwtToken } from "../utils/jw";
+import { UserStatus } from "../enums/status-user.enum";
+import { BadRequestException } from "../utils/app-error";
 
 export const googleLoginCallback = asyncHandler(
   async (req: Request, res: Response) => {
@@ -30,7 +44,7 @@ export const registerUserController = asyncHandler(
     await registerUserService(body);
 
     return res.status(HTTPSTATUS.CREATED).json({
-      message: "User created successfully",
+      message: "Tạo tài khoản thành công",
     });
   }
 );
@@ -49,12 +63,13 @@ export const loginUserController = asyncHandler(
         }
         if (!user) {
           return res.status(HTTPSTATUS.UNAUTHORIZED).json({
-            message: info?.message || "Invalid email or password",
+            message: info?.message || "",
           });
         }
-        if (user.status === "BLOCKED") {
+        if (user.status === UserStatus.INACTIVE) {
           return res.status(HTTPSTATUS.FORBIDDEN).json({
-            message: "Your account is blocked. Please contact support.",
+            message:
+              "Tài khoản của bạn đã ngừng hoạt động. Vui lòng liên hệ với quản trị viên để được hổ trợ",
           });
         }
         const access_token = signJwtToken({
@@ -62,7 +77,7 @@ export const loginUserController = asyncHandler(
           role: user.role,
         });
         return res.status(HTTPSTATUS.OK).json({
-          message: "User login successfully",
+          message: "Đăng nhập tài khoản thành công",
           data: {
             access_token,
             user,
@@ -77,16 +92,82 @@ export const logoutUserController = asyncHandler(
   async (req: Request, res: Response) => {
     req.logout((err) => {
       if (err) {
-        console.log("Logout error", err);
+        console.log("Logout Error", err);
         return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
-          error: "Failed to log out",
+          error: "Đăng xuất tài khoản thất bại",
         });
       }
     });
 
     req.session = null;
     return res.status(HTTPSTATUS.OK).json({
-      message: "Logged out successfully",
+      message: "Đăng xuất tài khoản thành công",
+    });
+  }
+);
+
+export const ChangePasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user!._id;
+    const { currentPassword, newPassword } = changePasswordSchema.parse(
+      req.body
+    );
+
+    await changePasswordService(userId, currentPassword, newPassword);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Thay đổi mật khẩu thành công",
+    });
+  }
+);
+
+export const fogotPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = forgotPasswordSchema.parse(req.body);
+
+    const result = await forgotPasswordService(email);
+
+    return res.status(HTTPSTATUS.OK).json(result);
+  }
+);
+
+export const resetPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { token, newPassword } = resetPasswordSchema.parse(req.body);
+
+    await resetPasswordService(token, newPassword);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Đặt lại mật khẩu thành công",
+    });
+  }
+);
+
+export const verifyEmailController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      throw new BadRequestException("Verification token is required");
+    }
+
+    await verifyEmailService(token);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Email verified successfully",
+    });
+  }
+);
+
+export const getMeController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user!._id;
+
+    const { user } = await getMeService(userId);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Lấy thông tin người dùng thành công",
+      data: { user },
     });
   }
 );

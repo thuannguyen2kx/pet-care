@@ -8,19 +8,18 @@ import connectDatabase from "./config/database.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
-import petRoutes from "./routes/pet.route"
-import postRoutes from "./routes/post.route"
+import petRoutes from "./routes/pet.route";
+import postRoutes from "./routes/post.route";
 
 import "./config/passport.config";
 import { passportAuthenticateJWT } from "./config/passport.config";
 import commentRoutes from "./routes/comment.route";
 import reactionRoutes from "./routes/reaction.route";
 import serviceRoutes from "./routes/service.route";
-import employeeRoutes from "./routes/employee.route";
+// import employeeRoutes from "./routes/employee.route";
 import appointmentRoutes from "./routes/appointment.route";
 import paymentRoutes from "./routes/payment.route";
 import webhookRoutes from "./routes/webhook.route";
-import { rawBodyMiddleware } from "./middlewares/rawBody.middleware";
 import reportRoutes from "./routes/report.route";
 
 const app = express();
@@ -38,9 +37,10 @@ app.use(
   })
 );
 
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/health", (req, res) => {
   res.status(200).json({
-    message: "Wellcome to PetCare",
+    status: "OK",
+    timestamp: new Date().toISOString(),
   });
 });
 app.use(`${BASE_PATH}/auth`, authRoutes);
@@ -49,10 +49,14 @@ app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
 app.use(`${BASE_PATH}`, passportAuthenticateJWT, commentRoutes);
 app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
 app.use(`${BASE_PATH}/reactions`, passportAuthenticateJWT, reactionRoutes);
-app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes)
-app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
-app.use(`${BASE_PATH}/appointments`, passportAuthenticateJWT, appointmentRoutes)
-app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes)
+app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes);
+// app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
+app.use(
+  `${BASE_PATH}/appointments`,
+  passportAuthenticateJWT,
+  appointmentRoutes
+);
+app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes);
 app.use(`${BASE_PATH}/reports`, passportAuthenticateJWT, reportRoutes);
 app.use(errorHandler);
 
