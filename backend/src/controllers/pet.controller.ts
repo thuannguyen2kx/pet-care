@@ -8,11 +8,24 @@ import {
   deletePetService,
   updatePetPictureService,
   addVaccinationService,
-  addMedicalRecordService
+  addMedicalRecordService,
+  getAllPetsService,
+  updateVaccinationService,
+  deleteVaccinationService,
+  updateMedicalRecordService,
+  deleteMedicalRecordService,
+  getPetStatsService,
 } from "../services/pet.service";
 import { HTTPSTATUS } from "../config/http.config";
 import { uploadPetPicture } from "../utils/file-uploade";
-import { createPetSchema, medicalRecordSchema, petIdSchema, updatePetSchema, vaccinationSchema } from "../validation/pet.validatioin";
+import {
+  createPetSchema,
+  medicalRecordSchema,
+  petFilterSchema,
+  petIdSchema,
+  updatePetSchema,
+  vaccinationSchema,
+} from "../validation/pet.validatioin";
 import { userIdSchema } from "../validation/user.validation";
 
 /**
@@ -22,12 +35,50 @@ import { userIdSchema } from "../validation/user.validation";
  */
 export const getUserPetsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = userIdSchema.parse(req.params.userId);
+    const userId = req.user?._id;
     const { pets } = await getUserPetsService(userId);
-    
+
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy danh sách thú cưng thành công",
-      pets,
+      data: pets,
+    });
+  }
+);
+
+/**
+ * @desc    Get all pets (admin/employee only)
+ * @route   GET /api/pets/all
+ * @access  Private (Admin/Employee)
+ */
+export const getAllPetsController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const role = req.user?.role;
+    const filters = petFilterSchema.parse(req.query);
+
+    const result = await getAllPetsService(filters, role);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Lấy danh sách tất cả thú cưng thành công",
+      data: {
+        ...result,
+      },
+    });
+  }
+);
+
+/**
+ * @desc    Get pet statistics
+ * @route   GET /api/pets/stats
+ * @access  Private
+ */
+export const getPetStatsController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+    const stats = await getPetStatsService(userId);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Lấy thống kê thành công",
+      data: stats,
     });
   }
 );
@@ -42,88 +93,61 @@ export const getPetByIdController = asyncHandler(
     const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
     const role = req.user?.role;
-    
+
     const { pet } = await getPetByIdService({ petId, userId, role });
-    
+
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy thông tin thú cưng thành công",
-      pet,
+      data: pet,
     });
   }
 );
 
 /**
- * @desc    Tạo thú cưng mới (không kèm ảnh)
+ * @desc    Create pet without picture
  * @route   POST /api/pets
  * @access  Private
  */
 export const createPetController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?._id;
-    const { name, species, breed, age, weight, gender, habits, allergies, specialNeeds } = createPetSchema.parse({...req.body});
-    
-    // Chuyển đổi habits và allergies từ chuỗi thành mảng nếu cần
-    const petData = {
-      name,
-      species,
-      breed,
-      age: age ? Number(age) : undefined,
-      weight: weight ? Number(weight) : undefined,
-      gender,
-      habits: habits ? (typeof habits === 'string' ? habits.split(',').map(item => item.trim()) : habits) : [],
-      allergies: allergies ? (typeof allergies === 'string' ? allergies.split(',').map(item => item.trim()) : allergies) : [],
-      specialNeeds
-    };
-    
+    const petData = createPetSchema.parse(req.body);
+
     const { pet } = await createPetService({ userId, petData });
-    
+
     return res.status(HTTPSTATUS.CREATED).json({
       message: "Tạo thú cưng thành công",
-      pet,
+      data: pet,
     });
   }
 );
 
 /**
- * @desc    Tạo thú cưng mới (có kèm ảnh)
+ * @desc    Create pet with picture
  * @route   POST /api/pets/with-picture
  * @access  Private
  */
-export const createPetWithPictureController = [
-  uploadPetPicture.single("petPicture"),
+export const createPetWithImageController = [
+  uploadPetPicture.single("petImage"),
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
-    const { name, species, breed, age, weight, gender, habits, allergies, specialNeeds } = createPetSchema.parse({...req.body});
-    
-    // Chuyển đổi habits và allergies từ chuỗi thành mảng nếu cần
-    const petData = {
-      name,
-      species,
-      breed,
-      age: age ? Number(age) : undefined,
-      weight: weight ? Number(weight) : undefined,
-      gender,
-      habits: habits ? (typeof habits === 'string' ? habits.split(',').map(item => item.trim()) : habits) : [],
-      allergies: allergies ? (typeof allergies === 'string' ? allergies.split(',').map(item => item.trim()) : allergies) : [],
-      specialNeeds
-    };
-    
-    // Tạo thú cưng với ảnh
-    const { pet } = await createPetService({ 
-      userId, 
+    const petData = createPetSchema.parse(req.body);
+
+    const { pet } = await createPetService({
+      userId,
       petData,
-      file: req.file
+      file: req.file,
     });
-    
+
     return res.status(HTTPSTATUS.CREATED).json({
       message: "Tạo thú cưng thành công",
-      pet,
+      data: pet,
     });
   }),
 ];
 
 /**
- * @desc    Cập nhật thông tin thú cưng
+ * @desc    Update pet
  * @route   PUT /api/pets/:id
  * @access  Private
  */
@@ -131,36 +155,22 @@ export const updatePetController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
-    const { name, species, breed, age, weight, gender, habits, allergies, specialNeeds } = updatePetSchema.parse({...req.body});
-    
-    // Chuẩn bị dữ liệu cập nhật
-    const updateData: any = {};
-    if (name) updateData.name = name;
-    if (species) updateData.species = species;
-    if (breed) updateData.breed = breed;
-    if (age !== undefined) updateData.age = Number(age);
-    if (weight !== undefined) updateData.weight = Number(weight);
-    if (gender) updateData.gender = gender;
-    
-    if (habits) {
-      updateData.habits = typeof habits === 'string' 
-        ? habits.split(',').map(item => item.trim()) 
-        : habits;
-    }
-    
-    if (allergies) {
-      updateData.allergies = typeof allergies === 'string' 
-        ? allergies.split(',').map(item => item.trim()) 
-        : allergies;
-    }
-    
-    if (specialNeeds !== undefined) updateData.specialNeeds = specialNeeds;
-    
-    const { pet } = await updatePetService({ petId, userId, updateData });
-    
+    const updateData = updatePetSchema.parse(req.body);
+
+    const { dateOfBirth, ...rest } = updateData;
+    const normalizedUpdateData = {
+      ...rest,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+    };
+    const { pet } = await updatePetService({
+      petId,
+      userId,
+      updateData: normalizedUpdateData,
+    });
+
     return res.status(HTTPSTATUS.OK).json({
       message: "Cập nhật thông tin thú cưng thành công",
-      pet,
+      data: pet,
     });
   }
 );
@@ -174,9 +184,9 @@ export const deletePetController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
-    
+
     const result = await deletePetService({ petId, userId });
-    
+
     return res.status(HTTPSTATUS.OK).json({
       message: result.message,
     });
@@ -188,21 +198,21 @@ export const deletePetController = asyncHandler(
  * @route   POST /api/pets/:id/picture
  * @access  Private
  */
-export const updatePetPictureController = [
-  uploadPetPicture.single("petPicture"),
+export const updatePetImageController = [
+  uploadPetPicture.single("petImage"),
   asyncHandler(async (req: Request, res: Response) => {
-    const petId =  petIdSchema.parse(req.params.id);
+    const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
-    
+
     const { pet } = await updatePetPictureService({
       petId,
       userId,
       file: req.file,
     });
-    
+
     return res.status(HTTPSTATUS.OK).json({
       message: "Cập nhật ảnh đại diện thú cưng thành công",
-      pet,
+      data: pet,
     });
   }),
 ];
@@ -216,25 +226,80 @@ export const addVaccinationController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
-    const { name, date, expiryDate, certificate } = vaccinationSchema.parse(req.body);
-    
+    const { name, date, expiryDate, certificate } = vaccinationSchema.parse(
+      req.body
+    );
+
     const vaccinationData = {
       name,
       date: new Date(date),
       expiryDate: expiryDate ? new Date(expiryDate) : undefined,
-      certificate
+      certificate,
     };
-    
+
     const { pet } = await addVaccinationService({
       petId,
       userId,
       role: req.user?.role,
-      vaccinationData
+      vaccinationData,
     });
-    
+
     return res.status(HTTPSTATUS.CREATED).json({
       message: "Thêm thông tin tiêm phòng thành công",
-      pet,
+      data: pet,
+    });
+  }
+);
+/**
+ * @desc    Update vaccination record
+ * @route   PUT /api/pets/:id/vaccinations/:vaccinationId
+ * @access  Private
+ */
+export const updateVaccinationController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const petId = petIdSchema.parse(req.params.id);
+    const vaccinationId = petIdSchema.parse(req.params.vaccinationId);
+    const userId = req.user?._id;
+    const role = req.user?.role;
+    const updateData = vaccinationSchema.partial().parse(req.body);
+
+    const { pet } = await updateVaccinationService({
+      petId,
+      vaccinationId,
+      userId,
+      role,
+      updateData,
+    });
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Cập nhật thông tin tiêm phòng thành công",
+      data: pet,
+    });
+  }
+);
+
+/**
+ * @desc    Delete vaccination record
+ * @route   DELETE /api/pets/:id/vaccinations/:vaccinationId
+ * @access  Private
+ */
+export const deleteVaccinationController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const petId = petIdSchema.parse(req.params.id);
+    const vaccinationId = petIdSchema.parse(req.params.vaccinationId);
+    const userId = req.user?._id;
+    const role = req.user?.role;
+
+    const { pet } = await deleteVaccinationService({
+      petId,
+      vaccinationId,
+      userId,
+      role,
+    });
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Xóa thông tin tiêm phòng thành công",
+      data: pet,
     });
   }
 );
@@ -248,25 +313,80 @@ export const addMedicalRecordController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const userId = req.user?._id;
-    const { condition, diagnosis, treatment, notes } = medicalRecordSchema.parse(req.body);
-    
+    const { condition, diagnosis, treatment, notes } =
+      medicalRecordSchema.parse(req.body);
+
     const medicalData = {
       condition,
       diagnosis: new Date(diagnosis),
       treatment,
-      notes
+      notes,
     };
-    
+
     const { pet } = await addMedicalRecordService({
       petId,
       userId,
       role: req.user?.role,
-      medicalData
+      medicalData,
     });
-    
+
     return res.status(HTTPSTATUS.CREATED).json({
       message: "Thêm lịch sử y tế thành công",
-      pet,
+      data: pet,
+    });
+  }
+);
+
+/**
+ * @desc    Update medical record
+ * @route   PUT /api/pets/:id/medical/:recordId
+ * @access  Private
+ */
+export const updateMedicalRecordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const petId = petIdSchema.parse(req.params.id);
+    const recordId = petIdSchema.parse(req.params.recordId);
+    const userId = req.user?._id;
+    const role = req.user?.role;
+    const updateData = medicalRecordSchema.partial().parse(req.body);
+
+    const { pet } = await updateMedicalRecordService({
+      petId,
+      recordId,
+      userId,
+      role,
+      updateData,
+    });
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Cập nhật hồ sơ y tế thành công",
+      data: pet,
+    });
+  }
+);
+
+/**
+ * @desc    Delete medical record
+ * @route   DELETE /api/pets/:id/medical/:recordId
+ * @access  Private
+ */
+export const deleteMedicalRecordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const petId = petIdSchema.parse(req.params.id);
+    const recordId = petIdSchema.parse(req.params.recordId);
+    const userId = req.user?._id;
+    const role = req.user?.role;
+
+    const { pet } = await deleteMedicalRecordService({
+      petId,
+      recordId,
+      userId,
+      role,
+    });
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Xóa hồ sơ y tế thành công",
+      data: pet,
     });
   }
 );

@@ -3,9 +3,7 @@ import z from 'zod';
 
 import { http } from './http';
 import { configureAuth } from './react-query-auth';
-import { storage } from './storage';
 import { paths } from '../config/paths';
-import { STORAGE_KEYS } from '../constant';
 
 import { AUTH_ENDPOINTS } from '@/shared/config/api-endpoints';
 import type { TApiResponseSuccess, TUser } from '@/shared/types/api-response';
@@ -14,8 +12,8 @@ export type TAuthResponse = {
   user: TUser;
   access_token: string;
 };
-
-const getUser = async (): Promise<TUser> => {
+export const USE_USER_KEY = ['authicated-user'];
+export const getUser = async (): Promise<TUser> => {
   const response = await http.get(AUTH_ENDPOINTS.ME);
   return response.data.user;
 };
@@ -67,6 +65,7 @@ const registerWithEmailAndPassword = (
 };
 
 const authConfig = {
+  userKey: USE_USER_KEY,
   userFn: getUser,
   loginFn: async (data: TLoginPayload) => {
     const auth = await loginWithEmailAndPassword(data);

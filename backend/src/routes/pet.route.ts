@@ -1,55 +1,59 @@
 import express from "express";
-import {
-  getUserPetsController,
-  getPetByIdController,
-  createPetController,
-  createPetWithPictureController,
-  updatePetController,
-  deletePetController,
-  updatePetPictureController,
-  addVaccinationController,
-  addMedicalRecordController,
-} from "../controllers/pet.controller";
-
-
+import * as controller from "../controllers/pet.controller";
+import { authorizeRoles } from "../middlewares/auth.middleware";
+import { Roles } from "../enums/role.enum";
 const petRoutes = express.Router();
 
-
-
 // Routes cơ bản CRUD
-petRoutes
-  .route("/:userId")
-  .get(getUserPetsController)
+// Get user's pets with filters
+petRoutes.get("/", controller.getUserPetsController);
 
-petRoutes.post("/", createPetController);
-
-// Route tạo pet kèm ảnh 
-petRoutes.post("/with-picture", createPetWithPictureController);
-
-petRoutes
-  .route("/details/:id")
-  .get(getPetByIdController)
-  .put( 
-    updatePetController
-  )
-  .delete(deletePetController);
-
-// Route cập nhật ảnh đại diện
-petRoutes.post(
-  "/:id/picture",
-  updatePetPictureController
+// Get all pets (admin/employee only)
+petRoutes.get(
+  "/all",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  controller.getAllPetsController
 );
 
-// Route thêm tiêm phòng
-petRoutes.post(
-  "/:id/vaccinations", 
-  addVaccinationController
+// Get statistics
+petRoutes.get("/stats", controller.getPetStatsController);
+
+// Get pet by ID
+petRoutes.get("/:id", controller.getPetByIdController);
+
+// Create pet
+petRoutes.post("/", controller.createPetWithImageController);
+petRoutes.post("/without-picture", controller.createPetController);
+
+// Update pet
+petRoutes.put("/:id", controller.updatePetController);
+
+// Delete pet
+petRoutes.delete("/:id", controller.deletePetController);
+
+// Update picture
+petRoutes.post("/:id/image", controller.updatePetImageController);
+
+// Vaccination management
+petRoutes.post("/:id/vaccinations", controller.addVaccinationController);
+petRoutes.put(
+  "/:id/vaccinations/:vaccinationId",
+  controller.updateVaccinationController
+);
+petRoutes.delete(
+  "/:id/vaccinations/:vaccinationId",
+  controller.deleteVaccinationController
 );
 
-// Route thêm lịch sử y tế
-petRoutes.post(
-  "/:id/medical", 
-  addMedicalRecordController
+// Medical record management
+petRoutes.post("/:id/medical", controller.addMedicalRecordController);
+petRoutes.put(
+  "/:id/medical/:recordId",
+  controller.updateMedicalRecordController
+);
+petRoutes.delete(
+  "/:id/medical/:recordId",
+  controller.deleteMedicalRecordController
 );
 
 export default petRoutes;

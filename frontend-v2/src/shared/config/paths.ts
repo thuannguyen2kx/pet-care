@@ -42,6 +42,10 @@ export const paths = {
       path: '/app/pets/:petId',
       getHref: (petId: string) => `/app/pets/${petId}`,
     },
+    petNew: {
+      path: '/app/pets/new',
+      getHref: () => '/app/pets/new',
+    },
     booking: {
       path: '/app/bookings',
       getHref: () => '/app/bookings',

@@ -16,3 +16,19 @@ export const getInitials = (name?: string, max = 2) => {
     .join('')
     .toUpperCase();
 };
+
+export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
+
+export const fileToUrl = (file?: File) => {
+  return file ? URL.createObjectURL(file) : undefined;
+};
+
+export function formatDateVN(date?: Date | null) {
+  if (!date) return '—';
+  return date.toLocaleDateString('vi-VN');
+}
+export function removeUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined),
+  ) as Partial<T>;
+}

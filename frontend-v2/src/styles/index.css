@@ -114,6 +114,13 @@
   --sidebar-accent-foreground: oklch(0.25 0 0);
   --sidebar-border: oklch(0.9 0 0);
   --sidebar-ring: oklch(0.62 0.09 155);
+
+  body[data-scroll-locked][data-scroll-locked] {
+    overflow: auto !important;
+  }
+  body[data-scroll-locked] {
+    margin-right: 0 !important;
+  }
 }
 
 .dark {

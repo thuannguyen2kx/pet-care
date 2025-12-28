@@ -34,6 +34,7 @@ export const PET_ENDPOINTS = {
   DETAIL: (petId: string) => `${API_BASE.PETS}/${petId}`,
   CREATE: `${API_BASE.PETS}`,
   UPDATE: (petId: string) => `${API_BASE.PETS}/${petId}`,
+  UPDATE_IMAGE: (petId: string) => `${API_BASE.PETS}/${petId}/image`,
   DELETE: (petId: string) => `${API_BASE.PETS}/${petId}`,
 };
 

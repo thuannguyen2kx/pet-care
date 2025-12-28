@@ -64,7 +64,24 @@ const createAppRouter = (queryClient: QueryClient) => {
                     },
                     {
                       path: paths.customer.pets.path,
-                      lazy: () => import('@/routes/customer/pets').then(convert(queryClient)),
+                      lazy: () =>
+                        import('@/features/pets/pages/customer-pets-list.page').then(
+                          convert(queryClient),
+                        ),
+                    },
+                    {
+                      path: paths.customer.petNew.path,
+                      lazy: () =>
+                        import('@/features/pets/pages/customer-pet-new.page').then(
+                          convert(queryClient),
+                        ),
+                    },
+                    {
+                      path: paths.customer.petDetail.path,
+                      lazy: () =>
+                        import('@/features/pets/pages/customer-pet-detail.page').then(
+                          convert(queryClient),
+                        ),
                     },
                     {
                       path: paths.customer.booking.path,
