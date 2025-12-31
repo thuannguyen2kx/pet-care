@@ -4,9 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { GoogleOauthButton } from './google-oauth-button';
 
-import { paths } from '@/shared/config/paths';
+import { resolveHomeRoute } from '@/features/auth/helpers/resolve-home-route';
 import { HTTPSTATUS } from '@/shared/constant';
-import { ROLES } from '@/shared/constant/roles';
 import {
   loginInputSchema,
   useLogin,
@@ -45,12 +44,10 @@ export const LoginForm = () => {
           navigate(redirectTo);
           return;
         }
-        if (data && data.role === ROLES.CUSTOMER) {
-          navigate(paths.customer.dashboard.path);
-        } else if (data && data.role === ROLES.ADMIN) {
-          navigate(paths.admin.root.path);
-        } else if (data && data.role === ROLES.EMPLOYEE) {
-          navigate(paths.employee.root.path);
+        if (data?.identity) {
+          console.log('identity');
+          const home = resolveHomeRoute(data.identity);
+          navigate(home);
         }
       },
       onError: (error) => {

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { Roles, RoleType } from "../enums/role.enum";
 import {
   GenderType,
@@ -15,7 +15,7 @@ import { deleteFile } from "../utils/file-uploade";
 import { ProviderEnum } from "../enums/account-provider.enum";
 import AccountModel from "../models/account.model";
 
-export const getCurrentUserService = async (userId: string) => {
+export const getCurrentUserService = async (userId: Types.ObjectId) => {
   const user = await UserModel.findById(userId).select("-password");
 
   if (!user) {
@@ -42,7 +42,7 @@ export const getProfileByIdService = async (userId: string) => {
 };
 
 export const updateProfileService = async (
-  userId: string,
+  userId: Types.ObjectId,
   body: {
     fullName?: string;
     phoneNumber?: string;
@@ -69,7 +69,7 @@ export const updateProfileService = async (
 };
 
 export const updateAddressService = async (
-  userId: string,
+  userId: Types.ObjectId,
   address: {
     province: string;
     ward: string;
@@ -92,7 +92,7 @@ export const updateAddressService = async (
 };
 
 export const updatePreferencesService = async (
-  userId: string,
+  userId: Types.ObjectId,
   preferences: {
     preferredEmployeeId?: string;
     communicationPreferences?: {
@@ -127,7 +127,7 @@ export const updatePreferencesService = async (
 };
 
 export const changeProfilePictureService = async (
-  userId: string,
+  userId: Types.ObjectId,
   file?: Express.Multer.File
 ) => {
   const user = await UserModel.findById(userId);
@@ -159,7 +159,7 @@ export const changeProfilePictureService = async (
   return { updatedUser };
 };
 
-export const deleteProfilePictureService = async (userId: string) => {
+export const deleteProfilePictureService = async (userId: Types.ObjectId) => {
   const user = await UserModel.findById(userId);
   if (!user) {
     throw new NotFoundException("User not found");

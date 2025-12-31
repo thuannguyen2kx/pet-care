@@ -13,12 +13,13 @@ export default function DashboardLayout({ title, description, children }: Props)
   const user = useUser();
   if (!user.data) return null;
 
+  const { profile } = user.data;
   return (
     <div className="bg-background flex min-h-dvh">
       <DashboardSidebar
-        name={user.data?.fullName}
-        imageUrl={user.data?.profilePicture.url ?? undefined}
-        email={user.data?.email}
+        name={profile.displayName}
+        imageUrl={profile.avatarUrl ?? undefined}
+        email={profile.email}
       />
       <div className="flex flex-1 flex-col">
         <DashboardHeader title={title} description={description} />

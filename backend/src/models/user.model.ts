@@ -73,6 +73,7 @@ interface IEmployeeInfo {
 }
 
 export interface UserDocument extends Document {
+  _id: Types.ObjectId;
   // Basic Info
   email: string;
   password?: string;

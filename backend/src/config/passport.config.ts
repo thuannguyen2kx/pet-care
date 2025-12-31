@@ -18,7 +18,7 @@ import {
 import { ProviderEnum } from "../enums/account-provider.enum";
 import { signJwtToken } from "../utils/jw";
 import { RoleType } from "../enums/role.enum";
-import { verify } from "crypto";
+import { Types } from "mongoose";
 
 passport.use(
   new GoogleStrategy(
@@ -42,8 +42,11 @@ passport.use(
           displayName: profile.displayName,
           providerId: googleId,
           picture: picture,
-        }); 
-        const jwt = signJwtToken({ userId: user._id, role: user.role });
+        });
+        const jwt = signJwtToken({
+          userId: user._id.toString(),
+          role: user.role,
+        });
         req.jwt = jwt;
         done(null, user);
       } catch (error) {
@@ -85,7 +88,9 @@ const options: StrategyOptions = {
 passport.use(
   new JwtStrategy(options, async (payload: JwtPayload, done) => {
     try {
-      const user = await findUserByIdService(payload.userId);
+      const user = await findUserByIdService(
+        new Types.ObjectId(payload.userId)
+      );
       if (!user) {
         return done(null, false);
       }
@@ -95,8 +100,6 @@ passport.use(
     }
   })
 );
-passport.serializeUser((user: any, done) => done(null, user));
-passport.deserializeUser((user: any, done) => done(null, user));
 
 export const passportAuthenticateJWT = passport.authenticate("jwt", {
   session: false,

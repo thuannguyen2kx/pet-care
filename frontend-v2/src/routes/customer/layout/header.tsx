@@ -52,7 +52,8 @@ export const Header = () => {
       },
     });
   };
-
+  if (!user.data) return null;
+  const { profile } = user.data || {};
   return (
     <header className="border-border bg-background/95 supports-backdrop-filter:bg-backgroud/60 sticky top-0 z-50 w-full border backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -92,16 +93,16 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="hidden gap-2 pr-1 pl-2 md:flex">
                 <Avatar>
-                  <AvatarImage src={user.data?.profilePicture.url || ''} />
-                  <AvatarFallback>{getInitials(user.data?.fullName)}</AvatarFallback>
+                  <AvatarImage src={profile.avatarUrl || ''} />
+                  <AvatarFallback>{getInitials(profile.displayName)}</AvatarFallback>
                 </Avatar>
                 <ChevronDown className="text-muted-foreground h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="border-border w-56">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{user?.data?.fullName}</p>
-                <p className="text-muted-foreground text-xs">{user.data?.email}</p>
+                <p className="text-sm font-medium">{profile.displayName}</p>
+                <p className="text-muted-foreground text-xs">{profile.email}</p>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -160,12 +161,12 @@ export const Header = () => {
             <div className="border-border mt-2 border-t pt-4">
               <div className="flex items-center gap-3 px-3 py-2">
                 <Avatar>
-                  <AvatarImage src={user.data?.profilePicture.url || ''} />
-                  <AvatarFallback>{getInitials(user.data?.fullName)}</AvatarFallback>
+                  <AvatarImage src={profile.avatarUrl || '/placeholder.svg'} />
+                  <AvatarFallback>{getInitials(profile.displayName)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-sm font-medium">Nguyễn Minh Anh</p>
-                  <p className="text-muted-foreground text-xs">minhanh@email.com</p>
+                  <p className="text-sm font-medium">{profile.displayName}</p>
+                  <p className="text-muted-foreground text-xs">{profile.email}</p>
                 </div>
               </div>
               <Link

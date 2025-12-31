@@ -33,12 +33,13 @@ import {
 } from "../validation/user.validation";
 import { UserStatusType } from "../enums/status-user.enum";
 import { RoleType } from "../enums/role.enum";
+import { Types } from "mongoose";
 
 export const getCurrentUserController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?._id;
 
-    const { user } = await getCurrentUserService(userId);
+    const { user } = await getCurrentUserService(new Types.ObjectId(userId));
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy thông tin người dùng thành công",
@@ -65,7 +66,10 @@ export const updateProfileController = asyncHandler(
     const userId = req?.user?._id;
     const body = updateProfileSchema.parse({ ...req.body });
 
-    const { updatedUser } = await updateProfileService(userId, body);
+    const { updatedUser } = await updateProfileService(
+      new Types.ObjectId(userId),
+      body
+    );
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Cập nhật thông tin người dùng thành công",
@@ -106,7 +110,7 @@ export const updatePreferencesController = asyncHandler(
 export const updateProfilePictureController = [
   uploadProfilePicture.single("profilePicture"),
   asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const result = await changeProfilePictureService(userId, req.file);
     res.status(HTTPSTATUS.OK).json({
       message: "Cập nhật ảnh người dùng thành công",

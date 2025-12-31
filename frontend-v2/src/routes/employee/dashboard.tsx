@@ -1,3 +1,15 @@
+import EmployeeLayout from '@/routes/employee/layout';
+import { useUser } from '@/shared/lib/auth';
+
 export default function EmployeeDashboardRoute() {
-  return <div>Dashboard</div>;
+  const user = useUser();
+
+  return (
+    <EmployeeLayout
+      title={`Xin chào, ${user.data?.fullName}`}
+      description="Tổng quan hoạt động của bạn"
+    >
+      <div>Dashboard</div>
+    </EmployeeLayout>
+  );
 }

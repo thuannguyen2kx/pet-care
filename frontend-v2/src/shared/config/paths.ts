@@ -26,11 +26,15 @@ export const paths = {
       path: '/auth/forgot-password',
       getHref: () => '/auth/forgot-password',
     },
+    suspended: {
+      path: '/auth/suspended',
+      getHref: () => '/auth/suspended',
+    },
   },
 
   /* ===================== CUSTOMER ===================== */
   customer: {
-    dashboard: {
+    root: {
       path: '/app',
       getHref: () => '/app',
     },
@@ -89,6 +93,10 @@ export const paths = {
     pets: {
       path: '/employee/pets',
       getHref: () => '/employee/pets',
+    },
+    profile: {
+      path: '/employee/profile',
+      getHref: () => '/employee/profile',
     },
   },
 

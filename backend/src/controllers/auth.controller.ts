@@ -21,6 +21,7 @@ import { HTTPSTATUS } from "../config/http.config";
 import { signJwtToken } from "../utils/jw";
 import { UserStatus } from "../enums/status-user.enum";
 import { BadRequestException } from "../utils/app-error";
+import { mapUserToGetMeResponse } from "../mapper/user.mapper";
 
 export const googleLoginCallback = asyncHandler(
   async (req: Request, res: Response) => {
@@ -73,14 +74,14 @@ export const loginUserController = asyncHandler(
           });
         }
         const access_token = signJwtToken({
-          userId: user._id,
+          userId: user._id.toString(),
           role: user.role,
         });
         return res.status(HTTPSTATUS.OK).json({
           message: "Đăng nhập tài khoản thành công",
           data: {
             access_token,
-            user,
+            user: mapUserToGetMeResponse(user),
           },
         });
       }
@@ -163,11 +164,11 @@ export const getMeController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user!._id;
 
-    const { user } = await getMeService(userId);
+    const { me } = await getMeService(userId);
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy thông tin người dùng thành công",
-      data: { user },
+      data: me,
     });
   }
 );

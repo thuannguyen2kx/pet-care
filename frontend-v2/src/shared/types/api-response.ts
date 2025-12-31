@@ -1,5 +1,6 @@
 import type { TRole } from '../constant/roles';
-import type { TGender, TUserStatus } from '../constant/status-user';
+
+import type { TMemberShipTier, TUserStatus } from '@/features/user/domain/user-status';
 
 type TApiResponseSuccess<T> = {
   status: number;
@@ -16,38 +17,36 @@ type TApiResponseError = {
 export type { TApiResponseSuccess, TApiResponseError };
 
 // ======================== USER =============================
-export type TUser = {
-  _id: string;
-  email: string;
-  password?: string;
-  fullName: string;
-  phoneNumber?: string;
-  gender: TGender;
+export type TUserIdentity = {
+  id: string;
   role: TRole;
   status: TUserStatus;
-  profilePicture: {
-    url: string | null;
-    publicId: string | null;
-  };
-  employeeInfo: TEmployeeInfo | null;
-  lastLogin: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+};
+export type TUserProfile = {
+  email: string;
+  displayName: string;
+  avatarUrl?: string | null;
+  phoneNumber?: string;
 };
 
-// ======================== EMPLOYEE =============================
-export type TEmployeeInfo = {
-  specialties?: string[];
-  schedule?: {
-    workDays: string[];
-    workHours: {
-      start: string;
-      end: string;
-    };
-    vacation?: { start: Date; end: Date }[];
-  };
-  performance?: {
-    rating: number;
-    completedServices: number;
-  };
+export type TEmployeeDomain = {
+  type: 'employee';
+  specialties: string[];
+  status: string;
+  isAcceptingBookings: boolean;
+};
+
+export type TCustomerDomain = {
+  type: 'customer';
+  membershipTier: TMemberShipTier;
+  loyaltyPoints: number;
+  isVip: boolean;
+};
+
+export type TUserDomain = TEmployeeDomain | TCustomerDomain;
+
+export type TGetMeResponse = {
+  identity: TUserIdentity;
+  profile: TUserProfile;
+  domain: TUserDomain;
 };

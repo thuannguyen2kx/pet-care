@@ -3,19 +3,19 @@ import z from 'zod';
 
 import { http } from './http';
 import { configureAuth } from './react-query-auth';
-import { paths } from '../config/paths';
 
 import { AUTH_ENDPOINTS } from '@/shared/config/api-endpoints';
-import type { TApiResponseSuccess, TUser } from '@/shared/types/api-response';
+import { paths } from '@/shared/config/paths';
+import type { TApiResponseSuccess, TGetMeResponse } from '@/shared/types/api-response';
 
 export type TAuthResponse = {
-  user: TUser;
+  user: TGetMeResponse;
   access_token: string;
 };
 export const USE_USER_KEY = ['authicated-user'];
-export const getUser = async (): Promise<TUser> => {
+export const getUser = async (): Promise<TGetMeResponse> => {
   const response = await http.get(AUTH_ENDPOINTS.ME);
-  return response.data.user;
+  return response.data;
 };
 
 const logout = async () => {

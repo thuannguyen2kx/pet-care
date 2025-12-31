@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import crypto from "crypto";
 import UserModel, { UserDocument } from "../models/user.model";
 import AccountModel from "../models/account.model";
@@ -11,6 +11,7 @@ import {
   UnauthorizedException,
 } from "../utils/app-error";
 import { hashValue } from "../utils/bcrypt";
+import { mapUserToGetMeResponse } from "../mapper/user.mapper";
 
 export const loginOrCreateAccountService = async (data: {
   provider: string;
@@ -143,7 +144,7 @@ export const verifyUserService = async ({
   } as UserDocument;
 };
 
-export const getMeService = async (userId: string) => {
+export const getMeService = async (userId: Types.ObjectId) => {
   const user = await UserModel.findById(userId).select("-password");
 
   if (!user) {
@@ -156,10 +157,12 @@ export const getMeService = async (userId: string) => {
     );
   }
 
-  return { user };
+  return {
+    me: mapUserToGetMeResponse(user),
+  };
 };
 
-export const findUserByIdService = async (userId: string) => {
+export const findUserByIdService = async (userId: Types.ObjectId) => {
   const user = await UserModel.findById(userId, {
     password: false,
   });
@@ -167,7 +170,7 @@ export const findUserByIdService = async (userId: string) => {
 };
 
 export const changePasswordService = async (
-  userId: string,
+  userId: Types.ObjectId,
   currentPassword: string,
   newPassword: string
 ) => {

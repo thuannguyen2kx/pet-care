@@ -6,7 +6,7 @@ import {
 } from "../utils/app-error";
 import { deleteFile } from "../utils/file-uploade";
 import { Roles, RoleType } from "../enums/role.enum";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { PetGender, PetType } from "../enums/pet";
 import {
   PetFilterQuery,
@@ -64,12 +64,12 @@ const formatPetResponse = (pet: IPet): PetResponse => {
 /**
  * Service để lấy danh sách thú cưng của người dùng
  */
-export const getUserPetsService = async (userId: string) => {
+export const getUserPetsService = async (userId: Types.ObjectId) => {
   const pets = await PetModel.find({ ownerId: userId, isActive: true });
   return { pets: pets.map(formatPetResponse) };
 };
 export const getPetStatsService = async (
-  userId: string
+  userId: Types.ObjectId
 ): Promise<PetStatsResponse> => {
   const pets = await PetModel.find({ ownerId: userId, isActive: true });
 
@@ -167,7 +167,7 @@ export const getPetByIdService = async ({
   role,
 }: {
   petId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
 }) => {
   const pet = await PetModel.findById(petId);
@@ -196,7 +196,7 @@ export const createPetService = async ({
   petData,
   file,
 }: {
-  userId: string;
+  userId: Types.ObjectId;
   petData: {
     name: string;
     type: string;
@@ -249,7 +249,7 @@ export const updatePetService = async ({
   updateData,
 }: {
   petId: string;
-  userId: string;
+  userId: Types.ObjectId;
   updateData: Partial<IPet>;
 }) => {
   const pet = await PetModel.findOne({ _id: petId, isActive: true });
@@ -295,7 +295,7 @@ export const deletePetService = async ({
   userId,
 }: {
   petId: string;
-  userId: string;
+  userId: Types.ObjectId;
 }) => {
   const pet = await PetModel.findById(petId);
 
@@ -336,7 +336,7 @@ export const updatePetPictureService = async ({
   file,
 }: {
   petId: string;
-  userId: string;
+  userId: Types.ObjectId;
   file?: Express.Multer.File;
 }) => {
   const pet = await PetModel.findById(petId);
@@ -382,7 +382,7 @@ export const addVaccinationService = async ({
   vaccinationData,
 }: {
   petId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
   vaccinationData: {
     name: string;
@@ -432,7 +432,7 @@ export const updateVaccinationService = async ({
 }: {
   petId: string;
   vaccinationId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
   updateData: any;
 }): Promise<{ pet: PetResponse }> => {
@@ -479,7 +479,7 @@ export const deleteVaccinationService = async ({
 }: {
   petId: string;
   vaccinationId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
 }): Promise<{ pet: PetResponse }> => {
   const pet = await PetModel.findById(petId);
@@ -515,7 +515,7 @@ export const addMedicalRecordService = async ({
   medicalData,
 }: {
   petId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
   medicalData: {
     condition: string;
@@ -560,7 +560,7 @@ export const updateMedicalRecordService = async ({
 }: {
   petId: string;
   recordId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
   updateData: any;
 }): Promise<{ pet: PetResponse }> => {
@@ -608,7 +608,7 @@ export const deleteMedicalRecordService = async ({
 }: {
   petId: string;
   recordId: string;
-  userId: string;
+  userId: Types.ObjectId;
   role: RoleType | undefined;
 }): Promise<{ pet: PetResponse }> => {
   const pet = await PetModel.findById(petId);

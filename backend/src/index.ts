@@ -19,13 +19,13 @@ import serviceRoutes from "./routes/service.route";
 // import employeeRoutes from "./routes/employee.route";
 import appointmentRoutes from "./routes/appointment.route";
 import paymentRoutes from "./routes/payment.route";
-import webhookRoutes from "./routes/webhook.route";
+// import webhookRoutes from "./routes/webhook.route";
 import reportRoutes from "./routes/report.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
 
-app.use(`${BASE_PATH}/webhook`, webhookRoutes);
+// app.use(`${BASE_PATH}/webhook`, webhookRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,18 +46,18 @@ app.get("/health", (req, res) => {
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/users`, passportAuthenticateJWT, userRoutes);
 app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
-app.use(`${BASE_PATH}`, passportAuthenticateJWT, commentRoutes);
-app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
-app.use(`${BASE_PATH}/reactions`, passportAuthenticateJWT, reactionRoutes);
-app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes);
+// app.use(`${BASE_PATH}`, passportAuthenticateJWT, commentRoutes);
+// app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
+// app.use(`${BASE_PATH}/reactions`, passportAuthenticateJWT, reactionRoutes);
+// app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes);
 // app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
-app.use(
-  `${BASE_PATH}/appointments`,
-  passportAuthenticateJWT,
-  appointmentRoutes
-);
-app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes);
-app.use(`${BASE_PATH}/reports`, passportAuthenticateJWT, reportRoutes);
+// app.use(
+//   `${BASE_PATH}/appointments`,
+//   passportAuthenticateJWT,
+//   appointmentRoutes
+// );
+// app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes);
+// app.use(`${BASE_PATH}/reports`, passportAuthenticateJWT, reportRoutes);
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {

@@ -35,7 +35,7 @@ import { userIdSchema } from "../validation/user.validation";
  */
 export const getUserPetsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const { pets } = await getUserPetsService(userId);
 
     return res.status(HTTPSTATUS.OK).json({
@@ -73,7 +73,7 @@ export const getAllPetsController = asyncHandler(
  */
 export const getPetStatsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const stats = await getPetStatsService(userId);
 
     return res.status(HTTPSTATUS.OK).json({
@@ -91,7 +91,7 @@ export const getPetStatsController = asyncHandler(
 export const getPetByIdController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const role = req.user?.role;
 
     const { pet } = await getPetByIdService({ petId, userId, role });
@@ -110,7 +110,7 @@ export const getPetByIdController = asyncHandler(
  */
 export const createPetController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const petData = createPetSchema.parse(req.body);
 
     const { pet } = await createPetService({ userId, petData });
@@ -130,7 +130,7 @@ export const createPetController = asyncHandler(
 export const createPetWithImageController = [
   uploadPetPicture.single("petImage"),
   asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const petData = createPetSchema.parse(req.body);
 
     const { pet } = await createPetService({
@@ -154,7 +154,7 @@ export const createPetWithImageController = [
 export const updatePetController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const updateData = updatePetSchema.parse(req.body);
 
     const { dateOfBirth, ...rest } = updateData;
@@ -183,7 +183,7 @@ export const updatePetController = asyncHandler(
 export const deletePetController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
 
     const result = await deletePetService({ petId, userId });
 
@@ -202,7 +202,7 @@ export const updatePetImageController = [
   uploadPetPicture.single("petImage"),
   asyncHandler(async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
 
     const { pet } = await updatePetPictureService({
       petId,
@@ -225,7 +225,7 @@ export const updatePetImageController = [
 export const addVaccinationController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const { name, date, expiryDate, certificate } = vaccinationSchema.parse(
       req.body
     );
@@ -259,7 +259,7 @@ export const updateVaccinationController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const vaccinationId = petIdSchema.parse(req.params.vaccinationId);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const role = req.user?.role;
     const updateData = vaccinationSchema.partial().parse(req.body);
 
@@ -287,7 +287,7 @@ export const deleteVaccinationController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const vaccinationId = petIdSchema.parse(req.params.vaccinationId);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const role = req.user?.role;
 
     const { pet } = await deleteVaccinationService({
@@ -312,7 +312,7 @@ export const deleteVaccinationController = asyncHandler(
 export const addMedicalRecordController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const { condition, diagnosis, treatment, notes } =
       medicalRecordSchema.parse(req.body);
 
@@ -346,7 +346,7 @@ export const updateMedicalRecordController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const recordId = petIdSchema.parse(req.params.recordId);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const role = req.user?.role;
     const updateData = medicalRecordSchema.partial().parse(req.body);
 
@@ -374,7 +374,7 @@ export const deleteMedicalRecordController = asyncHandler(
   async (req: Request, res: Response) => {
     const petId = petIdSchema.parse(req.params.id);
     const recordId = petIdSchema.parse(req.params.recordId);
-    const userId = req.user?._id;
+    const userId = req.user!._id;
     const role = req.user?.role;
 
     const { pet } = await deleteMedicalRecordService({

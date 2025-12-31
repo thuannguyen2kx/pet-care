@@ -1,5 +1,4 @@
 import { UserCheck, UserX } from 'lucide-react';
-import type { ElementType, ReactElement } from 'react';
 
 export const USER_STATUS = {
   ACTIVE: 'ACTIVE',

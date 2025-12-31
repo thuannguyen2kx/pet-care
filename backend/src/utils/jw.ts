@@ -1,29 +1,32 @@
-import jwt, {SignOptions} from "jsonwebtoken"
-import { UserDocument } from "../models/user.model"
-import { config } from "../config/app.config"
+import jwt, { SignOptions } from "jsonwebtoken";
+import { UserDocument } from "../models/user.model";
+import { config } from "../config/app.config";
 
 export type AccessTPayload = {
-    userId: UserDocument["_id"]
-    role: UserDocument["role"]
-}
+  userId: string;
+  role: UserDocument["role"];
+};
 
 type SignOptsAndSecret = SignOptions & {
-    secret: string
-}
+  secret: string;
+};
 
 const defaults: SignOptions = {
-    audience: ["user"]
-}
+  audience: ["user"],
+};
 
 export const accessTokenSignOptions: SignOptsAndSecret = {
-    expiresIn: "1d", 
-    secret: config.JWT_SECRET
-}
+  expiresIn: "1d",
+  secret: config.JWT_SECRET,
+};
 
-export const signJwtToken = (payload: AccessTPayload, options?: SignOptsAndSecret) => {
-    const {secret, ...opts} = options || accessTokenSignOptions
-    return jwt.sign(payload, secret, {
-        ...defaults,
-        ...opts
-    })
-}
+export const signJwtToken = (
+  payload: AccessTPayload,
+  options?: SignOptsAndSecret
+) => {
+  const { secret, ...opts } = options || accessTokenSignOptions;
+  return jwt.sign(payload, secret, {
+    ...defaults,
+    ...opts,
+  });
+};

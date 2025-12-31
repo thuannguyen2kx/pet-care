@@ -14,7 +14,6 @@ const GoogleOAuth = () => {
   const [params] = useSearchParams();
 
   const accessToken = params.get('access_token');
-  console.log('accessToken', accessToken);
   useEffect(() => {
     if (accessToken) {
       setAccessToken(accessToken);

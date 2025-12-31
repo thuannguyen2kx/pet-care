@@ -1,9 +1,9 @@
-import {Router} from "express";
+// import {Router} from "express";
 
-const webhookRoutes = Router();
-import {stripeWebhook} from "../controllers/payment.controller";
-import { rawBodyMiddleware } from "../middlewares/rawBody.middleware";
+// const webhookRoutes = Router();
+// import {stripeWebhook} from "../controllers/payment.controller";
+// import { rawBodyMiddleware } from "../middlewares/rawBody.middleware";
 
-webhookRoutes.post("/stripe", rawBodyMiddleware, stripeWebhook);
+// webhookRoutes.post("/stripe", rawBodyMiddleware, stripeWebhook);
 
-export default webhookRoutes;
+// export default webhookRoutes;
