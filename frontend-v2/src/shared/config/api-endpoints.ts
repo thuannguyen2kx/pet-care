@@ -26,6 +26,20 @@ export const AUTH_ENDPOINTS = {
 export const USER_ENDPOINTS = {
   PROFILE: `${API_BASE.USERS}/profile`,
   UPDATE_PROFILE: `${API_BASE.USERS}/profile`,
+  GET_PROFILE: (userId: string) => `${API_BASE.USERS}/${userId}`,
+  UPDATE_ADDRESS: `${API_BASE.USERS}/address`,
+  UPDATE_PREFERENCES: `${API_BASE.USERS}/preferences`,
+  UPDATE_PROFILE_IMAGE: `${API_BASE.USERS}/profile-image`,
+  REMOVE_PROFILE_IMAGE: `${API_BASE.USERS}/profile-image`,
+
+  GET_USER: (userId: string) => `${API_BASE.USERS}/admin/${userId}`,
+  CUSTOMER_LIST: `${API_BASE.USERS}/admin/customers`,
+  EMPLOYEE_LIST: `${API_BASE.USERS}/admin/employees`,
+  CREATE_EMPLOYEE: `${API_BASE.USERS}/admin/employees`,
+  UPDATE_EMPLOYEE: (userId: string) => `${API_BASE.USERS}/admin/employees/${userId}`,
+  CHANGE_STATUS: (userId: string) => `${API_BASE.USERS}/admin/users/${userId}/status`,
+  CHANGE_ROLE: (userId: string) => `${API_BASE.USERS}/admin/users/${userId}/role`,
+  DELETE: (userId: string) => `${API_BASE.USERS}/admin/users/${userId}`,
 };
 
 /* ================= PET ================= */

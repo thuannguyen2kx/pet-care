@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 
+import { ConfirmProvider } from '@/shared/components/confirm';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
 import { ROLES } from '@/shared/constant/roles';
@@ -21,7 +22,9 @@ const AppRoot = () => {
         renderLoading={() => <SplashScreen />}
         renderError={() => <Navigate to={paths.auth.login.getHref(location.pathname)} replace />}
       >
-        <Outlet />
+        <ConfirmProvider>
+          <Outlet />
+        </ConfirmProvider>
       </AuthLoader>
     </>
   );

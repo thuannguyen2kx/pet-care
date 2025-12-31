@@ -1,5 +1,5 @@
 import type { TRole } from '../constant/roles';
-import type { TGender, TStatusUser } from '../constant/status-user';
+import type { TGender, TUserStatus } from '../constant/status-user';
 
 type TApiResponseSuccess<T> = {
   status: number;
@@ -24,7 +24,7 @@ export type TUser = {
   phoneNumber?: string;
   gender: TGender;
   role: TRole;
-  status: TStatusUser;
+  status: TUserStatus;
   profilePicture: {
     url: string | null;
     publicId: string | null;

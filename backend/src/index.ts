@@ -44,7 +44,7 @@ app.get("/health", (req, res) => {
   });
 });
 app.use(`${BASE_PATH}/auth`, authRoutes);
-app.use(`${BASE_PATH}/user`, passportAuthenticateJWT, userRoutes);
+app.use(`${BASE_PATH}/users`, passportAuthenticateJWT, userRoutes);
 app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
 app.use(`${BASE_PATH}`, passportAuthenticateJWT, commentRoutes);
 app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);

@@ -121,7 +121,6 @@ const createAppRouter = (queryClient: QueryClient) => {
               children: [
                 {
                   path: paths.admin.root.path,
-                  lazy: () => import('@/routes/admin/layout').then(convert(queryClient)),
                   children: [
                     {
                       index: true,

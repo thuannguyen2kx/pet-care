@@ -249,7 +249,6 @@ export const getUserByIdService = async (userId: string) => {
 export const createEmployeeService = async (data: {
   fullName: string;
   email: string;
-  password: string;
   phoneNumber: string;
   specialties: string[];
   hourlyRate?: number;
@@ -268,11 +267,12 @@ export const createEmployeeService = async (data: {
       throw new BadRequestException("Email đã tồn tại");
     }
 
+    const password = data.email.split("@")[0] + "123";
     // Create employee
     const employee = new UserModel({
       email: data.email,
       fullName: data.fullName,
-      password: data.password,
+      password: password,
       phoneNumber: data.phoneNumber,
       role: Roles.EMPLOYEE,
       status: UserStatus.ACTIVE,
@@ -458,7 +458,7 @@ export const getEmployeeListService = async (filters: {
   const { specialty, isAcceptingBookings, page = 1, limit = 20 } = filters;
 
   const query: any = {
-    role: { $in: [Roles.EMPLOYEE, Roles.ADMIN] },
+    role: Roles.EMPLOYEE,
     status: UserStatus.ACTIVE,
   };
 

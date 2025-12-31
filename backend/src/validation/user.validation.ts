@@ -39,7 +39,6 @@ export const getAllUsersSchema = z.object({
 export const createEmployeeSchema = z.object({
   fullName: z.string().min(2, "Yêu cầu họ tên phải có ít nhất 2 ký tự"),
   email: z.string().email("Email không hợp lệ"),
-  password: z.string().min(8, "Mật khâu phải có ít nhất 8 ký tự"),
   phoneNumber: z.string().min(1, "Yêu cầu số điện thoại"),
   specialties: z.array(z.string()).min(1, "Yêu cầu ít nhất 1 chuyên môn"),
   hourlyRate: z.number().positive().optional(),

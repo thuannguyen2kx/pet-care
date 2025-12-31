@@ -110,9 +110,21 @@ export const paths = {
       path: '/admin/employees',
       getHref: () => '/admin/employees',
     },
-    analytics: {
-      path: '/admin/analytics',
-      getHref: () => '/admin/analytics',
+    customer: {
+      path: '/admin/customer',
+      getHref: () => '/admin/customer',
+    },
+    bookings: {
+      path: '/admin/bookings',
+      getHref: () => '/admin/bookings',
+    },
+    schedule: {
+      path: '/admin/schedule',
+      getHref: () => '/admin/schedule',
+    },
+    reports: {
+      path: '/admin/reports',
+      getHref: () => '/admin/reports',
     },
     settings: {
       path: '/admin/settings',

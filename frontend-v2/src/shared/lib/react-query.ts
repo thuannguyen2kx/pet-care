@@ -17,5 +17,12 @@ export type QueryConfig<T extends (...arg: any[]) => any> = Omit<
   ReturnType<T>,
   'queryKey' | 'queryFn'
 >;
-export type MutationConfig<MutationFnType extends (...args: any) => Promise<any>> =
-  UseMutationOptions<ApiFnReturnType<MutationFnType>, Error, Parameters<MutationFnType>[0]>;
+export type MutationConfig<
+  MutationFnType extends (...args: any) => Promise<any>,
+  TContext = unknown,
+> = UseMutationOptions<
+  ApiFnReturnType<MutationFnType>,
+  Error,
+  Parameters<MutationFnType>[0],
+  TContext
+>;
