@@ -67,7 +67,7 @@ userRoutes.post(
 
 userRoutes.put(
   "/admin/employees/:id",
-  authorizeRoles([Roles.ADMIN]),
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   updateEmployeeController
 );
 

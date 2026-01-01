@@ -3,7 +3,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
-export function EmployeePhoneFiled() {
+export function EmployeePhoneFiled({ disabled }: { disabled?: boolean }) {
   const form = useFormContext();
   return (
     <FieldGroup>
@@ -18,6 +18,7 @@ export function EmployeePhoneFiled() {
               id={field.name}
               placeholder="0901234567"
               aria-invalid={fieldState.invalid}
+              disabled={disabled}
               {...field}
             />
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

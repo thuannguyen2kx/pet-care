@@ -29,10 +29,10 @@ export const USER_ENDPOINTS = {
   GET_PROFILE: (userId: string) => `${API_BASE.USERS}/${userId}`,
   UPDATE_ADDRESS: `${API_BASE.USERS}/address`,
   UPDATE_PREFERENCES: `${API_BASE.USERS}/preferences`,
-  UPDATE_PROFILE_IMAGE: `${API_BASE.USERS}/profile-image`,
-  REMOVE_PROFILE_IMAGE: `${API_BASE.USERS}/profile-image`,
+  UPDATE_PROFILE_IMAGE: `${API_BASE.USERS}/profile-picture`,
+  REMOVE_PROFILE_IMAGE: `${API_BASE.USERS}/profile-picture`,
 
-  GET_USER: (userId: string) => `${API_BASE.USERS}/admin/${userId}`,
+  GET_USER: (userId: string) => `${API_BASE.USERS}/admin/users/${userId}`,
   CUSTOMER_LIST: `${API_BASE.USERS}/admin/customers`,
   EMPLOYEE_LIST: `${API_BASE.USERS}/admin/employees`,
   CREATE_EMPLOYEE: `${API_BASE.USERS}/admin/employees`,

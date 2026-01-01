@@ -3,7 +3,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
-export function EmployeeEmailField() {
+export function EmployeeEmailField({ disabled }: { disabled?: boolean }) {
   const form = useFormContext();
 
   return (
@@ -19,6 +19,7 @@ export function EmployeeEmailField() {
               id={field.name}
               placeholder="email@petcare.vn"
               aria-invalid={fieldState.invalid}
+              disabled={disabled}
               {...field}
             />
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

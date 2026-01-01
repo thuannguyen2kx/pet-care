@@ -1,4 +1,5 @@
-import type { TRole, TUserStatus } from '@/shared/constant';
+import type { TUserStatus } from '@/features/user/domain/user-status';
+import type { TRole } from '@/shared/constant';
 
 export type TEmployeeListQueryParams = {
   specialty?: string;

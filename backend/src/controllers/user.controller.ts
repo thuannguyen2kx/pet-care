@@ -114,7 +114,9 @@ export const updateProfilePictureController = [
     const result = await changeProfilePictureService(userId, req.file);
     res.status(HTTPSTATUS.OK).json({
       message: "Cập nhật ảnh người dùng thành công",
-      user: result.updatedUser,
+      data: {
+        user: result.updatedUser,
+      },
     });
   }),
 ];

@@ -7,7 +7,6 @@ export const updateProfileSchema = z.object({
   phoneNumber: z.string().optional(),
   gender: z.enum(Object.values(Gender) as [string, ...string[]]).optional(),
   dateOfBirth: z.string().optional(),
-  bio: z.string().max(500).optional(),
 });
 
 export const updateAddressSchema = z.object({

@@ -3,23 +3,22 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
-export function EmployeeHourlyRateField({ disabled }: { disabled?: boolean }) {
+export function EmployeeMaxDailyBookingsField() {
   const form = useFormContext();
 
   return (
     <FieldGroup>
       <Controller
-        name="hourlyRate"
+        name="maxDailyBookings"
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Lương theo giờ (VNĐ)</FieldLabel>
+            <FieldLabel htmlFor={field.name}>Lịch đặt / Ngày</FieldLabel>
             <Input
               type="number"
               id={field.name}
-              placeholder="150000"
+              placeholder="10"
               aria-invalid={fieldState.invalid}
-              disabled={disabled}
               {...field}
             />
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

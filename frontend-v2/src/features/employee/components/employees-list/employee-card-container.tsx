@@ -7,16 +7,22 @@ import {
 } from '@/features/employee/actions/employee-actions.key';
 import { useChangeEmployeeStatus } from '@/features/employee/api/change-employee-status';
 import { useDeleteEmployee } from '@/features/employee/api/delete-employee';
+import { EmployeeInfoDialogController } from '@/features/employee/components/employee-action/update-employee/employee-info-dialog-controller';
 import { EmployeeCardView } from '@/features/employee/components/employees-list/employee-card-view';
 import { useEmployeeActions } from '@/features/employee/components/employees-list/use-employee-action';
 import type { TEmployeeListItem } from '@/features/employee/types';
+import { USER_STATUS_UI } from '@/features/user/domain/user-status';
 import { ActionMenu } from '@/shared/action-system/components/action-menu';
 import type { ActionHandlers } from '@/shared/action-system/types';
-import { USER_STATUS_UI } from '@/shared/constant';
 
-export function EmployeeCardContainer({ employee }: { employee: TEmployeeListItem }) {
+export function EmployeeCardContainer({
+  employee,
+  onEdit,
+}: {
+  employee: TEmployeeListItem;
+  onEdit: (id: string) => void;
+}) {
   const statusUI = USER_STATUS_UI[employee.status];
-  const [openEditDialog, setOpenEditDialog] = useState(false);
   const deleteEmployee = useDeleteEmployee();
   const changeEmployeeStatus = useChangeEmployeeStatus({
     mutationConfig: {
@@ -27,10 +33,10 @@ export function EmployeeCardContainer({ employee }: { employee: TEmployeeListIte
   });
   const handlers: ActionHandlers<TEmployeeListItem, TEmployeeActionKey> = {
     dialog: {
-      open: (key) => {
+      open: (key, entity) => {
         switch (key) {
           case EmployeeActionKey.EDIT:
-            setOpenEditDialog(true);
+            onEdit(entity._id);
             break;
         }
       },

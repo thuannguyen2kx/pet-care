@@ -1,4 +1,16 @@
+import type { QueryClient } from '@tanstack/react-query';
+
+import EmployeeProfileContainer from '@/features/employee/containers/employee-profile.container';
+import { getProfleQueryOptions } from '@/features/user/api/get-profile';
 import EmployeeLayout from '@/routes/employee/layout';
+
+export const clientLoader = (queryClient: QueryClient) => {
+  return () => {
+    const query = getProfleQueryOptions();
+
+    return queryClient.getQueryData(query.queryKey) ?? queryClient.fetchQuery(query);
+  };
+};
 
 export default function EmployeeProfileRoute() {
   return (
@@ -6,7 +18,7 @@ export default function EmployeeProfileRoute() {
       title="Thông tin cá nhân"
       description="Cập nhật thông tin và chuyên môn của bạn"
     >
-      <div>Profile</div>
+      <EmployeeProfileContainer />
     </EmployeeLayout>
   );
 }

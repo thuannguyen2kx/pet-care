@@ -45,7 +45,6 @@ export const LoginForm = () => {
           return;
         }
         if (data?.identity) {
-          console.log('identity');
           const home = resolveHomeRoute(data.identity);
           navigate(home);
         }

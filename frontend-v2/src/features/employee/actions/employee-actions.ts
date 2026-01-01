@@ -6,8 +6,8 @@ import {
   EmployeeActionKey,
   type TEmployeeActionKey,
 } from '@/features/employee/actions/employee-actions.key';
+import { USER_STATUS } from '@/features/user/domain/user-status';
 import type { AdminAction } from '@/shared/action-system/types';
-import { USER_STATUS } from '@/shared/constant';
 
 export const employeeActions: AdminAction<TEmployeeListItem, TEmployeeActionKey>[] = [
   {

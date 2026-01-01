@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { employeeKeys } from '@/features/employee/api/query-key';
 import type { TEmployeeListItem } from '@/features/employee/types';
+import type { TUserStatus } from '@/features/user/domain/user-status';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
-import type { TUserStatus } from '@/shared/constant';
 import { http } from '@/shared/lib/http';
 import type { MutationConfig } from '@/shared/lib/react-query';
 import type { TApiResponseSuccess } from '@/shared/types/api-response';

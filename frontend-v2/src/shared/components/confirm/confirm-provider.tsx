@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// shared/ui/confirm/confirm-provider.tsx
+import React, { createContext, useCallback, useRef, useState } from 'react';
 
 import { Button } from '@/shared/ui/button';
 import {
@@ -10,54 +11,56 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog';
 
-type ConfirmOptions = {
+export type ConfirmOptions = {
   title: string;
   message?: string;
   confirmText?: string;
+  cancelText?: string;
 };
 
-export type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>;
+type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>;
+
 // eslint-disable-next-line react-refresh/only-export-components
-export const ConfirmContext = React.createContext<ConfirmFn | null>(null);
+export const ConfirmContext = createContext<ConfirmFn | null>(null);
 
 export function ConfirmProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<{
-    options: ConfirmOptions;
-    resolve: (value: boolean) => void;
-  } | null>(null);
+  const [options, setOptions] = useState<ConfirmOptions | null>(null);
+  const resolverRef = useRef<(value: boolean) => void>(undefined);
 
-  const confirm: ConfirmFn = (options) =>
-    new Promise((resolve) => {
-      setState({ options, resolve });
+  const confirm = useCallback<ConfirmFn>((opts) => {
+    // Prevent stacking confirms
+    if (resolverRef.current) {
+      return Promise.resolve(false);
+    }
+
+    return new Promise<boolean>((resolve) => {
+      resolverRef.current = resolve;
+      setOptions(opts);
     });
+  }, []);
 
-  const handleClose = () => setState(null);
-
-  const handleConfirm = () => {
-    state?.resolve(true);
-    handleClose();
-  };
-
-  const handleCancel = () => {
-    state?.resolve(false);
-    handleClose();
+  const close = (result: boolean) => {
+    resolverRef.current?.(result);
+    resolverRef.current = undefined;
+    setOptions(null);
   };
 
   return (
     <ConfirmContext.Provider value={confirm}>
       {children}
 
-      <Dialog open={!!state}>
+      <Dialog open={!!options} onOpenChange={() => close(false)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{state?.options.title}</DialogTitle>
-            <DialogDescription>{state?.options.message}</DialogDescription>
+            <DialogTitle>{options?.title}</DialogTitle>
+            {options?.message && <DialogDescription>{options.message}</DialogDescription>}
           </DialogHeader>
+
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancel}>
-              Huỷ
+            <Button variant="outline" onClick={() => close(false)}>
+              {options?.cancelText ?? 'Huỷ'}
             </Button>
-            <Button onClick={handleConfirm}>{state?.options.confirmText || 'Xác nhận'}</Button>
+            <Button onClick={() => close(true)}>{options?.confirmText ?? 'Xác nhận'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
