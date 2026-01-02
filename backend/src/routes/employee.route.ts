@@ -1,132 +1,85 @@
 import { Router } from "express";
 import {
-  getAllEmployeesController,
+  bulkCreateShiftsController,
+  createBreakTemplateController,
+  createShiftOverrideController,
+  createShiftTemplateController,
+  deleteShiftOverrideController,
+  deleteShiftTemplateController,
   getEmployeeByIdController,
-  createEmployeeController,
-  updateEmployeeController,
-  deleteEmployeeController,
-  uploadEmployeeProfilePictureController,
-  resetEmployeePasswordController,
-  getEmployeePerformanceController,
   getEmployeeScheduleController,
-  updateEmployeeAvailabilityController,
-  assignAppointmentToEmployeeController,
-  getAvailableEmployeesController,
-  getEmployeeScheduleRangeController,
-  setEmployeeScheduleController,
-  deleteEmployeeScheduleController,
-  getEmployeeAvailabilityForDateController,
+  getEmployeesController,
+  getEmployeeShiftsController,
+  getShiftOverridesController,
+  updateBreakTemplateController,
+  updateEmployeeProfileController,
+  updateShiftOverrideController,
+  updateShiftTemplateController,
 } from "../controllers/employee.controller";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
 
-const employeeRoutes = Router();
+const router = Router();
 
-// Routes that require admin access
-// Get all employees
-employeeRoutes.get(
-  "/",
-  authorizeRoles([Roles.ADMIN]),
-  getAllEmployeesController
-)
-employeeRoutes.get("/available", authorizeRoles([Roles.CUSTOMER, Roles.ADMIN]), getAvailableEmployeesController);
+// Employee
+router.get("/", getEmployeesController);
+router.get("/:id", getEmployeeByIdController);
+router.put("/:id/profile", updateEmployeeProfileController);
 
-// Create a new employee
-employeeRoutes.post(
-  "/",
-  authorizeRoles([Roles.ADMIN]),
-  createEmployeeController
-);
+// Schedule
+router.get("/:id/schedule", getEmployeeScheduleController);
 
-// Get employee by ID
-employeeRoutes.get(
-  "/:id",
+// Shifts
+router.post(
+  "/:id/shifts",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  getEmployeeByIdController
+  createShiftTemplateController
 );
-
-// Update employee
-employeeRoutes.put(
-  "/:id",
+router.post(
+  "/:id/shifts/bulk",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  updateEmployeeController
+  bulkCreateShiftsController
 );
-
-// Delete employee
-employeeRoutes.delete(
-  "/:id",
-  authorizeRoles([Roles.ADMIN]),
-  deleteEmployeeController
-);
-
-// Upload employee profile picture
-employeeRoutes.post(
-  "/:id/profile-picture",
+router.get("/:id/shifts", getEmployeeShiftsController);
+router.put(
+  "/shifts/:id",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  uploadEmployeeProfilePictureController
+  updateShiftTemplateController
 );
-
-// Reset employee password
-employeeRoutes.put(
-  "/:id/reset-password",
-  authorizeRoles([Roles.ADMIN]),
-  resetEmployeePasswordController
-);
-
-// Get employee performance metrics
-employeeRoutes.get(
-  "/:id/performance",
+router.delete(
+  "/shifts/:id",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  getEmployeePerformanceController
+  deleteShiftTemplateController
 );
 
-// Update employee availability
-employeeRoutes.put(
-  "/:id/availability",
-  authorizeRoles([Roles.ADMIN]),
-  updateEmployeeAvailabilityController
-);
-
-// Assign appointment to employee
-employeeRoutes.put(
-  "/:id/assign/:appointmentId",
-  authorizeRoles([Roles.ADMIN]),
-  assignAppointmentToEmployeeController
-);
-
-// Get employee schedule - accessible by both admin and the employee themselves
-employeeRoutes.get(
-  "/:id/schedule",
+// Overrides
+router.post(
+  "/:id/overrides",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  getEmployeeScheduleController
+  createShiftOverrideController
 );
-
-// Get employee schedule range
-employeeRoutes.get(
-  "/:id/schedule-range",
-  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE, Roles.CUSTOMER]),
-  getEmployeeScheduleRangeController
-);
-
-// Set employee daily schedule
-employeeRoutes.post(
-  "/:id/schedule",
+router.get("/:id/overrides", getShiftOverridesController);
+router.put(
+  "/overrides/:id",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  setEmployeeScheduleController
+  updateShiftOverrideController
 );
-
-// Delete specific schedule entry
-employeeRoutes.delete(
-  "/:id/schedule/:scheduleId",
+router.delete(
+  "/overrides/:id",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  deleteEmployeeScheduleController
+  deleteShiftOverrideController
 );
-
-// Get employee availability for a specific date (can be accessed by customers)
-employeeRoutes.get(
-  "/:id/availability",
-  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE, Roles.CUSTOMER]),
-  getEmployeeAvailabilityForDateController
+// Breaks
+router.post(
+  "/:id/breaks",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  createBreakTemplateController
 );
+router.put(
+  "/breaks/:id",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  updateBreakTemplateController
+);
+router.delete("/breaks/:id", authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]));
 
-export default employeeRoutes;
+export default router;

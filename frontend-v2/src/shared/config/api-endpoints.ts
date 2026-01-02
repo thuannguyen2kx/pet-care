@@ -9,7 +9,7 @@ export const API_BASE = {
   SERVICES: `${API_VERSION}/services`,
   SOCIAL: `${API_VERSION}/social`,
   ADMIN: `${API_VERSION}/admin`,
-  EMPLOYEE: `${API_VERSION}/employee`,
+  EMPLOYEE: `${API_VERSION}/employees`,
 };
 
 /* ================= AUTH ================= */
@@ -42,6 +42,24 @@ export const USER_ENDPOINTS = {
   DELETE: (userId: string) => `${API_BASE.USERS}/admin/users/${userId}`,
 };
 
+/* ================= EMPLOYEE SCHEDULE ================= */
+export const EMPLOYEE_SCHEDULE_ENDPOINTS = {
+  GET_EMPLOYEE: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}`,
+  SCHEDULE: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/schedule`,
+  CREATE_SHIFT: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/shifts`,
+  CREATE_SHIFT_BULK: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/shifts/bulk`,
+  GET_SHIFT: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/shifts`,
+  UPDATE_SHIFT: (shiftId: string) => `${API_BASE.EMPLOYEE}/shifts/${shiftId}`,
+  DELETE_SHIFT: (shiftId: string) => `${API_BASE.EMPLOYEE}/shifts/${shiftId}`,
+  CREATE_OVERRIDE: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/overrides`,
+  GET_OVERRIDE: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/overrides`,
+  UPDATE_OVERRIDE: (overrideId: string) => `${API_BASE.EMPLOYEE}/overrides/${overrideId}`,
+  DELETE_OVERRIDE: (overrideId: string) => `${API_BASE.EMPLOYEE}/overrides/${overrideId}`,
+  CREATE_BREAK: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/breaks`,
+  GET_BREAK: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/breaks`,
+  UPDATE_BREAK: (breakId: string) => `${API_BASE.EMPLOYEE}/breaks/${breakId}`,
+  DELETE_BREAK: (breakId: string) => `${API_BASE.EMPLOYEE}/breaks/${breakId}`,
+};
 /* ================= PET ================= */
 export const PET_ENDPOINTS = {
   LIST: `${API_BASE.PETS}`,

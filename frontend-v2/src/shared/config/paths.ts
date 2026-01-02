@@ -118,6 +118,10 @@ export const paths = {
       path: '/admin/employees',
       getHref: () => '/admin/employees',
     },
+    employeeSchedule: {
+      path: '/admin/employees/:employeeId/schedule',
+      getHref: (employeeId: string) => `/admin/employees/${employeeId}/schedule`,
+    },
     customer: {
       path: '/admin/customer',
       getHref: () => '/admin/customer',

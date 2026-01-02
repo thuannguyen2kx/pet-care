@@ -1,6 +1,8 @@
 import { Calendar, DollarSign, Mail, Phone, Star } from 'lucide-react';
+import { Link } from 'react-router';
 
 import type { TEmployeeListItem } from '@/features/employee/types';
+import { paths } from '@/shared/config/paths';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
@@ -27,7 +29,12 @@ export function EmployeeCardView({ employee, statusUI, actionMenu }: Props) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="text-foreground font-semibold">{employee.fullName}</h3>
+              <Link
+                to={paths.admin.employeeSchedule.getHref(employee._id)}
+                className="hover:underline"
+              >
+                <h3 className="text-foreground font-semibold">{employee.fullName}</h3>
+              </Link>
               <Badge variant="outline" className={statusUI.className}>
                 {statusUI.label}
               </Badge>
