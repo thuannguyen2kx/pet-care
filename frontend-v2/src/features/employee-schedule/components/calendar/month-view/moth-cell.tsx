@@ -1,3 +1,5 @@
+import { AlertCircle, Clock, Coffee } from 'lucide-react';
+
 import type { TCalendarDayWithSchedule } from '@/features/employee-schedule/domain/calendar-day-with-schedule.type';
 import { cn } from '@/shared/lib/utils';
 
@@ -8,27 +10,56 @@ export function MonthCell({
   day: TCalendarDayWithSchedule;
   onClick: () => void;
 }) {
-  const isWorking = day.schedule?.isWorking;
+  const schedule = day.schedule;
+  const isWorking = schedule?.isWorking;
+  const hasBreaks = (schedule?.breaks?.length ?? 0) > 0;
+
+  const isOverride = schedule?.override;
 
   return (
     <div
-      className={cn(
-        'bg-background min-h-25 p-2 text-sm',
-        !day.isCurrentMonth && 'text-muted-foreground bg-muted/40',
-      )}
       onClick={onClick}
+      className={cn(
+        'min-h-28 cursor-pointer p-2.5 text-sm transition-colors',
+        'hover:bg-muted/60',
+        !day.isCurrentMonth && 'bg-muted/40 text-muted-foreground',
+        day.isToday && 'bg-primary/10',
+      )}
     >
-      <div className="flex justify-between">
-        <span>{day.date.getDate()}</span>
-        {day.schedule?.override && <span className="text-xs text-orange-500">Override</span>}
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <span className="font-medium">{day.date.getDate()}</span>
+
+        {isOverride && (
+          <span
+            className="flex items-center gap-1 text-xs text-orange-600"
+            title={schedule?.reason}
+          >
+            <AlertCircle className="h-3 w-3" />
+            Lịch điều chỉnh
+          </span>
+        )}
       </div>
 
+      {/* Content */}
       {isWorking ? (
-        <div className="mt-1 text-xs text-green-600">
-          {day.schedule?.startTime} – {day.schedule?.endTime}
+        <div className="mt-1 space-y-1">
+          <div className="flex items-center gap-1 text-xs text-green-600">
+            <Clock className="h-3 w-3" />
+            {schedule?.startTime} – {schedule?.endTime}
+          </div>
+
+          {hasBreaks && (
+            <div className="text-muted-foreground flex items-center gap-1 text-xs">
+              <Coffee className="h-3 w-3" />
+              {schedule!.breaks.length} lần nghỉ
+            </div>
+          )}
         </div>
       ) : (
-        <div className="text-muted-foreground mt-1 text-xs">Nghỉ</div>
+        <div className="text-muted-foreground mt-1 text-xs">
+          {isOverride ? 'Nghỉ (Lịch điều chỉnh)' : 'Nghỉ'}
+        </div>
       )}
     </div>
   );

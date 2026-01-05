@@ -1,3 +1,4 @@
+import { MonthHeader } from '@/features/employee-schedule/components/calendar/month-view/month-header';
 import { MonthCell } from '@/features/employee-schedule/components/calendar/month-view/moth-cell';
 import { DayDetailDialog } from '@/features/employee-schedule/components/day-detail/day-detail-dialog';
 import { useDayDetailPresenter } from '@/features/employee-schedule/components/day-detail/use-day-detail-precenter';
@@ -9,6 +10,8 @@ type Props = {
   cursorDate: Date;
   days: TCalendarScheduleDay[];
 };
+const WEEK_DAYS_MON = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+
 export function MonthGrid({ cursorDate, days }: Props) {
   const presenter = useDayDetailPresenter();
   const matrix = buildMonthMatrix(cursorDate);
@@ -16,14 +19,18 @@ export function MonthGrid({ cursorDate, days }: Props) {
 
   return (
     <>
-      <div className="bg-muted grid grid-cols-7 gap-px rounded-lg border">
-        {calendar.flat().map((day) => (
-          <MonthCell
-            key={day.date.toISOString()}
-            day={day}
-            onClick={() => presenter.openDayDetail(day)}
-          />
-        ))}
+      <div className="bg-card border-border overflow-hidden rounded-lg border">
+        <MonthHeader days={WEEK_DAYS_MON} />
+
+        <div className="grid grid-cols-7 gap-px">
+          {calendar.flat().map((day) => (
+            <MonthCell
+              key={day.date.toISOString()}
+              day={day}
+              onClick={() => presenter.openDayDetail(day)}
+            />
+          ))}
+        </div>
       </div>
 
       <DayDetailDialog day={presenter.selectedDay} onClose={presenter.closeDayDetail} />

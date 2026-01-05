@@ -13,7 +13,11 @@ export function PetBirthDateField() {
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
           <FieldLabel>Ngày sinh</FieldLabel>
-          <PickerWithInput value={field.value ?? undefined} onChange={field.onChange} />
+          <PickerWithInput
+            value={field.value ?? undefined}
+            onChange={field.onChange}
+            disabledDate={(date) => date > new Date()}
+          />
           {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}

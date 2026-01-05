@@ -2,12 +2,11 @@ import type { TCalendarScheduleDay } from '@/features/employee-schedule/domain/s
 import { Badge } from '@/shared/ui/badge';
 
 export function StatusBadge({ schedule }: { schedule: TCalendarScheduleDay }) {
-  if (!schedule.isWorking) {
-    return <Badge variant="secondary">Nghỉ</Badge>;
-  }
-
   if (schedule.override) {
-    return <Badge variant="destructive">Override</Badge>;
+    return <Badge variant="destructive">Lịch điều chỉnh</Badge>;
+  }
+  if (!schedule.isWorking) {
+    return <Badge variant="destructive">Nghỉ</Badge>;
   }
 
   return <Badge>Đang làm</Badge>;

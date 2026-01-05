@@ -11,9 +11,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 type PickerWithInputProps = {
   value?: Date;
   onChange: (date?: Date) => void;
+  disabled?: boolean;
+  disabledDate?: (date: Date) => boolean;
 };
 
-export function PickerWithInput({ value, onChange }: PickerWithInputProps) {
+export function PickerWithInput({ value, onChange, disabled, disabledDate }: PickerWithInputProps) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date | undefined>(value);
 
@@ -25,13 +27,13 @@ export function PickerWithInput({ value, onChange }: PickerWithInputProps) {
     <div className="relative flex gap-2">
       <Input
         value={value ? format(value, 'dd MMMM yyyy', { locale: vi }) : ''}
-        placeholder="June 01, 2025"
+        placeholder="Chọn ngày"
         readOnly
         className="bg-background cursor-pointer pr-10"
         onClick={() => setOpen(true)}
       />
 
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open && !disabled} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             type="button"
@@ -54,7 +56,7 @@ export function PickerWithInput({ value, onChange }: PickerWithInputProps) {
               onChange(date);
               setOpen(false);
             }}
-            disabled={(date) => date > new Date()}
+            disabled={disabledDate}
           />
         </PopoverContent>
       </Popover>

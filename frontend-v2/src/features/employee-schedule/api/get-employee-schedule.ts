@@ -16,6 +16,7 @@ const getEmployeeSchedule = (
   params: GetEmployeeScheduleParams,
 ): Promise<TApiResponseSuccess<TEmployeeScheduleDay[]>> => {
   const { employeeId, startDate, endDate } = params;
+  console.log({ startDate, endDate });
   return http.get(EMPLOYEE_SCHEDULE_ENDPOINTS.SCHEDULE(employeeId), {
     params: { startDate, endDate },
   });
@@ -28,7 +29,7 @@ export const getEmployeeScheduleQueryOptions = ({
 }: GetEmployeeScheduleParams) => {
   return queryOptions({
     queryKey: employeeScheduleKeys.detail(employeeId, startDate, endDate),
-    queryFn: () => getEmployeeSchedule({ employeeId }),
+    queryFn: () => getEmployeeSchedule({ employeeId, startDate, endDate }),
   });
 };
 

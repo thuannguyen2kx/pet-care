@@ -21,6 +21,7 @@ export default function EmploeeScheduleContainer() {
 
   const range = getApiDateRange(date, view);
   const { startDate, endDate } = mapDateRangeToApiParams(range);
+
   const employeeScheduleQuery = useEmployeeSchedule({ employeeId, startDate, endDate });
   const onChangeMonth = (nextDate: Date) => {
     setSearchParams({

@@ -13,7 +13,7 @@ export function WeekGrid({ cursorDate, days }: Props) {
   const calendar = attachScheduleToWeekDays(weekDays, days);
 
   return (
-    <div className="grid grid-cols-7 overflow-hidden rounded-lg border">
+    <div className="border-border bg-card grid grid-cols-7 overflow-hidden rounded-lg border">
       {calendar.map((day) => (
         <WeekDayColumn key={day.date.toISOString()} day={day} />
       ))}

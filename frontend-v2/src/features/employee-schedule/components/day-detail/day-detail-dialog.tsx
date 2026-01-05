@@ -11,6 +11,7 @@ export function DayDetailDialog({ day, onClose }: Props) {
   if (!day) return null;
 
   const schedule = day.schedule;
+  const hasBreaks = !!schedule?.breaks?.length;
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -29,18 +30,21 @@ export function DayDetailDialog({ day, onClose }: Props) {
         {!schedule && <p className="text-muted-foreground">Không có lịch làm việc</p>}
 
         {schedule && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <StatusBadge schedule={schedule} />
 
             {schedule.isWorking ? (
               <>
-                {/* <TimeRow label="Giờ làm" value={`${schedule.startTime} – ${schedule.endTime}`} /> */}
+                <p className="text-sm">
+                  <span className="font-medium">Giờ làm:</span> {schedule.startTime} –{' '}
+                  {schedule.endTime}
+                </p>
 
-                {schedule.breaks.length > 0 && (
+                {hasBreaks && (
                   <div>
-                    <p className="font-medium">Nghỉ giữa giờ</p>
-                    <ul className="text-sm">
-                      {schedule.breaks.map((b, i) => (
+                    <p className="text-sm font-medium">Nghỉ giữa giờ</p>
+                    <ul className="ml-4 list-disc text-sm">
+                      {schedule.breaks!.map((b, i) => (
                         <li key={i}>
                           {b.name}: {b.startTime} – {b.endTime}
                         </li>
@@ -54,7 +58,10 @@ export function DayDetailDialog({ day, onClose }: Props) {
             )}
 
             {schedule.override && (
-              <p className="text-xs text-orange-500">Override: {schedule.reason}</p>
+              <div className="text-destructive text-xs">
+                <span className="font-medium">Lịch điều chỉnh</span>
+                {schedule.reason && `: ${schedule.reason}`}
+              </div>
             )}
           </div>
         )}

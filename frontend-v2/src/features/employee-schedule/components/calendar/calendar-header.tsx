@@ -62,7 +62,7 @@ export function ViewModeSwitch({
   onChange: (view: TCalendarViewMode) => void;
 }) {
   return (
-    <div className="flex rounded-md border p-1">
+    <div className="border-border flex rounded-md border p-1">
       <button
         onClick={() => onChange('month')}
         className={cn(

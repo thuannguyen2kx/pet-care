@@ -6,11 +6,15 @@ import {
   createShiftTemplateController,
   deleteShiftOverrideController,
   deleteShiftTemplateController,
+  disableShiftTemplateController,
   getEmployeeByIdController,
   getEmployeeScheduleController,
   getEmployeesController,
   getEmployeeShiftsController,
+  getEmployeeWorkingTodayController,
   getShiftOverridesController,
+  getTeamWeekScheduleController,
+  replaceShiftTemplateController,
   updateBreakTemplateController,
   updateEmployeeProfileController,
   updateShiftOverrideController,
@@ -28,6 +32,16 @@ router.put("/:id/profile", updateEmployeeProfileController);
 
 // Schedule
 router.get("/:id/schedule", getEmployeeScheduleController);
+router.get(
+  "/schedule/week",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getTeamWeekScheduleController
+);
+router.get(
+  "/schedule/today",
+  authorizeRoles([Roles.ADMIN]),
+  getEmployeeWorkingTodayController
+);
 
 // Shifts
 router.post(
@@ -45,6 +59,16 @@ router.put(
   "/shifts/:id",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   updateShiftTemplateController
+);
+router.put(
+  "/shifts/:shiftId/replace",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  replaceShiftTemplateController
+);
+router.put(
+  "/shifts/:shiftId/disable",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  disableShiftTemplateController
 );
 router.delete(
   "/shifts/:id",

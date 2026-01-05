@@ -11,4 +11,10 @@ export const employeeScheduleKeys = {
     'employee',
     employeeId,
   ],
+  teamSchedule: (startDate?: string, endDate?: string) => [
+    ...employeeScheduleKeys.schedule,
+    'team',
+    startDate,
+    endDate,
+  ],
 };

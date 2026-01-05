@@ -141,6 +141,10 @@ const createAppRouter = (queryClient: QueryClient) => {
                       lazy: () => import('@/routes/admin/employees').then(convert(queryClient)),
                     },
                     {
+                      path: paths.admin.schedule.path,
+                      lazy: () => import('@/routes/admin/schedule').then(convert(queryClient)),
+                    },
+                    {
                       path: paths.admin.employeeSchedule.path,
                       lazy: () =>
                         import('@/routes/admin/employee-schedule').then(convert(queryClient)),

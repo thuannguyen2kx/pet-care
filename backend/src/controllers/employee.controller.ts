@@ -8,9 +8,11 @@ import {
   createBreakTemplateSchema,
   createShiftOverrideSchema,
   createShiftTemplateSchema,
+  disableShiftTemplateSchema,
+  replaceShiftTemplateSchema,
   updateEmployeeProfileSchema,
 } from "../validation/employee.validation";
-
+import { getCurrentWeekRange, parseDateOnly } from "../utils/format-date";
 /**
  * @desc    Get employees
  * @route   GET /api/employees
@@ -123,11 +125,12 @@ export const bulkCreateShiftsController = asyncHandler(
 export const getEmployeeShiftsController = asyncHandler(
   async (req: Request, res: Response) => {
     const employeeId = req.params.id;
-    const date = req.query.date
-      ? new Date(req.query.date as string)
-      : undefined;
+    const date = parseDateOnly(req.query.date as string);
 
-    const shifts = await employeeService.getEmployeeShifts(employeeId, date);
+    const shifts = await employeeService.getEmployeeScheduleByDate(
+      employeeId,
+      date
+    );
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy thông tin ca làm việc của nhân viên thành công",
@@ -170,6 +173,40 @@ export const deleteShiftTemplateController = asyncHandler(
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Xóa ca làm việc của nhân viên thành công",
+    });
+  }
+);
+
+/**
+ * @desc Replace shift template
+ * @route POST /api/employees/shifts/:shiftId/replace
+ * @access Private (Admin)
+ */
+export const replaceShiftTemplateController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const shiftId = req.params.shiftId;
+
+    const data = replaceShiftTemplateSchema.parse(req.body);
+
+    const shift = await employeeService.replaceShiftTemplate(shiftId, data);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Cập nhật ca làm việc của nhân viên thành công",
+      data: shift,
+    });
+  }
+);
+export const disableShiftTemplateController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const shiftId = req.params.shiftId;
+
+    const data = disableShiftTemplateSchema.parse(req.body);
+
+    const shift = await employeeService.disableShiftTemplate(shiftId, data);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Cập nhật ca làm việc thành công",
+      data: shift,
     });
   }
 );
@@ -345,11 +382,11 @@ export const getEmployeeScheduleController = asyncHandler(
 
     const now = new Date();
     const startDate = req.query.startDate
-      ? new Date(req.query.startDate as string)
+      ? parseDateOnly(req.query.startDate as string)
       : new Date(now.getFullYear(), now.getMonth(), 1);
 
     const endDate = req.query.endDate
-      ? new Date(req.query.endDate as string)
+      ? parseDateOnly(req.query.endDate as string)
       : new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     const schedule = await employeeService.getEmployeeSchedule(
@@ -361,6 +398,44 @@ export const getEmployeeScheduleController = asyncHandler(
     return res.status(HTTPSTATUS.OK).json({
       message: "Đã lấy lịch làm việc thành công",
       data: schedule,
+    });
+  }
+);
+
+export const getTeamWeekScheduleController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const now = new Date();
+
+    let startDate: Date;
+    let endDate: Date;
+
+    if (req.query.startDate && req.query.endDate) {
+      startDate = new Date(req.query.startDate as string);
+      endDate = new Date(req.query.endDate as string);
+    } else {
+      const weekRange = getCurrentWeekRange(now);
+      startDate = weekRange.startDate;
+      endDate = weekRange.endDate;
+    }
+    const result = await employeeService.getTeamWeekSchedule(
+      startDate,
+      endDate
+    );
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Đã lấy lịch làm việc của nhân viên trong tuần",
+      data: result,
+    });
+  }
+);
+
+export const getEmployeeWorkingTodayController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const result = await employeeService.getEmployeesWorkingToday();
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Đã lấy lịch làm việc của nhân viên trong ngày",
+      data: result,
     });
   }
 );
