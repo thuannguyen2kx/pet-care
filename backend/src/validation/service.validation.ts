@@ -1,79 +1,159 @@
-// src/validation/service.validation.ts
 import { z } from "zod";
-import { Specialty } from "../enums/employee.enum";
+import { SPECIALTIES } from "../enums/employee.enum";
 
-// Schema for validating service ID
+// Service ID validation (MongoDB ObjectId format)
 export const serviceIdSchema = z
-  .string({
-    required_error: "Service ID is required",
-    invalid_type_error: "Service ID must be a string",
+  .string()
+  .trim()
+  .length(24, "Mã dịch vụ không hợp lệ")
+  .regex(/^[0-9a-fA-F]{24}$/, "Mã dịch vụ không hợp lệ");
+
+// Create service schema
+export const createServiceSchema = z
+  .object({
+    name: z
+      .string({ required_error: "Tên dịch vụ là bắt buộc" })
+      .trim()
+      .min(3, "Tên dịch vụ phải ít nhất 3 ký tự")
+      .max(100, "Tên dịch vụ tối đa 100 ký tự")
+      .refine((val) => val.length > 0, "Tên dịch vụ không được trống"),
+
+    description: z
+      .string()
+      .trim()
+      .max(1000, "Mổ tả dịch vụ tối đa 1000 ký tự")
+      .optional(),
+
+    price: z
+      .number({ required_error: "Giá dịch vụ là bắt buộc" })
+      .positive("Giá dịch vụ phải là một số dương")
+      .min(10000, "Giá dịch vụ phải ít nhất 10,000 VND")
+      .max(100000000, "Giá không được vượt quá 100.000.000 VND")
+      .finite("Giá phải là một con số hữu hạn."),
+
+    duration: z
+      .number({ required_error: "Thời lượng là bắt buộc" })
+      .int("Thời lượng phải là một số nguyên")
+      .positive("Thời lượng phải là một số dương.")
+      .min(15, "Thời lượng phải ít nhất 15 phút.")
+      .max(10080, "Thời lượng không được vượt quá 1 tuần (10.080 phút)."),
+
+    category: z.enum(SPECIALTIES),
+
+    requiredSpecialties: z.array(z.enum(SPECIALTIES)).default([]),
+
+    isActive: z.boolean().optional().default(true),
   })
-  .min(1, "Service ID cannot be empty");
+  .strict();
 
-// Schema for creating a new service
-export const createServiceSchema = z.object({
-  name: z
-    .string({ required_error: "Service name is required" })
-    .min(3, "Service name must be at least 3 characters"),
+// Update service schema (all fields optional except at least one must be provided)
+export const updateServiceSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(3, "Tên dịch vụ phải ít nhất 3 ký tự")
+      .max(100, "Tên dịch vụ tối đa 100 ký tự")
+      .optional(),
 
-  description: z.string().optional(),
+    description: z
+      .string()
+      .trim()
+      .max(1000, "Mổ tả dịch vụ tối đa 1000 ký tự")
+      .optional(),
 
-  price: z
-    .coerce.number({ required_error: "Price is required" })
-    .min(0, "Price must be a positive number or zero"),
+    price: z
+      .number()
+      .positive("Giá dịch vụ phải là một số dương")
+      .min(10000, "Giá dịch vụ phải ít nhất 10,000 VND")
+      .max(100000000, "Giá không được vượt quá 100.000.000 VND")
+      .finite("Giá phải là một con số hữu hạn.")
+      .optional(),
 
-  duration: z
-    .coerce.number({ required_error: "Duration is required" })
-    .int("Duration must be a whole number")
-    .min(1, "Duration must be at least 1 minute"),
+    duration: z
+      .number()
+      .int("Thời lượng phải là một số nguyên")
+      .positive("Thời lượng phải là một số dương.")
+      .min(15, "Thời lượng phải ít nhất 15 phút.")
+      .max(10080, "Thời lượng không được vượt quá 1 tuần (10.080 phút).")
+      .optional(),
 
-  category: z
-    .string({ required_error: "Category is required" })
-    .min(1, "Category cannot be empty"),
+    category: z.enum(SPECIALTIES),
 
-  applicablePetTypes: z.array(z.string()).optional(),
+    requiredSpecialties: z.array(z.enum(SPECIALTIES)).default([]),
 
-  applicablePetSizes: z.array(z.string()).optional(),
+    isActive: z.boolean().optional(),
+    keepImageIds: z.array(z.string()).default([]),
+  })
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Ít nhất một trường phải được cung cấp để cập nhật.",
+  });
 
-  images: z.array(z.string().url("Each image must be a valid URL")).optional(),
+// Query filters validation with proper type coercion
+export const serviceQuerySchema = z
+  .object({
+    // Filters
+    category: z.enum(SPECIALTIES).optional(),
 
-  isActive: z.coerce.boolean().optional().default(true),
-});
+    isActive: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (val === undefined) return undefined;
+        if (val === "true") return true;
+        if (val === "false") return false;
+        throw new Error("isActive phải là 'true' hoặc 'false'");
+      }),
 
-// Schema for updating an existing service
-export const updateServiceSchema = z.object({
-  name: z
-    .string()
-    .min(3, "Service name must be at least 3 characters")
-    .optional(),
+    // Price range
+    minPrice: z
+      .string()
+      .optional()
+      .transform((val) => (val ? parseFloat(val) : undefined))
+      .pipe(z.number().positive().optional()),
 
-  description: z.string().optional(),
+    maxPrice: z
+      .string()
+      .optional()
+      .transform((val) => (val ? parseFloat(val) : undefined))
+      .pipe(z.number().positive().optional()),
 
-  price: z
-    .number()
-    .min(0, "Price must be a positive number or zero")
-    .optional(),
+    // Search
+    search: z.string().trim().max(100).optional(),
 
-  duration: z
-    .number()
-    .int("Duration must be a whole number")
-    .min(1, "Duration must be at least 1 minute")
-    .optional(),
+    // Sorting
+    sortBy: z
+      .enum(["name", "price", "duration", "createdAt", "updatedAt"])
+      .optional()
+      .default("createdAt"),
 
-  category: z.nativeEnum(Specialty).optional(),
+    sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 
-  applicablePetTypes: z.array(z.string()).optional(),
+    // Pagination
+    page: z
+      .string()
+      .optional()
+      .default("1")
+      .transform((val) => parseInt(val))
+      .pipe(z.number().int().positive()),
 
-  applicablePetSizes: z.array(z.string()).optional(),
-
-  images: z
-    .array(
-      z.object({
-        url: z.string().url("Each image must be a valid URL"),
-        publicId: z.string(),
-      })
-    )
-    .optional(),
-
-  isActive: z.boolean().optional(),
-});
+    limit: z
+      .string()
+      .optional()
+      .default("10")
+      .transform((val) => parseInt(val))
+      .pipe(z.number().int().positive().max(100, "Tối đa 100 mục mỗi trang")),
+  })
+  .refine(
+    (data) => {
+      if (data.minPrice !== undefined && data.maxPrice !== undefined) {
+        return data.minPrice <= data.maxPrice;
+      }
+      return true;
+    },
+    {
+      message: "minPrice phải nhỏ hơn hoặc bằng maxPrice",
+      path: ["minPrice"],
+    }
+  );

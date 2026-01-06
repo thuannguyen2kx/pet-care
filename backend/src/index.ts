@@ -49,7 +49,7 @@ app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
 // app.use(`${BASE_PATH}`, passportAuthenticateJWT, commentRoutes);
 // app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
 // app.use(`${BASE_PATH}/reactions`, passportAuthenticateJWT, reactionRoutes);
-// app.use(`${BASE_PATH}/services`, passportAuthenticateJWT, serviceRoutes);
+app.use(`${BASE_PATH}/services`, serviceRoutes);
 app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
 // app.use(
 //   `${BASE_PATH}/appointments`,

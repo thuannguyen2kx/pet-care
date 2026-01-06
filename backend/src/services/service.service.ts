@@ -1,197 +1,332 @@
-import ServiceModel from "../models/service.model";
-import ServicePackage from "../models/service-package.model";
+import ServiceModel, { IService } from "../models/service.model";
+
+import mongoose from "mongoose";
 import { BadRequestException, NotFoundException } from "../utils/app-error";
 import { deleteFile } from "../utils/file-uploade";
-import { SpecialtyType } from "../enums/employee.enum";
 
 interface ServiceFilters {
   category?: string;
-  petType?: string;
   isActive?: boolean;
+  price?: {
+    $gte?: number;
+    $lte?: number;
+  };
+  $or?: Array<{
+    name?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+  }>;
 }
 
-interface CreateServiceData {
-  name: string;
-  description?: string;
-  price: number;
-  duration: number;
-  category: string;
-  applicablePetTypes?: string[];
-  applicablePetSizes?: string[];
-  isActive?: boolean;
-}
+/**
+ * Get all services with filters, sorting & pagination
+ */
+export const getServicesService = async (
+  filters: ServiceFilters = {},
+  sort: any = { createdAt: -1 },
+  skip: number = 0,
+  limit: number = 10
+) => {
+  const [services, total] = await Promise.all([
+    ServiceModel.find(filters).sort(sort).skip(skip).limit(limit).lean().exec(),
+    ServiceModel.countDocuments(filters),
+  ]);
 
-interface UpdateServiceData {
-  name?: string;
-  description?: string;
-  price?: number;
-  duration?: number;
-  category?: SpecialtyType;
-  applicablePetTypes?: string[];
-  applicablePetSizes?: string[];
-  images?: { url: string; publicId: string }[];
-  isActive?: boolean;
-}
+  const totalPages = Math.ceil(total / limit);
+  const currentPage = Math.floor(skip / limit) + 1;
 
-// Get all services with optional filtering
-export const getServicesService = async (filters: ServiceFilters) => {
-  const queryFilters: any = {};
+  const result = {
+    services,
+    total,
+    totalPages,
+    currentPage,
+  };
 
-  if (filters.category) {
-    queryFilters.category = filters.category;
-  }
-
-  if (filters.petType) {
-    queryFilters.applicablePetTypes = filters.petType;
-  }
-
-  if (filters.isActive !== undefined) {
-    queryFilters.isActive = filters.isActive;
-  } else {
-    // By default, only show active services
-    queryFilters.isActive = true;
-  }
-
-  const services = await ServiceModel.find(queryFilters);
-  return { services };
+  return result;
 };
 
-// Get a service by ID
+/**
+ * Get service by ID
+ */
 export const getServiceByIdService = async (serviceId: string) => {
-  const service = await ServiceModel.findById(serviceId);
+  const service = await ServiceModel.findById(serviceId).lean();
 
   if (!service) {
-    throw new NotFoundException("Service not found");
+    throw new NotFoundException("Dịch vụ không tồn tại");
   }
 
   return { service };
 };
 
-// Create a new service
+/**
+ * Create new service
+ */
 export const createServiceService = async ({
   serviceData,
   files,
+  createdBy,
 }: {
-  serviceData: CreateServiceData;
+  serviceData: Partial<IService>;
   files?: Express.Multer.File[];
+  createdBy: string;
 }) => {
-  // Process applicablePetTypes if it's a string
-  let processedPetTypes = serviceData.applicablePetTypes;
-  if (typeof serviceData.applicablePetTypes === "string") {
-    processedPetTypes = (serviceData.applicablePetTypes as string)
-      .split(",")
-      .map((type: string) => type.trim());
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    // Check duplicate name (case-insensitive)
+    const existingService = await ServiceModel.findOne({
+      name: { $regex: new RegExp(`^${serviceData.name}$`, "i") },
+    }).session(session);
+
+    if (existingService) {
+      throw new BadRequestException("Tên dịch vụ này đã tồn tại");
+    }
+
+    const images =
+      files?.map((file) => ({
+        url: file.path,
+        publicId: file.filename,
+      })) ?? [];
+
+    const [service] = await ServiceModel.create(
+      [
+        {
+          ...serviceData,
+          images,
+          createdBy,
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+
+    return { service };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
   }
-
-  // Process applicablePetSizes if it's a string
-  let processedPetSizes = serviceData.applicablePetSizes;
-  if (typeof serviceData.applicablePetSizes === "string") {
-    processedPetSizes = (serviceData.applicablePetSizes as string)
-      .split(",")
-      .map((size: string) => size.trim());
-  }
-
-  const service = await ServiceModel.create({
-    ...serviceData,
-    applicablePetTypes: processedPetTypes || [],
-    applicablePetSizes: processedPetSizes || [],
-    isActive: serviceData.isActive !== undefined ? serviceData.isActive : true,
-  });
-
-  // Process upload service images
-  if (files && files.length > 0) {
-    const images = files.map((file: Express.Multer.File) => ({
-      url: file.path,
-      publicId: file.filename,
-    }));
-    service.images = images;
-
-    await service.save();
-  }
-
-  return { service };
 };
 
-// Update a service
+/**
+ * Update service
+ */
 export const updateServiceService = async (
   serviceId: string,
-  updateData: UpdateServiceData
+  updateData: Partial<IService> & { keepImageIds: string[] },
+  files?: Express.Multer.File[],
+  updatedBy?: string
+) => {
+  const session = await mongoose.startSession();
+
+  let imagesToDelete: { publicId: string }[] = [];
+
+  try {
+    session.startTransaction();
+
+    const service = await ServiceModel.findById(serviceId).session(session);
+
+    if (!service) {
+      throw new NotFoundException("Dịch vụ này không tồn tại");
+    }
+
+    // ===== Check duplicate name =====
+    if (updateData.name && updateData.name !== service.name) {
+      const escapedName = updateData.name.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
+
+      const existingService = await ServiceModel.findOne({
+        name: { $regex: new RegExp(`^${escapedName}$`, "i") },
+        _id: { $ne: serviceId },
+      }).session(session);
+
+      if (existingService) {
+        throw new BadRequestException("Tên dịch vụ này đã tồn tại");
+      }
+    }
+
+    // ===== IMAGE HANDLING =====
+    const oldImages = service.images ?? [];
+    const keepIds = updateData.keepImageIds ?? [];
+
+    imagesToDelete = oldImages.filter((img) => !keepIds.includes(img.publicId));
+
+    const uploadedImages =
+      files?.map((file) => ({
+        url: file.path,
+        publicId: file.filename,
+      })) ?? [];
+
+    service.images = [
+      ...oldImages.filter((img) => keepIds.includes(img.publicId)),
+      ...uploadedImages,
+    ];
+
+    // ===== REMOVE fields not allowed to be assigned =====
+    delete (updateData as any).images;
+    delete (updateData as any).keepImageIds;
+
+    Object.assign(service, updateData);
+
+    if (updatedBy) {
+      (service as any).updatedBy = updatedBy;
+    }
+
+    await service.save({ session });
+    await session.commitTransaction();
+
+    // ===== DELETE FILES AFTER COMMIT =====
+    await Promise.allSettled(
+      imagesToDelete.map((img) => deleteFile(img.publicId))
+    );
+
+    return { service };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
+};
+
+/**
+ * Toggle service status
+ */
+export const toggleServiceStatusService = async (
+  serviceId: string,
+  updatedBy?: string
 ) => {
   const service = await ServiceModel.findById(serviceId);
 
   if (!service) {
-    throw new NotFoundException("Service not found");
+    throw new NotFoundException("Dịch vụ này không tồn tại");
   }
 
-  // Process applicablePetTypes if it's a string
-  if (updateData.applicablePetTypes) {
-    // if (typeof updateData.applicablePetTypes === 'string') {
-    //   service.applicablePetTypes = updateData.applicablePetTypes
-    //     .split(',')
-    //     .map((type: string) => type.trim());
-    // } else {
-    // }
-    service.applicablePetTypes = updateData.applicablePetTypes;
+  service.isActive = !service.isActive;
+  if (updatedBy) {
+    (service as any).updatedBy = updatedBy;
   }
 
-  // Process applicablePetSizes if it's a string
-  if (updateData.applicablePetSizes) {
-    // if (typeof updateData.applicablePetSizes === 'string') {
-    //   service.applicablePetSizes = updateData.applicablePetSizes
-    //     .split(',')
-    //     .map((size: string) => size.trim());
-    // } else {
-    // }
-    service.applicablePetSizes = updateData.applicablePetSizes;
-  }
+  await service.save();
 
-  // Update other fields
-  if (updateData.name !== undefined) service.name = updateData.name;
-  if (updateData.description !== undefined)
-    service.description = updateData.description;
-  if (updateData.price !== undefined) service.price = updateData.price;
-  if (updateData.duration !== undefined) service.duration = updateData.duration;
-  if (updateData.category !== undefined) service.category = updateData.category;
-  if (updateData.images !== undefined) service.images = updateData.images;
-  if (updateData.isActive !== undefined) service.isActive = updateData.isActive;
-
-  const updatedService = await service.save();
-
-  return { service: updatedService };
+  return { service };
 };
 
-// Delete a service
-export const deleteServiceService = async (serviceId: string) => {
-  const service = await ServiceModel.findById(serviceId);
+/**
+ * Delete service (soft or hard delete)
+ */
+export const deleteServiceService = async (
+  serviceId: string,
+  hardDelete: boolean = false,
+  deletedBy?: string
+) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!service) {
-    throw new NotFoundException("Service not found");
-  }
+  try {
+    const service = await ServiceModel.findById(serviceId).session(session);
 
-  // Check if service is used in any packages
-  const packagesUsingService = await ServicePackage.findOne({
-    "services.serviceId": service._id,
-  });
-
-  if (packagesUsingService) {
-    throw new BadRequestException(
-      "Cannot delete service that is used in packages. Deactivate it instead."
-    );
-  }
-  // Delete images of service from cloudinary
-  if (service.images && service.images.length > 0) {
-    for (const image of service.images) {
-      try {
-        if (image.publicId) {
-          await deleteFile(image.publicId);
-        }
-      } catch (error) {
-        console.log("Failed to delete image of service from cloudinary", error);
-      }
+    if (!service) {
+      throw new NotFoundException("Dịch vụ không tồn tại");
     }
+
+    if (hardDelete) {
+      // Delete images from Cloudinary
+      if (service.images && service.images.length > 0) {
+        const deletePromises = service.images.map((image) =>
+          deleteFile(image.publicId)
+        );
+
+        await Promise.allSettled(deletePromises);
+      }
+
+      // Permanently delete
+      await ServiceModel.findByIdAndDelete(serviceId).session(session);
+    } else {
+      // Soft delete
+      service.isActive = false;
+      if (deletedBy) {
+        (service as any).deletedBy = deletedBy;
+        (service as any).deletedAt = new Date();
+      }
+      await service.save({ session });
+    }
+
+    await session.commitTransaction();
+
+    return { message: "Đã xoá dịch vụ thành công" };
+  } catch (error) {
+    await session.abortTransaction();
+
+    if (error instanceof NotFoundException) throw error;
+
+    throw new BadRequestException("Có lỗi khi xoá dịch vụ");
+  } finally {
+    session.endSession();
   }
+};
 
-  await service.deleteOne();
+/**
+ * Get popular services (for homepage)
+ */
+export const getPopularServicesService = async (limit: number = 6) => {
+  // TODO: Join with bookings to get actual popular services
+  // For now, return most recent active services
+  const services = await ServiceModel.find({ isActive: true })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
 
-  return { message: "Service deleted successfully" };
+  const result = { services };
+
+  return result;
+};
+
+/**
+ * Get service statistics (for admin dashboard)
+ */
+export const getServiceStatisticsService = async () => {
+  const [totalServices, activeServices, servicesByCategory] = await Promise.all(
+    [
+      ServiceModel.countDocuments(),
+      ServiceModel.countDocuments({ isActive: true }),
+      ServiceModel.aggregate([
+        {
+          $group: {
+            _id: "$category",
+            count: { $sum: 1 },
+            activeCount: {
+              $sum: { $cond: [{ $eq: ["$isActive", true] }, 1, 0] },
+            },
+            totalRevenue: { $sum: "$price" },
+            avgPrice: { $avg: "$price" },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+      ]),
+    ]
+  );
+
+  const statistics = {
+    total: totalServices,
+    active: activeServices,
+    inactive: totalServices - activeServices,
+    byCategory: servicesByCategory.map((cat) => ({
+      category: cat._id,
+      total: cat.count,
+      active: cat.activeCount,
+      inactive: cat.count - cat.activeCount,
+      totalRevenue: cat.totalRevenue,
+      avgPrice: Math.round(cat.avgPrice),
+    })),
+  };
+
+  return statistics;
 };
