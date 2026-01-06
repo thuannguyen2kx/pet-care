@@ -85,7 +85,14 @@ export const BOOKING_ENDPOINTS = {
 /* ================= SERVICE ================= */
 export const SERVICE_ENDPOINTS = {
   LIST: `${API_BASE.SERVICES}`,
+  POPULAR: `${API_BASE.SERVICES}/popular`,
+  CATEGORY: (category: string) => `${API_BASE.SERVICES}/category/${category}`,
   DETAIL: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}`,
+  STATISTICS: `${API_BASE.SERVICES}/admin/statistics`,
+  CREATE: `${API_BASE.SERVICES}`,
+  UPDATE: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}`,
+  DELETE: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}`,
+  TOGGLE_STATUS: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}/toogle-status`,
 };
 
 /* ================= SOCIAL ================= */

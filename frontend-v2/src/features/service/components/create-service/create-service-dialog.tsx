@@ -1,0 +1,57 @@
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+
+import { CreateServiceForm } from '@/features/service/components/create-service/create-service-form';
+import { useCreateServiceForm } from '@/features/service/components/create-service/use-create-service-form';
+import { mapCreateServiceFormToApiPayload } from '@/features/service/mappers/map-create-service-form-to-api-payload';
+import { Button } from '@/shared/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
+import { ScrollArea } from '@/shared/ui/scroll-area';
+
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  isSubmitting: boolean;
+  onSubmit: (formData: FormData) => void;
+};
+export function CreateServiceDialog({ open, onOpenChange, isSubmitting, onSubmit }: Props) {
+  const { form } = useCreateServiceForm();
+
+  const handleSubmit = form.handleSubmit((data) => {
+    const payload = mapCreateServiceFormToApiPayload(data);
+    onSubmit(payload);
+  });
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Thêm dịch vụ mới</DialogTitle>
+          <DialogDescription>
+            Tạo dịch vụ mới cho cửa hàng. Điền đầy đủ thông tin bên dưới.
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="max-h-[70vh] pr-4">
+          <CreateServiceForm form={form} />
+        </ScrollArea>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" disabled={isSubmitting}>
+              Huỷ
+            </Button>
+          </DialogClose>
+          <Button onClick={handleSubmit} disabled={isSubmitting}>
+            Tạo dịch vụ
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

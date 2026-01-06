@@ -20,6 +20,7 @@ import {
 import { Roles } from "../enums/role.enum";
 import { BadRequestException } from "../utils/app-error";
 import { uploadServiceImage } from "../utils/file-uploade";
+import { parseArrayField } from "../utils/parser-data";
 
 // @desc    Get all services with filtering, sorting & pagination
 // @route   GET /api/services
@@ -42,7 +43,6 @@ export const getServicesController = asyncHandler(
     } = validatedQuery;
 
     const filters: any = {};
-
     // Build filters
     if (category) filters.category = category;
 
@@ -177,7 +177,7 @@ export const createServiceController = [
     // Parse and validate request body
     const serviceData = createServiceSchema.parse({
       ...req.body,
-      requiredSpecialties: JSON.parse(req.body.requiredSpecialties ?? "[]"),
+      requiredSpecialties: parseArrayField(req.body.requiredSpecialties),
     });
 
     const { service } = await createServiceService({
@@ -205,10 +205,12 @@ export const updateServiceController = [
     // Parse arrays if they exist
     const parsedBody = { ...req.body };
     if (req.body.requiredSpecialties) {
-      parsedBody.requiredSpecialties = JSON.parse(req.body.requiredSpecialties);
+      parsedBody.requiredSpecialties = parseArrayField(
+        req.body.requiredSpecialties
+      );
     }
     if (req.body.keepImageIds) {
-      parsedBody.keepImageIds = JSON.parse(req.body.keepImageIds);
+      parsedBody.keepImageIds = parseArrayField(req.body.keepImageIds);
     }
 
     const updateData = updateServiceSchema.parse(parsedBody);

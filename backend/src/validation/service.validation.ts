@@ -24,14 +24,14 @@ export const createServiceSchema = z
       .max(1000, "Mổ tả dịch vụ tối đa 1000 ký tự")
       .optional(),
 
-    price: z
+    price: z.coerce
       .number({ required_error: "Giá dịch vụ là bắt buộc" })
       .positive("Giá dịch vụ phải là một số dương")
       .min(10000, "Giá dịch vụ phải ít nhất 10,000 VND")
       .max(100000000, "Giá không được vượt quá 100.000.000 VND")
       .finite("Giá phải là một con số hữu hạn."),
 
-    duration: z
+    duration: z.coerce
       .number({ required_error: "Thời lượng là bắt buộc" })
       .int("Thời lượng phải là một số nguyên")
       .positive("Thời lượng phải là một số dương.")
@@ -42,7 +42,7 @@ export const createServiceSchema = z
 
     requiredSpecialties: z.array(z.enum(SPECIALTIES)).default([]),
 
-    isActive: z.boolean().optional().default(true),
+    isActive: z.coerce.boolean().optional().default(true),
   })
   .strict();
 
@@ -62,7 +62,7 @@ export const updateServiceSchema = z
       .max(1000, "Mổ tả dịch vụ tối đa 1000 ký tự")
       .optional(),
 
-    price: z
+    price: z.coerce
       .number()
       .positive("Giá dịch vụ phải là một số dương")
       .min(10000, "Giá dịch vụ phải ít nhất 10,000 VND")
@@ -70,7 +70,7 @@ export const updateServiceSchema = z
       .finite("Giá phải là một con số hữu hạn.")
       .optional(),
 
-    duration: z
+    duration: z.coerce
       .number()
       .int("Thời lượng phải là một số nguyên")
       .positive("Thời lượng phải là một số dương.")
@@ -82,7 +82,7 @@ export const updateServiceSchema = z
 
     requiredSpecialties: z.array(z.enum(SPECIALTIES)).default([]),
 
-    isActive: z.boolean().optional(),
+    isActive: z.coerce.boolean().optional(),
     keepImageIds: z.array(z.string()).default([]),
   })
   .strict()

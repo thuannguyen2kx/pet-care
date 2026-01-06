@@ -1,0 +1,62 @@
+import { useNavigate } from 'react-router';
+
+import { employeeFilterToSearchParams } from '@/features/employee/mapping';
+import type { TEmployeeFilter } from '@/features/employee/shemas';
+import { paths } from '@/shared/config/paths';
+import { getPaginationItems } from '@/shared/lib/helper';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/shared/ui/pagination';
+type Props = {
+  page: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+};
+export function AdminServiceListPagination({ page, totalPages, onChange }: Props) {
+  if (totalPages <= 1) return null;
+
+  const items = getPaginationItems(page, totalPages);
+  return (
+    <Pagination className="mt-6 justify-end">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={() => onChange(page - 1)}
+            className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
+          />
+        </PaginationItem>
+
+        {items.map((item, index) => {
+          if (item.type === 'ellipsis') {
+            return (
+              <PaginationItem key={`ellipsis-${index}`}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            );
+          }
+
+          return (
+            <PaginationItem key={item.page}>
+              <PaginationLink isActive={item.page === page} onClick={() => onChange(item.page)}>
+                {item.page}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        })}
+
+        <PaginationItem>
+          <PaginationNext
+            onClick={() => onChange(page + 1)}
+            className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+}

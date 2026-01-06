@@ -1,0 +1,1 @@
+export const SPECIALTIES = ['GROOMING', 'SPA', 'HEALTHCARE', 'TRAINING', 'BOARDING'] as const;

@@ -20,6 +20,5 @@ export const specialties = {
     label: 'Lưu trú',
   },
 } as const;
-
 export const specialtiesList = Object.values(specialties);
 export type Specialty = (typeof specialtiesList)[number]['value'];
