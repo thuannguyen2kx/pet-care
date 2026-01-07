@@ -14,7 +14,7 @@ export const ErrorBoundary = () => {
 const AppRoot = () => {
   const user = useUser();
   const location = useLocation();
-  useRoleTheme(user.data?.role || ROLES.CUSTOMER);
+  useRoleTheme(user.data?.identity.role || ROLES.CUSTOMER);
 
   return (
     <>

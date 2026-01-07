@@ -52,7 +52,6 @@ export const Header = () => {
       },
     });
   };
-  if (!user.data) return null;
   const { profile } = user.data || {};
   return (
     <header className="border-border bg-background/95 supports-backdrop-filter:bg-backgroud/60 sticky top-0 z-50 w-full border backdrop-blur-sm">
@@ -75,62 +74,78 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Search */}
-          <Button variant="ghost" size="icon" className="hidden md:flex">
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Tìm kiếm</span>
-          </Button>
-
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="bg-destructive absolute top-1.5 right-1.5 h-2 w-2 rounded-full" />
-            <span className="sr-only">Thông báo</span>
-          </Button>
-
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="hidden gap-2 pr-1 pl-2 md:flex">
-                <Avatar>
-                  <AvatarImage src={profile.avatarUrl || ''} />
-                  <AvatarFallback>{getInitials(profile.displayName)}</AvatarFallback>
-                </Avatar>
-                <ChevronDown className="text-muted-foreground h-4 w-4" />
+          {profile && (
+            <>
+              {/* Search */}
+              <Button variant="ghost" size="icon" className="hidden md:flex">
+                <Search className="h-5 w-5" />
+                <span className="sr-only">Tìm kiếm</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="border-border w-56">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{profile.displayName}</p>
-                <p className="text-muted-foreground text-xs">{profile.email}</p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to={paths.customer.profile.path} className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Hồ sơ cá nhân
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={paths.customer.settings.path} className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Cài đặt
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Button
-                  onClick={handleLogout}
-                  variant="ghost"
-                  className="text-destructive flex w-full cursor-pointer justify-start gap-2"
-                >
-                  <LogOut className="text-destructive h-4 w-4" />
-                  Đăng xuất
-                </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
+              {/* Notifications */}
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                <span className="bg-destructive absolute top-1.5 right-1.5 h-2 w-2 rounded-full" />
+                <span className="sr-only">Thông báo</span>
+              </Button>
+
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="hidden gap-2 pr-1 pl-2 md:flex">
+                    <Avatar>
+                      <AvatarImage src={profile.avatarUrl || ''} />
+                      <AvatarFallback>{getInitials(profile.displayName)}</AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="text-muted-foreground h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="border-border w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{profile.displayName}</p>
+                    <p className="text-muted-foreground text-xs">{profile.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to={paths.customer.profile.path} className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Hồ sơ cá nhân
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={paths.customer.settings.path} className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Cài đặt
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Button
+                      onClick={handleLogout}
+                      variant="ghost"
+                      className="text-destructive flex w-full cursor-pointer justify-start gap-2"
+                    >
+                      <LogOut className="text-destructive h-4 w-4" />
+                      Đăng xuất
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+
+          {!profile && (
+            <div className="hidden items-center gap-3 md:flex">
+              <Link to={paths.auth.login.path}>
+                <Button variant="ghost" size="sm">
+                  Đăng nhập
+                </Button>
+              </Link>
+              <Link to={paths.auth.register.path}>
+                <Button size="sm">Đăng ký</Button>
+              </Link>
+            </div>
+          )}
           {/* Mobile Menu Button */}
           <Button
             variant="outline"
@@ -158,45 +173,47 @@ export const Header = () => {
                 {item.label}
               </Link>
             ))}
-            <div className="border-border mt-2 border-t pt-4">
-              <div className="flex items-center gap-3 px-3 py-2">
-                <Avatar>
-                  <AvatarImage src={profile.avatarUrl || '/placeholder.svg'} />
-                  <AvatarFallback>{getInitials(profile.displayName)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium">{profile.displayName}</p>
-                  <p className="text-muted-foreground text-xs">{profile.email}</p>
+            {profile && (
+              <div className="border-border mt-2 border-t pt-4">
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <Avatar>
+                    <AvatarImage src={profile.avatarUrl || '/placeholder.svg'} />
+                    <AvatarFallback>{getInitials(profile.displayName)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{profile.displayName}</p>
+                    <p className="text-muted-foreground text-xs">{profile.email}</p>
+                  </div>
                 </div>
+                <Link
+                  to={paths.customer.profile.path}
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="h-5 w-5" />
+                  Hồ sơ cá nhân
+                </Link>
+                <Link
+                  to={paths.customer.settings.path}
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Settings className="h-5 w-5" />
+                  Cài đặt
+                </Link>
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:bg-destructive/10 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Đăng xuất
+                </Button>
               </div>
-              <Link
-                to={paths.customer.profile.path}
-                className="text-muted-foreground hover:bg-muted hover:text-foreground mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                Hồ sơ cá nhân
-              </Link>
-              <Link
-                to={paths.customer.settings.path}
-                className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Settings className="h-5 w-5" />
-                Cài đặt
-              </Link>
-              <Button
-                variant="ghost"
-                className="text-destructive hover:bg-destructive/10 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  handleLogout();
-                }}
-              >
-                <LogOut className="h-5 w-5" />
-                Đăng xuất
-              </Button>
-            </div>
+            )}
           </nav>
         </div>
       )}
