@@ -92,7 +92,7 @@ export const SERVICE_ENDPOINTS = {
   CREATE: `${API_BASE.SERVICES}`,
   UPDATE: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}`,
   DELETE: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}`,
-  TOGGLE_STATUS: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}/toogle-status`,
+  TOGGLE_STATUS: (serviceId: string) => `${API_BASE.SERVICES}/${serviceId}/toggle-status`,
 };
 
 /* ================= SOCIAL ================= */

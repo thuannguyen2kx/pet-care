@@ -11,7 +11,6 @@ import {
   getServiceStatisticsController,
 } from "../controllers/service.controller";
 import { Roles } from "../enums/role.enum";
-import { serviceQuerySchema } from "../validation/service.validation";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { passportAuthenticateJWT } from "../config/passport.config";
 
@@ -20,14 +19,6 @@ const serviceRoutes = express.Router();
 // ============================================
 // PUBLIC ROUTES (No Authentication Required)
 // ============================================
-
-/**
- * @route   GET /api/services
- * @desc    Get all active services with filters, sorting & pagination
- * @access  Public
- * @params  Query: category, petType, petSize, minPrice, maxPrice, search, sortBy, sortOrder, page, limit
- */
-serviceRoutes.get("/", getServicesController);
 
 /**
  * @route   GET /api/services/popular
@@ -56,7 +47,13 @@ serviceRoutes.get("/:id", getServiceByIdController);
 // ============================================
 // PROTECTED ROUTES (Authentication Required)
 // ============================================
-
+/**
+ * @route   GET /api/services
+ * @desc    Get all active services with filters, sorting & pagination
+ * @access  Public
+ * @params  Query: category, petType, petSize, minPrice, maxPrice, search, sortBy, sortOrder, page, limit
+ */
+serviceRoutes.get("/", passportAuthenticateJWT, getServicesController);
 /**
  * @route   GET /api/services/admin/statistics
  * @desc    Get service statistics for admin dashboard

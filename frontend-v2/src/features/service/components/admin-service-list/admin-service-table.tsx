@@ -2,6 +2,12 @@ import { MoreHorizontal } from 'lucide-react';
 
 import { CATEGORY_CONFIG } from '@/features/service/constants';
 import type { TService } from '@/features/service/domain/service.entity';
+import type {
+  RemoveAction,
+  DetailAction,
+  ToggleStatusAction,
+  UpdateAction,
+} from '@/features/service/hooks/use-admin-service-controller';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import {
@@ -13,8 +19,18 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 type Props = {
   services: TService[];
+  onDetail: DetailAction['openWithId'];
+  onDelete: RemoveAction['execute'];
+  onToggleStatus: ToggleStatusAction['execute'];
+  onUpdate: UpdateAction['openWithService'];
 };
-export function AdminSeriveTable({ services }: Props) {
+export function AdminSeriveTable({
+  services,
+  onDetail,
+  onDelete,
+  onToggleStatus,
+  onUpdate,
+}: Props) {
   return (
     <div className="bg-card my-6 w-full rounded-lg p-4">
       <Table>
@@ -24,7 +40,7 @@ export function AdminSeriveTable({ services }: Props) {
             <TableHead>Danh mục</TableHead>
             <TableHead className="text-right">Giá</TableHead>
             <TableHead className="text-center">Thời lượng (phút)</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Trạng thái</TableHead>
             <TableHead className="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,9 +66,30 @@ export function AdminSeriveTable({ services }: Props) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
-                    <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Xoá</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDetail(service._id)}>
+                      Xem chi tiết
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onUpdate(service)}>Chỉnh sửa</DropdownMenuItem>
+                    {service.isActive && (
+                      <DropdownMenuItem
+                        onClick={() => onToggleStatus(service._id, service.isActive)}
+                      >
+                        Ngưng dịch vụ
+                      </DropdownMenuItem>
+                    )}
+                    {!service.isActive && (
+                      <DropdownMenuItem
+                        onClick={() => onToggleStatus(service._id, service.isActive)}
+                      >
+                        Kích hoạt dịch vụ
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => onDelete(service._id)}
+                    >
+                      Xoá
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

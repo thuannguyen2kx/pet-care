@@ -2,6 +2,12 @@ import { Search } from 'lucide-react';
 
 import { AdminSeriveTable } from '@/features/service/components/admin-service-list/admin-service-table';
 import type { TService } from '@/features/service/domain/service.entity';
+import type {
+  RemoveAction,
+  DetailAction,
+  ToggleStatusAction,
+  UpdateAction,
+} from '@/features/service/hooks/use-admin-service-controller';
 import { EmptyState } from '@/shared/components/template/empty-state';
 import { SectionSpinner } from '@/shared/components/template/loading';
 
@@ -12,9 +18,19 @@ export type AdminServiceTableState =
 
 type Props = {
   state: AdminServiceTableState;
+  onDetail: DetailAction['openWithId'];
+  onRemove: RemoveAction['execute'];
+  onToggleStatus: ToggleStatusAction['execute'];
+  onUpdate: UpdateAction['openWithService'];
 };
 
-export function AdminServiceTableContent({ state }: Props) {
+export function AdminServiceTableContent({
+  state,
+  onDetail,
+  onRemove,
+  onToggleStatus,
+  onUpdate,
+}: Props) {
   switch (state.type) {
     case 'loading':
       return <SectionSpinner />;
@@ -27,6 +43,14 @@ export function AdminServiceTableContent({ state }: Props) {
         />
       );
     case 'data':
-      return <AdminSeriveTable services={state.services} />;
+      return (
+        <AdminSeriveTable
+          services={state.services}
+          onDetail={onDetail}
+          onDelete={onRemove}
+          onToggleStatus={onToggleStatus}
+          onUpdate={onUpdate}
+        />
+      );
   }
 }

@@ -15,3 +15,5 @@ export type TGetServicesResponse = {
   pagination: TPaginationMeta;
 };
 export type TGetServicesApiResponse = TApiResponseSuccess<TGetServicesResponse>;
+
+export type TGetServiceDetailApiResponse = TApiResponseSuccess<{ service: TService }>;

@@ -45,7 +45,6 @@ export const getServicesController = asyncHandler(
     const filters: any = {};
     // Build filters
     if (category) filters.category = category;
-
     // Public users only see active services
     if (req.user?.role === Roles.ADMIN || req.user?.role === Roles.EMPLOYEE) {
       if (isActive !== undefined) filters.isActive = isActive;
@@ -54,10 +53,10 @@ export const getServicesController = asyncHandler(
     }
 
     // Price range
-    if (minPrice || maxPrice) {
+    if (minPrice !== undefined || maxPrice !== undefined) {
       filters.price = {};
-      if (minPrice) filters.price.$gte = minPrice;
-      if (maxPrice) filters.price.$lte = maxPrice;
+      if (minPrice !== undefined) filters.price.$gte = minPrice;
+      if (maxPrice !== undefined) filters.price.$lte = maxPrice;
     }
 
     // Search
