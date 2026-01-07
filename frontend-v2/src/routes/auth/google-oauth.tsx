@@ -18,7 +18,7 @@ const GoogleOAuth = () => {
     if (accessToken) {
       setAccessToken(accessToken);
       storage.set(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-      navigate(paths.customer.dashboard.path);
+      navigate(paths.customer.root.path);
     }
   }, [accessToken, navigate]);
 

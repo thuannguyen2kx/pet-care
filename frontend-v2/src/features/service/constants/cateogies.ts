@@ -17,21 +17,26 @@ export const CATEGORY_CONFIG = {
   GROOMING: {
     value: 'GROOMING',
     label: 'Chăm sóc lông',
+    color: 'bg-chart-1/10 text-chart-1',
   },
   SPA: {
     value: 'SPA',
     label: 'Spa thú cưng',
+    color: 'bg-chart-5/10 text-chart-5',
   },
   HEALTHCARE: {
     value: 'HEALTHCARE',
     label: 'Chăm sóc sức khoẻ',
+    color: 'bg-chart-3/10 text-chart-3',
   },
   TRAINING: {
     value: 'TRAINING',
     label: 'Huấn luyện',
+    color: 'bg-chart-4/10 text-chart-4',
   },
   BOARDING: {
     value: 'BOARDING',
     label: 'Lưu trú',
+    color: 'bg-chart-2/10 text-chart-2',
   },
 } as const;

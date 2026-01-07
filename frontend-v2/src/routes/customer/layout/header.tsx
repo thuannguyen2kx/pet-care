@@ -31,7 +31,7 @@ import {
 import { Logo } from '@/shared/ui/logo';
 
 const navItems = [
-  { label: 'Trang chủ', href: paths.customer.dashboard.path, icon: Home },
+  { label: 'Trang chủ', href: paths.customer.root.path, icon: Home },
   { label: 'Thú cưng', href: paths.customer.pets.path, icon: PawPrint },
   { label: 'Đặt lịch', href: paths.customer.booking.path, icon: Calendar },
   { label: 'Cộng đồng', href: paths.customer.social.path, icon: MessageCircle },
@@ -57,7 +57,7 @@ export const Header = () => {
   return (
     <header className="border-border bg-background/95 supports-backdrop-filter:bg-backgroud/60 sticky top-0 z-50 w-full border backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to={paths.customer.dashboard.path}>
+        <Link to={paths.customer.root.path}>
           <Logo />
         </Link>
 
