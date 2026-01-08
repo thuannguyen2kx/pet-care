@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import passport from "passport";
 
@@ -21,6 +21,8 @@ import appointmentRoutes from "./routes/appointment.route";
 import paymentRoutes from "./routes/payment.route";
 // import webhookRoutes from "./routes/webhook.route";
 import reportRoutes from "./routes/report.route";
+import bookingRoutes from "./routes/booking.route";
+import availabilityRoutes from "./routes/availability.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -51,6 +53,8 @@ app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
 // app.use(`${BASE_PATH}/reactions`, passportAuthenticateJWT, reactionRoutes);
 app.use(`${BASE_PATH}/services`, serviceRoutes);
 app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
+app.use(`${BASE_PATH}/availability`, availabilityRoutes);
+app.use(`${BASE_PATH}/bookings`, bookingRoutes);
 // app.use(
 //   `${BASE_PATH}/appointments`,
 //   passportAuthenticateJWT,
