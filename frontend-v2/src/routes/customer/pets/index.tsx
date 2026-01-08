@@ -1,25 +1,25 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { ChevronLeft, Plus } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, type ClientLoaderFunctionArgs } from 'react-router';
 
 import { getUserPetsQueryOptions } from '@/features/pets/api/get-user-pet';
-import { CustomerPetsView } from '@/features/pets/components/customer-pet-view';
+import { CustomerPetsListPrecenter } from '@/features/pets/presenters/cutomer-pets-list.precenter';
 import { paths } from '@/shared/config/paths';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 import { Button } from '@/shared/ui/button';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return async () => {
+  return privateClientLoader(queryClient, async (_args: ClientLoaderFunctionArgs) => {
     const query = getUserPetsQueryOptions();
-
     return queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
-  };
+  });
 };
 
 export default function CustomerPetsRoute() {
   return (
     <main className="container mx-auto px-4 py-6">
       <Link
-        to={paths.customer.dashboard.path}
+        to={paths.customer.root.path}
         className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm transition-colors"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -39,7 +39,7 @@ export default function CustomerPetsRoute() {
         </Button>
       </div>
 
-      <CustomerPetsView />
+      <CustomerPetsListPrecenter />
     </main>
   );
 }

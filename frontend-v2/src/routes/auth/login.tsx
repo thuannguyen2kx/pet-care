@@ -2,8 +2,10 @@ import { Link } from 'react-router';
 
 import { LoginForm } from '@/features/auth/components/login-form';
 import { paths } from '@/shared/config/paths';
+import { guestOnlyLoader } from '@/shared/lib/auth.loader';
 import { Logo } from '@/shared/ui/logo';
 
+export const clientLoader = () => guestOnlyLoader(async () => null);
 export default function LoginRoute() {
   return (
     <div className="flex min-h-screen">

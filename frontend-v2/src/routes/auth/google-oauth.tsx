@@ -4,12 +4,14 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
 import { STORAGE_KEYS } from '@/shared/constant';
+import { guestOnlyLoader } from '@/shared/lib/auth.loader';
 import { setAccessToken } from '@/shared/lib/http';
 import { storage } from '@/shared/lib/storage';
 import { Button } from '@/shared/ui/button';
 import { Logo } from '@/shared/ui/logo';
 
-const GoogleOAuth = () => {
+export const clientLoader = () => guestOnlyLoader(async () => null);
+export default function GoogleOAuthRoute() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
@@ -41,6 +43,4 @@ const GoogleOAuth = () => {
       </div>
     </div>
   );
-};
-
-export default GoogleOAuth;
+}

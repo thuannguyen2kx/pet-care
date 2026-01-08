@@ -6,7 +6,7 @@ export default function EmployeeDashboardRoute() {
 
   return (
     <EmployeeLayout
-      title={`Xin chào, ${user.data?.fullName}`}
+      title={`Xin chào, ${user.data?.profile.displayName}`}
       description="Tổng quan hoạt động của bạn"
     >
       <div>Dashboard</div>

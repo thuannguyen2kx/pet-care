@@ -6,9 +6,10 @@ import EmployeeScheduleContainer from '@/features/employee-schedule/containers/e
 import { getApiDateRange } from '@/features/employee-schedule/utils/get-api-date-range';
 import { parseScheduleSearch } from '@/features/employee-schedule/utils/parse-schedule-search';
 import DashboardLayout from '@/routes/admin/layout';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return async ({ params, request }: ClientLoaderFunctionArgs) => {
+  return privateClientLoader(queryClient, async ({ params, request }: ClientLoaderFunctionArgs) => {
     const employeeId = params.employeeId as string;
 
     const url = new URL(request.url);
@@ -21,7 +22,7 @@ export const clientLoader = (queryClient: QueryClient) => {
       endDate: endDate.toISOString(),
     });
     return queryClient.getQueryData(query.queryKey) ?? queryClient.fetchQuery(query);
-  };
+  });
 };
 export default function AdminEmployeeScheduleRoute() {
   return (

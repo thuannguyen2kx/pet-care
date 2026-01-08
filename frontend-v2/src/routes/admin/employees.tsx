@@ -5,10 +5,11 @@ import { getEmployeesOptions } from '@/features/employee/api/get-employees';
 import AdminEmploContainerListContainer from '@/features/employee/containers/admin-employees-list.container';
 import { getEmployeeListFilterSchema } from '@/features/employee/shemas';
 import DashboardLayout from '@/routes/admin/layout';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const clientLoader = (queryClient: QueryClient) => {
-  return async ({ request }: ClientLoaderFunctionArgs) => {
+  return privateClientLoader(queryClient, async ({ request }: ClientLoaderFunctionArgs) => {
     const url = new URL(request.url);
     const {
       specialty,
@@ -25,7 +26,7 @@ export const clientLoader = (queryClient: QueryClient) => {
     });
 
     return queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
-  };
+  });
 };
 
 export default function AdminEmployeesRoute() {

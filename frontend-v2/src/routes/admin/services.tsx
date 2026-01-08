@@ -5,18 +5,16 @@ import { getServicesQueryOptions } from '@/features/service/api/get-services';
 import AdminServicesContainer from '@/features/service/containers/admin-services-container';
 import { mapSearchParamsToServiceQuery } from '@/features/service/mappers/map-search-param-to-service-query';
 import DashboardLayout from '@/routes/admin/layout';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return async ({ request }: ClientLoaderFunctionArgs) => {
+  return privateClientLoader(queryClient, async ({ request }: ClientLoaderFunctionArgs) => {
     const url = new URL(request.url);
     const filter = mapSearchParamsToServiceQuery(url.searchParams);
     const query = getServicesQueryOptions(filter);
 
-    return (
-      queryClient.getQueriesData({ queryKey: query.queryKey }) ??
-      (await queryClient.fetchQuery(query))
-    );
-  };
+    return queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
+  });
 };
 export default function AdminServicesRoute() {
   return (

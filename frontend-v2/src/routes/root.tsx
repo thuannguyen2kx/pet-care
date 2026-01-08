@@ -5,7 +5,7 @@ import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
 import { ROLES } from '@/shared/constant/roles';
 import { useRoleTheme } from '@/shared/hooks/use-role-theme';
-import { AuthLoader, useUser } from '@/shared/lib/auth';
+import { AuthLoader, ProtectedRoute, useUser } from '@/shared/lib/auth';
 
 export const ErrorBoundary = () => {
   return <div>Something went wrong</div>;
@@ -23,7 +23,9 @@ const AppRoot = () => {
         renderError={() => <Navigate to={paths.auth.login.getHref(location.pathname)} replace />}
       >
         <ConfirmProvider>
-          <Outlet />
+          <ProtectedRoute>
+            <Outlet />
+          </ProtectedRoute>
         </ConfirmProvider>
       </AuthLoader>
     </>

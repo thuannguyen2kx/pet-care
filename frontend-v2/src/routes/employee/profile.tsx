@@ -3,13 +3,14 @@ import type { QueryClient } from '@tanstack/react-query';
 import EmployeeProfileContainer from '@/features/employee/containers/employee-profile.container';
 import { getProfleQueryOptions } from '@/features/user/api/get-profile';
 import EmployeeLayout from '@/routes/employee/layout';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return () => {
+  return privateClientLoader(queryClient, async () => {
     const query = getProfleQueryOptions();
 
     return queryClient.getQueryData(query.queryKey) ?? queryClient.fetchQuery(query);
-  };
+  });
 };
 
 export default function EmployeeProfileRoute() {

@@ -3,8 +3,10 @@ import { Link, useSearchParams } from 'react-router';
 
 import { RegisterForm } from '@/features/auth/components/register-form';
 import { paths } from '@/shared/config/paths';
+import { guestOnlyLoader } from '@/shared/lib/auth.loader';
 import { Logo } from '@/shared/ui/logo';
 
+export const clientLoader = () => guestOnlyLoader(async () => null);
 export default function RegisteRoute() {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');

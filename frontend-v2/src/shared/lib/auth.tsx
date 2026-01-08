@@ -12,7 +12,7 @@ export type TAuthResponse = {
   user: TGetMeResponse;
   access_token: string;
 };
-export const USE_USER_KEY = ['authicated-user'];
+export const USE_USER_KEY = ['authenticated-user'];
 export const getUser = async (): Promise<TGetMeResponse> => {
   const response = await http.get(AUTH_ENDPOINTS.ME);
   return response.data;

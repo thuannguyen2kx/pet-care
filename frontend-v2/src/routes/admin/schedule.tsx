@@ -5,9 +5,10 @@ import { getTeamScheduleQueryOptions } from '@/features/employee-schedule/api/ge
 import AdminScheduleContainer from '@/features/employee-schedule/containers/admin-schedule.container';
 import { getWeekRangeFromParam } from '@/features/employee-schedule/utils/get-week-range-from-param';
 import DashboardLayout from '@/routes/admin/layout';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return async ({ request }: ClientLoaderFunctionArgs) => {
+  return privateClientLoader(queryClient, async ({ request }: ClientLoaderFunctionArgs) => {
     const url = new URL(request.url);
     const weekParam = url.searchParams.get('week');
     const { startDate, endDate } = getWeekRangeFromParam(weekParam ?? undefined);
@@ -15,7 +16,7 @@ export const clientLoader = (queryClient: QueryClient) => {
     const query = getTeamScheduleQueryOptions(startDate, endDate);
 
     return queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
-  };
+  });
 };
 export default function AdminScheduleRoute() {
   return (

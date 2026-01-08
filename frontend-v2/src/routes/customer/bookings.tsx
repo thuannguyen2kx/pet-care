@@ -1,11 +1,12 @@
 import type { QueryClient } from '@tanstack/react-query';
-import type { ClientActionFunctionArgs } from 'react-router';
+import type { LoaderFunctionArgs } from 'react-router';
 
 import { getServicesQueryOptions } from '@/features/service/api/get-services';
 import CustomerServiceContainer from '@/features/service/containers/customer-services-container';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return async ({ request }: ClientActionFunctionArgs) => {
+  return privateClientLoader(queryClient, async ({ request }: LoaderFunctionArgs) => {
     const url = new URL(request.url);
     const filter = {
       search: url.searchParams.get('search') || undefined,
@@ -15,7 +16,7 @@ export const clientLoader = (queryClient: QueryClient) => {
     const query = getServicesQueryOptions(filter);
 
     return queryClient.getQueryData(query.queryKey) ?? queryClient.fetchQuery(query);
-  };
+  });
 };
 export default function CustomerBookingsRoute() {
   return <CustomerServiceContainer />;

@@ -8,13 +8,14 @@ import { CustomerPetDetailPrecenter } from '@/features/pets/presenters/customer-
 import { FullscrenSpinner } from '@/shared/components/template/loading';
 import { paths } from '@/shared/config/paths';
 import { useConfirm } from '@/shared/hooks/use-confirm';
+import { privateClientLoader } from '@/shared/lib/auth.loader';
 
 export const clientLoader = (queryClient: QueryClient) => {
-  return ({ params }: ClientLoaderFunctionArgs) => {
+  return privateClientLoader(queryClient, async ({ params }: ClientLoaderFunctionArgs) => {
     const petId = params.petId as string;
     const query = getPetQueryOptions(petId);
     return queryClient.getQueryData(query.queryKey) ?? queryClient.fetchQuery(query);
-  };
+  });
 };
 
 export default function CustomerPetDetailsPage() {
