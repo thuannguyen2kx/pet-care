@@ -3,17 +3,18 @@ import { Link } from 'react-router';
 import { paths } from '@/shared/config/paths';
 import { Button } from '@/shared/ui/button';
 
-export default function NotFoundRoute() {
+export const ForbiddenFallback = () => {
   return (
     <main className="bg-background flex min-h-screen w-full flex-col items-center justify-center px-4 text-center">
-      <div className="mx-auto mb-6 max-w-lg">
-        <img src="/images/error-404.svg" alt="Không tìm thấy trang" className="h-full w-full" />
+      <div className="mb-8">
+        <h1 className="text-primary text-9xl font-bold">403</h1>
+        <div className="bg-secondary mx-auto mt-2 h-1 w-24"></div>
       </div>
 
-      <h1 className="text-foreground mb-3 text-2xl font-semibold">Không tìm thấy trang</h1>
+      <h2 className="text-foreground mb-3 text-2xl font-semibold">Không có quyền truy cập</h2>
 
       <p className="text-muted-foreground mx-auto mb-8 max-w-xl">
-        Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.
+        Tài khoản của bạn không được phép truy cập trang này.
       </p>
 
       <Button asChild>
@@ -21,4 +22,4 @@ export default function NotFoundRoute() {
       </Button>
     </main>
   );
-}
+};

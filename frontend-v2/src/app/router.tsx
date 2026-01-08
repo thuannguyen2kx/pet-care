@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Guards } from '@/features/user/domain/user.guards';
 import { default as AppRoot, ErrorBoundary as AppErrorBoundary } from '@/routes/root';
 import { MainErrorFallback } from '@/shared/components/errors/main';
+import { ForbiddenFallback } from '@/shared/components/forbidden/main';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
 import { Authorization } from '@/shared/lib/authorization';
@@ -24,7 +25,7 @@ const createAppRouter = (queryClient: QueryClient) => {
     {
       id: 'root',
       hydrateFallbackElement: <SplashScreen />,
-      // ErrorBoundary: MainErrorFallback,
+      ErrorBoundary: MainErrorFallback,
       children: [
         {
           path: paths.root.path,
@@ -47,11 +48,15 @@ const createAppRouter = (queryClient: QueryClient) => {
         {
           path: '',
           element: <AppRoot />,
-          // ErrorBoundary: AppErrorBoundary,
           children: [
             /* ================= CUSTOMER ================= */
             {
-              element: <Authorization guard={Guards.customerArea} />,
+              element: (
+                <Authorization
+                  guard={Guards.customerArea}
+                  forbiddenFallback={<ForbiddenFallback />}
+                />
+              ),
               children: [
                 {
                   path: paths.customer.root.path,
@@ -89,7 +94,12 @@ const createAppRouter = (queryClient: QueryClient) => {
             },
             /* ================= EMPLOYEE ================= */
             {
-              element: <Authorization guard={Guards.employeeArea} />,
+              element: (
+                <Authorization
+                  guard={Guards.employeeArea}
+                  forbiddenFallback={<ForbiddenFallback />}
+                />
+              ),
               children: [
                 {
                   path: paths.employee.root.path,
@@ -116,7 +126,9 @@ const createAppRouter = (queryClient: QueryClient) => {
             },
             /* ================= ADMIN ================= */
             {
-              element: <Authorization guard={Guards.adminArea} />,
+              element: (
+                <Authorization guard={Guards.adminArea} forbiddenFallback={<ForbiddenFallback />} />
+              ),
               children: [
                 {
                   path: paths.admin.root.path,
