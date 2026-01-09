@@ -54,6 +54,18 @@ export const paths = {
       path: '/app/bookings',
       getHref: () => '/app/bookings',
     },
+    createBooking: {
+      path: '/app/bookings/create',
+      getHref: (serviceId: string) => `/app/bookings/create?serviceId=${serviceId}`,
+    },
+    successBooking: {
+      path: '/app/bookings/create/success',
+      getHref: () => '/app/bookings/create/success',
+    },
+    myBookings: {
+      path: '/app/bookings/me',
+      getHref: () => '/app/bookings/me',
+    },
     bookingDetail: {
       path: '/app/bookings/:bookingId',
       getHref: (bookingId: string) => `/app/bookings/${bookingId}`,

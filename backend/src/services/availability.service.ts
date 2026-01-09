@@ -4,8 +4,11 @@ import { BreakTemplateModel } from "../models/break-time.model";
 import { BookingModel, BookingStatus } from "../models/booking.model";
 import { ShiftTemplateModel } from "../models/shift-template.model";
 import { ShiftOverrideModel } from "../models/shift-override.model";
-import { BadRequestException } from "../utils/app-error";
+import { BadRequestException, NotFoundException } from "../utils/app-error";
 import ServiceModel from "../models/service.model";
+import UserModel, { UserDocument } from "../models/user.model";
+import { Roles } from "../enums/role.enum";
+import { UserStatus } from "../enums/status-user.enum";
 
 interface TimeSlot {
   start: string; // "09:00"
@@ -288,4 +291,34 @@ export class AvailabilityCalculator {
     // Convert to: Monday = 0 → Sunday = 6
     return (date.getDay() + 6) % 7;
   }
+}
+
+export const getAvailableEmployeesSerivce = async (serviceId: string) => {
+  const service = await ServiceModel.findById(serviceId);
+
+  if (!service) {
+    throw new NotFoundException("Dịch vụ không tồn tại");
+  }
+  const employees = await UserModel.find({
+    role: Roles.EMPLOYEE,
+    status: UserStatus.ACTIVE,
+    "employeeInfo.isAcceptingBookings": true,
+    "employeeInfo.vacationMode": false,
+    "employeeInfo.specialties": {
+      $in: service.requiredSpecialties,
+    },
+  });
+
+  return employees.map(mapToAvailableEmployee);
+};
+
+function mapToAvailableEmployee(e: UserDocument) {
+  return {
+    _id: e.id,
+    fullName: e.fullName,
+    avatar: e.profilePicture?.url,
+    specialties: e.employeeInfo?.specialties,
+    rating: e.employeeInfo?.stats.rating,
+    completedServices: e.employeeInfo?.stats.completedBookings,
+  };
 }

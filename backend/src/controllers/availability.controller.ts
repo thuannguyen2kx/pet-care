@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { AvailabilityCalculator } from "../services/availability.service";
+import {
+  AvailabilityCalculator,
+  getAvailableEmployeesSerivce,
+} from "../services/availability.service";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import ServiceModel from "../models/service.model";
 import UserModel from "../models/user.model";
@@ -7,9 +10,9 @@ import {
   availabilityEmployeesQuerySchema,
   availabilitySlotsQuerySchema,
 } from "../validation/availablity.validation";
-import { formatInTimeZone } from "date-fns-tz";
 import { parseDateOnly } from "../utils/format-date";
 import { Roles } from "../enums/role.enum";
+import { serviceIdSchema } from "../validation/service.validation";
 /**
  * GET /api/availability/slots
  * Query params:
@@ -34,12 +37,14 @@ export const getAvailableSlotsController = asyncHandler(
 
     // Response
     return res.status(200).json({
-      date: query.date,
-      employeeId: query.employeeId,
-      serviceId: query.serviceId,
-      totalSlots: slots.length,
-      availableSlots: slots.filter((s) => s.available).length,
-      slots: slots,
+      data: {
+        date: query.date,
+        employeeId: query.employeeId,
+        serviceId: query.serviceId,
+        totalSlots: slots.length,
+        availableSlots: slots.filter((s) => s.available).length,
+        slots: slots,
+      },
     });
   }
 );
@@ -115,6 +120,26 @@ export const getAvailableEmployeesController = asyncHandler(
       startTime: query.startTime,
       serviceId: query.serviceId,
       availableEmployees: available,
+    });
+  }
+);
+
+// GET /api/availability/employees
+// Find available employees for a service
+//  params:
+//   - serviceId: string
+
+export const getBookableEmployeesByServiceController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const serviceId = serviceIdSchema.parse(req.params.serviceId);
+
+    const result = await getAvailableEmployeesSerivce(serviceId);
+
+    return res.status(200).json({
+      message: "Lấy danh sách nhân viên tồn tại",
+      data: {
+        employees: result,
+      },
     });
   }
 );

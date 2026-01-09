@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 
 import { CATEGORY_CONFIG } from '@/features/service/constants';
 import type { TService } from '@/features/service/domain/service.entity';
+import { paths } from '@/shared/config/paths';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
@@ -49,7 +50,7 @@ export function ServiceCard({ service }: Props) {
           </div>
 
           <Button size="sm" asChild>
-            <Link to={`/customer/booking?service=${service._id}`}>
+            <Link to={paths.customer.createBooking.getHref(service._id)}>
               Đặt ngay
               <ArrowRight className="ml-1 h-4 w-4" />
             </Link>

@@ -11,6 +11,8 @@ import {
 } from "../utils/app-error";
 import { AvailabilityCalculator } from "./availability.service";
 import ServiceModel from "../models/service.model";
+import { Roles } from "../enums/role.enum";
+import { UserStatus } from "../enums/status-user.enum";
 
 class BookingService {
   /**
@@ -74,8 +76,8 @@ class BookingService {
       const User = mongoose.model("User");
       const employee = await User.findOne({
         _id: employeeId,
-        role: { $in: ["employee", "admin"] },
-        status: "active",
+        role: { $in: [Roles.EMPLOYEE] },
+        status: UserStatus.ACTIVE,
         "employeeInfo.isAcceptingBookings": true,
         "employeeInfo.vacationMode": false,
       });

@@ -10,6 +10,7 @@ export const API_BASE = {
   SOCIAL: `${API_VERSION}/social`,
   ADMIN: `${API_VERSION}/admin`,
   EMPLOYEE: `${API_VERSION}/employees`,
+  AVAILABILITY: `${API_VERSION}/availability`,
 };
 
 /* ================= AUTH ================= */
@@ -74,6 +75,13 @@ export const PET_ENDPOINTS = {
   DELETE: (petId: string) => `${API_BASE.PETS}/${petId}`,
 };
 
+// ================= AVAILABILITY =================
+export const AVAILABILITY_ENDPOINTS = {
+  SLOTS: `${API_BASE.AVAILABILITY}/slots`,
+  EMPLOYEES: `${API_BASE.AVAILABILITY}/employees`,
+  BOOKABLE_EMPLOYEES: (serviceId: string) =>
+    `${API_BASE.AVAILABILITY}/services/${serviceId}/bookable-employees`,
+};
 /* ================= BOOKING ================= */
 export const BOOKING_ENDPOINTS = {
   LIST: `${API_BASE.BOOKINGS}`,

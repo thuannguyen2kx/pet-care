@@ -82,7 +82,20 @@ const createAppRouter = (queryClient: QueryClient) => {
                     },
                     {
                       path: paths.customer.booking.path,
-                      lazy: () => import('@/routes/customer/bookings').then(convert(queryClient)),
+                      lazy: () =>
+                        import('@/routes/customer/bookings/index').then(convert(queryClient)),
+                    },
+                    {
+                      path: paths.customer.createBooking.path,
+                      lazy: () =>
+                        import('@/routes/customer/bookings/booking-new').then(convert(queryClient)),
+                    },
+                    {
+                      path: paths.customer.successBooking.path,
+                      lazy: () =>
+                        import('@/routes/customer/bookings/booking-success').then(
+                          convert(queryClient),
+                        ),
                     },
                     {
                       path: paths.customer.social.path,
