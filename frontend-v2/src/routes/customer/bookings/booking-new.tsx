@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { redirect, type ClientLoaderFunctionArgs } from 'react-router';
 
-import CreateBookingContainer from '@/features/containers/create-booking-container';
+import CreateBookingPage from '@/features/booking/customer-app/create-booking/page';
 import { getSerivceQueryOptions } from '@/features/service/api/get-service';
 import { paths } from '@/shared/config/paths';
 import { privateClientLoader } from '@/shared/lib/auth.loader';
@@ -20,9 +20,9 @@ export const clientLoader = (queryClient: QueryClient) => {
     const serviceQuery =
       queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
 
-    return { serviceId, service: serviceQuery.data.service };
+    return { serviceId };
   });
 };
 export default function NewBookingRoute() {
-  return <CreateBookingContainer />;
+  return <CreateBookingPage />;
 }
