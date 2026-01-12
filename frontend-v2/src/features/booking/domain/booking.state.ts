@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { bookingStatusSchema } from '@/features/booking/domain/booking.entity';
 import { isoDateSchema, mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
 // ==========================
@@ -58,12 +59,19 @@ export const BOOKING_STEPS: BookingStep[] = [
   BOOKING_STEP.CONFIRM,
 ];
 
+export const customerBookingQuerySchema = z.object({
+  status: bookingStatusSchema.optional(),
+  page: z.coerce.number().default(1),
+  limit: z.coerce.number().default(20),
+});
+
 // ========================
 // Types
 // ========================
 
 export type CreateBookingDraft = z.infer<typeof createBookingDraftSchema>;
 export type CreateBooking = z.infer<typeof createBookingSchema>;
+export type CustomerBookingQuery = z.infer<typeof customerBookingQuerySchema>;
 // ====================
 // DERIVED TYPES
 // ====================

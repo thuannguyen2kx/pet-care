@@ -227,7 +227,7 @@ class BookingService {
     const [bookings, total] = await Promise.all([
       BookingModel.find(query)
         .populate("customerId", "fullName email phoneNumber profilePicture")
-        .populate("petId", "name type breed profilePicture")
+        .populate("petId", "name type breed image")
         .populate(
           "employeeId",
           "fullName profilePicture employeeInfo.specialties"

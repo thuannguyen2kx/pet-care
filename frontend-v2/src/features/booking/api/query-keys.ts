@@ -1,3 +1,5 @@
+import type { CustomerBookingQuery } from '@/features/booking/domain/booking.state';
+
 export const bookingQueryKeys = {
   all: ['bookings'] as const,
   admin: {
@@ -22,7 +24,8 @@ export const bookingQueryKeys = {
     all: () => [...bookingQueryKeys.all, 'customer'] as const,
 
     lists: () => [...bookingQueryKeys.customer.all(), 'list'] as const,
-    list: (params?: { status?: string }) => [...bookingQueryKeys.customer.lists(), params] as const,
+    list: (params?: Omit<CustomerBookingQuery, 'role'>) =>
+      [...bookingQueryKeys.customer.lists(), params] as const,
 
     details: () => [...bookingQueryKeys.customer.all(), 'detail'] as const,
     detail: (bookingId: string) => [...bookingQueryKeys.customer.details(), bookingId] as const,
