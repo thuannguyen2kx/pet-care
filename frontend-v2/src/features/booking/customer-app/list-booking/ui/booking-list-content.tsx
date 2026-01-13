@@ -25,8 +25,9 @@ export type ListState =
 
 type Props = {
   state: ListState;
+  onCancelBooking: (bookingId: string) => void;
 };
-export function BookingListContent({ state }: Props) {
+export function BookingListContent({ state, onCancelBooking }: Props) {
   switch (state.type) {
     case 'loading':
       return <SectionSpinner />;
@@ -39,21 +40,33 @@ export function BookingListContent({ state }: Props) {
         />
       );
     case 'data':
-      return <BookingList bookings={state.bookings} />;
+      return <BookingList bookings={state.bookings} onCancelBooking={onCancelBooking} />;
   }
 }
 
-function BookingList({ bookings }: { bookings: Booking[] }) {
+function BookingList({
+  bookings,
+  onCancelBooking,
+}: {
+  bookings: Booking[];
+  onCancelBooking: (bookingId: string) => void;
+}) {
   return (
     <ul className="flex flex-col gap-4">
       {bookings.map((booking) => (
-        <BookingCard key={booking.id} booking={booking} />
+        <BookingCard key={booking.id} booking={booking} onCancelBooking={onCancelBooking} />
       ))}
     </ul>
   );
 }
 
-function BookingCard({ booking }: { booking: Booking }) {
+function BookingCard({
+  booking,
+  onCancelBooking,
+}: {
+  booking: Booking;
+  onCancelBooking: (bookingId: string) => void;
+}) {
   const status = getStatusConfig(booking.status);
   return (
     <Card className="border-border/50 overflow-hidden">
@@ -111,7 +124,12 @@ function BookingCard({ booking }: { booking: Booking }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Hủy lịch hẹn</DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => onCancelBooking(booking.id)}
+                  >
+                    Hủy lịch hẹn
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}

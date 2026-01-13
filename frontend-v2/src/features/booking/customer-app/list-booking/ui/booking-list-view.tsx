@@ -15,6 +15,7 @@ type Props = {
 
   filter: CustomerBookingQuery;
   onFilter: (next: Partial<CustomerBookingQuery>) => void;
+  onCancelBooking: (bookingId: string) => void;
 };
 
 export function BookingListView({
@@ -24,6 +25,7 @@ export function BookingListView({
   totalPages,
   filter,
   onFilter,
+  onCancelBooking,
 }: Props) {
   const listState: ListState = (() => {
     if (isLoading) {
@@ -47,7 +49,7 @@ export function BookingListView({
           </p>
         </div>
         <BookingListToolbar filter={filter} onFilter={onFilter} />
-        <BookingListContent state={listState} />
+        <BookingListContent state={listState} onCancelBooking={onCancelBooking} />
 
         <BookingListPagination
           page={page}

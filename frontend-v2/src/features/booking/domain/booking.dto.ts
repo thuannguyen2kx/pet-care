@@ -24,7 +24,9 @@ export const bookingsQueryDtoSchema = z.object({
   page: z.number().optional(),
   limit: z.number().optional(),
 });
-
+export const canncelBooingDtoSchema = z.object({
+  reason: z.string().min(1, 'Cancellation reason is required').max(500),
+});
 // =====================
 // Response DTOs (Output)
 // =====================
@@ -144,3 +146,4 @@ export type CreateBookingDto = z.infer<typeof createBookingDtoSchema>;
 export type BookingDto = z.infer<typeof bookingDtoSchema>;
 export type PaginationDto = z.infer<typeof paginationDtoSchema>;
 export type BookingQueryDto = z.infer<typeof bookingsQueryDtoSchema>;
+export type CancelBookingDto = z.infer<typeof canncelBooingDtoSchema>;

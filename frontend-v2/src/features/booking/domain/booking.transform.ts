@@ -2,6 +2,7 @@ import type { GetBookingsResponseDto } from '@/features/booking/domain/booking-h
 import type {
   BookingDto,
   BookingQueryDto,
+  CancelBookingDto,
   CreateBookingDto,
 } from '@/features/booking/domain/booking.dto';
 import type {
@@ -14,6 +15,7 @@ import type {
 } from '@/features/booking/domain/booking.entity';
 import {
   createBookingSchema,
+  type CancelBooking,
   type CreateBooking,
   type CreateBookingDraft,
   type CustomerBookingQuery,
@@ -138,6 +140,11 @@ export function mapCustomerBookingQueryToDto(query: CustomerBookingQuery): Booki
     status: query.status,
     page: query.page,
     limit: query.limit,
+  };
+}
+export function mapCancelBookingToDto(cancelBooking: CancelBooking): CancelBookingDto {
+  return {
+    reason: cancelBooking.reason,
   };
 }
 // ====================

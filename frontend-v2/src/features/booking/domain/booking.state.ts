@@ -65,6 +65,11 @@ export const customerBookingQuerySchema = z.object({
   limit: z.coerce.number().default(20),
 });
 
+export const cancelBookingSchema = z.object({
+  bookingId: mongoObjectIdSchema,
+  reason: z.string().min(1, 'Cần nêu lý do huỷ lịch').max(500),
+});
+
 // ========================
 // Types
 // ========================
@@ -72,6 +77,7 @@ export const customerBookingQuerySchema = z.object({
 export type CreateBookingDraft = z.infer<typeof createBookingDraftSchema>;
 export type CreateBooking = z.infer<typeof createBookingSchema>;
 export type CustomerBookingQuery = z.infer<typeof customerBookingQuerySchema>;
+export type CancelBooking = z.infer<typeof cancelBookingSchema>;
 // ====================
 // DERIVED TYPES
 // ====================

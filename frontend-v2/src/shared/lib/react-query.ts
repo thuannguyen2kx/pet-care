@@ -23,6 +23,6 @@ export type MutationConfig<
 > = UseMutationOptions<
   ApiFnReturnType<MutationFnType>,
   Error,
-  Parameters<MutationFnType> extends [] ? void : Parameters<MutationFnType>[0],
+  Parameters<MutationFnType>[0],
   TContext
 >;
