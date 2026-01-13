@@ -1,8 +1,5 @@
-import { useUser } from '@/shared/lib/auth';
+import CustomerAppDashboardPage from '@/features/dashboard/customer-app/page';
 
 export default function CustomerRoute() {
-  const user = useUser();
-
-  console.log('customer', user.data);
-  return <div>Customer</div>;
+  return <CustomerAppDashboardPage />;
 }

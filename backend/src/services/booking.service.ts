@@ -13,7 +13,9 @@ import { AvailabilityCalculator } from "./availability.service";
 import ServiceModel from "../models/service.model";
 import { Roles } from "../enums/role.enum";
 import { UserStatus } from "../enums/status-user.enum";
+import { endOfDay, startOfDay, startOfTomorrow } from "date-fns";
 
+export type BookingView = "today" | "upcoming" | "ongoing" | "past" | "all";
 class BookingService {
   /**
    * Create a new booking with availability validation
@@ -196,6 +198,7 @@ class BookingService {
     customerId?: string;
     employeeId?: string;
     petId?: string;
+    view?: BookingView;
     status?: BookingStatus | BookingStatus[];
     startDate?: Date;
     endDate?: Date;
@@ -213,7 +216,9 @@ class BookingService {
         ? { $in: filters.status }
         : filters.status;
     }
-
+    if (filters.view) {
+      Object.assign(query, this.buildBookingViewFilter(filters.view));
+    }
     if (filters.startDate || filters.endDate) {
       query.scheduledDate = {};
       if (filters.startDate) query.scheduledDate.$gte = filters.startDate;
@@ -223,7 +228,6 @@ class BookingService {
     const page = filters.page || 1;
     const limit = filters.limit || 20;
     const skip = (page - 1) * limit;
-
     const [bookings, total] = await Promise.all([
       BookingModel.find(query)
         .populate("customerId", "fullName email phoneNumber profilePicture")
@@ -796,6 +800,61 @@ class BookingService {
 
   private async sendBookingConfirmation() {
     // TODO: gửi email / socket
+  }
+
+  private buildBookingViewFilter(view?: BookingView) {
+    const now = new Date();
+
+    const startToday = startOfDay(now);
+    const endToday = endOfDay(now);
+    const startTomorrow = startOfTomorrow();
+
+    switch (view) {
+      case "today":
+        return {
+          scheduledDate: {
+            $gte: startToday,
+            $lte: endToday,
+          },
+          status: {
+            $in: [
+              BookingStatus.PENDING,
+              BookingStatus.CONFIRMED,
+              BookingStatus.IN_PROGRESS,
+            ],
+          },
+        };
+
+      case "upcoming":
+        return {
+          scheduledDate: {
+            $gte: startTomorrow,
+          },
+          status: {
+            $in: [BookingStatus.PENDING, BookingStatus.CONFIRMED],
+          },
+        };
+
+      case "ongoing":
+        return {
+          status: BookingStatus.IN_PROGRESS,
+        };
+
+      case "past":
+        return {
+          status: {
+            $in: [
+              BookingStatus.COMPLETED,
+              BookingStatus.CANCELLED,
+              BookingStatus.NO_SHOW,
+            ],
+          },
+        };
+
+      case "all":
+      default:
+        return {};
+    }
   }
 }
 

@@ -224,6 +224,7 @@ export function mapDraftToCreateBookingInput(draft: CreateBookingDraft): CreateB
 export function mapCustomerBookingQueryToDto(query: CustomerBookingQuery): BookingQueryDto {
   return {
     status: query.status,
+    view: query.view,
     page: query.page,
     limit: query.limit,
   };

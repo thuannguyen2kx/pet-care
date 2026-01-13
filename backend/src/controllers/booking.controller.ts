@@ -64,7 +64,10 @@ export const getBookingsController = asyncHandler(
       filters.startDate = new Date(req.query.startDate as string);
     if (req.query.endDate)
       filters.endDate = new Date(req.query.endDate as string);
+    if (req.query.view) filters.view = req.query.view;
+
     const result = await bookingService.getBookings(filters);
+
     return res.status(HTTPSTATUS.OK).json({
       message: "Lấy danh sách lịch đặt thành công",
       ...result,

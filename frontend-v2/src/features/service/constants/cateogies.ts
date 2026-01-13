@@ -1,3 +1,5 @@
+import { Dumbbell, HeartPulse, Home, Scissors, Sparkles } from 'lucide-react';
+
 export const CATEGORIES = ['GROOMING', 'SPA', 'HEALTHCARE', 'TRAINING', 'BOARDING'] as const;
 
 export type TCategory = (typeof CATEGORIES)[number];
@@ -18,25 +20,31 @@ export const CATEGORY_CONFIG = {
     value: 'GROOMING',
     label: 'Chăm sóc lông',
     color: 'bg-chart-1/10 text-chart-1',
+    icon: Scissors,
   },
   SPA: {
     value: 'SPA',
     label: 'Spa thú cưng',
     color: 'bg-chart-5/10 text-chart-5',
+    icon: Sparkles,
   },
   HEALTHCARE: {
     value: 'HEALTHCARE',
     label: 'Chăm sóc sức khoẻ',
     color: 'bg-chart-3/10 text-chart-3',
+    icon: HeartPulse,
   },
   TRAINING: {
     value: 'TRAINING',
     label: 'Huấn luyện',
     color: 'bg-chart-4/10 text-chart-4',
+    icon: Dumbbell,
   },
   BOARDING: {
     value: 'BOARDING',
     label: 'Lưu trú',
     color: 'bg-chart-2/10 text-chart-2',
+    icon: Home,
   },
 } as const;
+export const getCategoryConfig = (category: TCategory) => CATEGORY_CONFIG[category];

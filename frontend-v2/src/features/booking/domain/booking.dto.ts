@@ -19,6 +19,7 @@ export const bookingsQueryDtoSchema = z.object({
   employeeId: z.string().optional(),
   petId: z.string().optional(),
   status: z.union([z.string(), z.array(z.string())]).optional(),
+  view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   page: z.number().optional(),

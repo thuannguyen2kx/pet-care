@@ -63,12 +63,21 @@ export const customerBookingQuerySchema = z.object({
   status: bookingStatusSchema.optional(),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().default(20),
+  view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional(),
 });
 
 export const cancelBookingSchema = z.object({
   bookingId: mongoObjectIdSchema,
   reason: z.string().min(1, 'Cần nêu lý do huỷ lịch').max(500),
 });
+
+export const BOOKING_VIEW = {
+  TODAY: 'today',
+  UPCOMMING: 'upcoming',
+  ONGOING: 'ongoing',
+  PAST: 'past',
+  ALL: 'all',
+} as const;
 
 // ========================
 // Types
