@@ -139,6 +139,53 @@ export const paginationDtoSchema = z.object({
   totalPages: z.number(),
 });
 
+export const bookingDetailDtoSchema = z.object({
+  _id: z.string(),
+
+  customerId: customerDtoSchema,
+  petId: petDtoSchema,
+  employeeId: employeeDtoSchema,
+  serviceId: serviceDtoSchema,
+
+  scheduledDate: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  duration: z.number(),
+
+  serviceSnapshot: serviceSnapshotDtoSchema,
+
+  status: z.string(),
+  statusHistory: z.array(statusHistoryEntryDtoSchema),
+
+  paymentStatus: z.string(),
+  totalAmount: z.number(),
+  paidAmount: z.number(),
+  paymentMethod: z.string().optional(),
+  transactionId: z.string().optional(),
+
+  customerNotes: z.string().optional(),
+  employeeNotes: z.string().optional(),
+  internalNotes: z.string().optional(),
+
+  reminderSent: z.boolean(),
+  reminderSentAt: z.string().optional(),
+
+  cancelledAt: z.string().optional(),
+  cancelledBy: z.string().optional(),
+  cancellationReason: z.string().optional(),
+  cancellationInitiator: z.enum(['customer', 'employee', 'admin', 'system']).optional(),
+
+  completedAt: z.string().optional(),
+  completedBy: z.string().optional(),
+
+  rating: ratingDtoSchema.optional(),
+
+  isPast: z.boolean(),
+  isCancellable: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  __v: z.number(),
+});
 // =====================
 // Types
 // =====================
@@ -147,3 +194,4 @@ export type BookingDto = z.infer<typeof bookingDtoSchema>;
 export type PaginationDto = z.infer<typeof paginationDtoSchema>;
 export type BookingQueryDto = z.infer<typeof bookingsQueryDtoSchema>;
 export type CancelBookingDto = z.infer<typeof canncelBooingDtoSchema>;
+export type BookingDetailDto = z.infer<typeof bookingDetailDtoSchema>;

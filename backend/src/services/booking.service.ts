@@ -261,10 +261,7 @@ class BookingService {
   ) {
     const booking = await BookingModel.findById(bookingId)
       .populate("customerId", "fullName email phoneNumber profilePicture")
-      .populate(
-        "petId",
-        "name type breed age weight profilePicture vaccinations"
-      )
+      .populate("petId", "name type breed age weight image vaccinations")
       .populate("employeeId", "fullName profilePicture employeeInfo")
       .populate("serviceId", "name description category duration price");
 

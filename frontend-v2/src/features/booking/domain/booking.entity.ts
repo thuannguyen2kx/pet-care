@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { imageDtoSchema } from '@/shared/lib/zod-primitives';
+
 // ============================================
 // ENUMS
 // ============================================
@@ -17,13 +19,12 @@ export const paymentStatusSchema = z.enum(['pending', 'paid', 'refunded', 'faile
 export const serviceCategory = z.enum(['GROOMING', 'SPA', 'HEALTHCARE', 'TRAINING']);
 
 export const petTypeSchema = z.enum(['dog', 'cat']);
+
+export const cancellationInitiatorSchema = z.enum(['customer', 'employee', 'admin', 'system']);
+
 // ======================
 // Value Objects
 // ======================
-export const profilePictureSchema = z.object({
-  url: z.string().nullable(),
-  publicId: z.string().nullable(),
-});
 
 export const serviceSnapshotSchema = z.object({
   name: z.string(),
@@ -46,8 +47,8 @@ export const statusHistoryEntrySchema = z.object({
 export const customerInfoSchema = z.object({
   id: z.string(),
   fullName: z.string(),
-  email: z.string().email(),
-  profilePicture: profilePictureSchema,
+  email: z.email(),
+  profilePicture: imageDtoSchema,
 });
 
 export const petInfoSchema = z.object({
@@ -61,7 +62,7 @@ export const petInfoSchema = z.object({
 export const employeeInfoSchema = z.object({
   id: z.string(),
   fullName: z.string(),
-  profilePicture: profilePictureSchema,
+  profilePicture: imageDtoSchema,
   specialties: z.array(serviceCategory),
 });
 
@@ -132,6 +133,56 @@ export const paginationSchema = z.object({
   limit: z.number(),
   totalPages: z.number(),
 });
+
+export const bookingDetailSchema = z.object({
+  id: z.string(),
+  customer: customerInfoSchema,
+  pet: petInfoSchema,
+  employee: employeeInfoSchema,
+  service: serviceInfoSchema,
+
+  scheduledDate: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  duration: z.number().min(15),
+
+  serviceSnapshot: serviceSnapshotSchema,
+
+  status: bookingStatusSchema,
+  statusHistory: z.array(statusHistoryEntrySchema),
+
+  paymentStatus: paymentStatusSchema,
+  totalAmount: z.number().min(0),
+  paidAmount: z.number().min(0),
+  paymentMethod: z.string().optional(),
+  transactionId: z.string().optional(),
+
+  customerNotes: z.string().optional(),
+  employeeNotes: z.string().optional(),
+  internalNotes: z.string().optional(),
+
+  reminderSent: z.boolean(),
+  reminderSentAt: z.string().optional(),
+
+  cancelledAt: z.string().optional(),
+  cancelledBy: z.string().optional(),
+  cancellationReason: z.string().optional(),
+  cancellationInitiator: cancellationInitiatorSchema.optional(),
+  completedAt: z.string().optional(),
+  completedBy: z.string().optional(),
+
+  rating: z
+    .object({
+      score: z.number().min(1).max(5),
+      feedback: z.string().optional(),
+      ratedAt: z.string(),
+    })
+    .optional(),
+  isPast: z.boolean(),
+  isCancellable: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
 // ============================================
 // TYPES
 // ============================================
@@ -141,6 +192,7 @@ export type BookingStatus = z.infer<typeof bookingStatusSchema>;
 export type PaymentStatus = z.infer<typeof paymentStatusSchema>;
 export type ServiceCategory = z.infer<typeof serviceCategory>;
 export type PetType = z.infer<typeof petTypeSchema>;
+export type CancellationInitiator = z.infer<typeof cancellationInitiatorSchema>;
 
 export type CustomerInfo = z.infer<typeof customerInfoSchema>;
 export type PetInfo = z.infer<typeof petInfoSchema>;
@@ -149,9 +201,10 @@ export type ServiceInfo = z.infer<typeof serviceInfoSchema>;
 
 export type ServiceSnapshot = z.infer<typeof serviceSnapshotSchema>;
 export type StatusHistoryEntry = z.infer<typeof statusHistoryEntrySchema>;
-export type ProfilePicture = z.infer<typeof profilePictureSchema>;
+export type ProfilePicture = z.infer<typeof imageDtoSchema>;
 
 export type Pagination = z.infer<typeof paginationSchema>;
+export type BookingDetail = z.infer<typeof bookingDetailSchema>;
 // ============================================
 // CONSTANTS
 // ============================================

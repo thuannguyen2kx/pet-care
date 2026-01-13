@@ -11,6 +11,7 @@ export interface StatusConfig {
   className: string;
   icon: LucideIcon;
   description?: string;
+  timelineIconClass: string;
 }
 
 export const BOOKING_STATUS_CONFIG: Record<BookingStatus, StatusConfig> = {
@@ -19,36 +20,42 @@ export const BOOKING_STATUS_CONFIG: Record<BookingStatus, StatusConfig> = {
     className: 'bg-yellow-50 text-yellow-600',
     icon: Clock,
     description: 'Đang chờ xác nhận từ nhân viên',
+    timelineIconClass: 'text-stone-400',
   },
   confirmed: {
     label: 'Đã xác nhận',
     className: 'bg-blue-50 text-blue-600',
     icon: CheckCircle,
     description: 'Đã xác nhận, chờ đến ngày hẹn',
+    timelineIconClass: 'text-blue-500',
   },
   'in-progress': {
     label: 'Đang thực hiện',
     className: 'bg-purple-50 text-purple-600',
     icon: PlayCircle,
     description: 'Dịch vụ đang được thực hiện',
+    timelineIconClass: 'text-emerald-600',
   },
   completed: {
     label: 'Hoàn thành',
     className: 'bg-green-50 text-green-600',
     icon: CheckCircle,
     description: 'Dịch vụ đã hoàn thành',
+    timelineIconClass: 'text-emerald-600',
   },
   cancelled: {
     label: 'Đã hủy',
     className: 'bg-red-50 text-red-600',
     icon: XCircle,
     description: 'Đặt lịch đã bị hủy',
+    timelineIconClass: 'text-red-600',
   },
   'no-show': {
     label: 'Không đến',
     className: 'bg-gray-50 text-gray-600',
     icon: UserX,
     description: 'Khách hàng không đến',
+    timelineIconClass: 'text-stone-500',
   },
 } as const;
 

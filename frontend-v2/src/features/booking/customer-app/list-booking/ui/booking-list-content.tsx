@@ -1,11 +1,13 @@
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Calendar, Clock, MoreHorizontal } from 'lucide-react';
+import { Link } from 'react-router';
 
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import { BOOKING_STATUS, type Booking } from '@/features/booking/domain/booking.entity';
 import { EmptyState } from '@/shared/components/template/empty-state';
 import { SectionSpinner } from '@/shared/components/template/loading';
+import { paths } from '@/shared/config/paths';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
@@ -123,7 +125,9 @@ function BookingCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={paths.customer.bookingDetail.getHref(booking.id)}>Xem chi tiết</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive"
                     onClick={() => onCancelBooking(booking.id)}

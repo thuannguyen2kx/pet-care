@@ -1,5 +1,6 @@
 import type { GetBookingsResponseDto } from '@/features/booking/domain/booking-http-schema';
 import type {
+  BookingDetailDto,
   BookingDto,
   BookingQueryDto,
   CancelBookingDto,
@@ -7,6 +8,7 @@ import type {
 } from '@/features/booking/domain/booking.dto';
 import type {
   Booking,
+  BookingDetail,
   BookingStatus,
   Pagination,
   PaymentStatus,
@@ -106,6 +108,90 @@ export function mapBookingDtoToEntity(dto: BookingDto): Booking {
   };
 }
 
+export function mapBookingDetailDtoToEntity(dto: BookingDetailDto): BookingDetail {
+  return {
+    id: dto._id,
+
+    customer: {
+      id: dto.customerId._id,
+      fullName: dto.customerId.fullName,
+      email: dto.customerId.email,
+      profilePicture: dto.customerId.profilePicture,
+    },
+
+    pet: {
+      id: dto.petId._id,
+      name: dto.petId.name,
+      type: dto.petId.type as PetType,
+      breed: dto.petId.breed,
+      image: dto.petId.image.url || undefined,
+    },
+
+    employee: {
+      id: dto.employeeId._id,
+      fullName: dto.employeeId.fullName,
+      profilePicture: dto.employeeId.profilePicture,
+      specialties: dto.employeeId.employeeInfo.specialties as ServiceCategory[],
+    },
+
+    service: {
+      id: dto.serviceId._id,
+      name: dto.serviceId.name,
+      price: dto.serviceId.price,
+      duration: dto.serviceId.duration,
+      category: dto.serviceId.category as ServiceCategory,
+    },
+
+    scheduledDate: dto.scheduledDate,
+    startTime: dto.startTime,
+    endTime: dto.endTime,
+    duration: dto.duration,
+
+    serviceSnapshot: {
+      name: dto.serviceSnapshot.name,
+      price: dto.serviceSnapshot.price,
+      duration: dto.serviceSnapshot.duration,
+      category: dto.serviceSnapshot.category as ServiceCategory,
+    },
+
+    status: dto.status as BookingStatus,
+    statusHistory: dto.statusHistory.map((entry) => ({
+      id: entry._id,
+      status: entry.status as BookingStatus,
+      changedAt: entry.changedAt,
+      changedBy: entry.changedBy,
+      reason: entry.reason,
+    })),
+
+    paymentStatus: dto.paymentStatus as PaymentStatus,
+    totalAmount: dto.totalAmount,
+    paidAmount: dto.paidAmount,
+    paymentMethod: dto.paymentMethod,
+    transactionId: dto.transactionId,
+
+    customerNotes: dto.customerNotes,
+    employeeNotes: dto.employeeNotes,
+    internalNotes: dto.internalNotes,
+
+    reminderSent: dto.reminderSent,
+    reminderSentAt: dto.reminderSentAt,
+
+    cancelledAt: dto.cancelledAt,
+    cancelledBy: dto.cancelledBy,
+    cancellationReason: dto.cancellationReason,
+    cancellationInitiator: dto.cancellationInitiator,
+
+    completedAt: dto.completedAt,
+    completedBy: dto.completedBy,
+
+    rating: dto.rating,
+
+    isCancellable: dto.isCancellable,
+    isPast: dto.isPast,
+    createdAt: dto.createdAt,
+    updatedAt: dto.updatedAt,
+  };
+}
 export function mapBookingsDtoToEntities(dtos: BookingDto[]): Booking[] {
   return dtos.map(mapBookingDtoToEntity);
 }
