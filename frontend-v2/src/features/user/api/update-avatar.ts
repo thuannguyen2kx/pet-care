@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { customerQueryKey } from '@/features/customer/api/query-keys';
 import { userKeys } from '@/features/user/api/query-key';
 import type { TProfile } from '@/features/user/types';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
@@ -23,6 +24,7 @@ export const useUpdateAvatar = ({ mutaionConfig }: UseUpdateAvatarOptions = {}) 
   return useMutation({
     onSuccess: (data, ...args) => {
       queryClient.setQueriesData({ queryKey: userKeys.profile() }, data);
+      queryClient.invalidateQueries({ queryKey: customerQueryKey.profile() });
 
       onSuccess?.(data, ...args);
     },

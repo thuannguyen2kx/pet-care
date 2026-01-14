@@ -48,7 +48,10 @@ export const updateProfileService = async (
     phoneNumber?: string;
     gender?: GenderType | string;
     dateOfBirth?: string;
-    bio?: string;
+    address?: {
+      province: string;
+      ward: string;
+    };
   }
 ) => {
   const user = await UserModel.findById(userId);
@@ -62,6 +65,12 @@ export const updateProfileService = async (
   if (body.phoneNumber) user.phoneNumber = body.phoneNumber;
   if (body.gender) user.gender = body.gender as GenderType;
   if (body.dateOfBirth) user.dateOfBirth = new Date(body.dateOfBirth);
+  if (body.address) {
+    user.address = {
+      ...user.address,
+      ...body.address,
+    };
+  }
 
   const updatedUser = await user.save();
 

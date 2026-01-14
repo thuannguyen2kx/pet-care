@@ -113,6 +113,10 @@ const createAppRouter = (queryClient: QueryClient) => {
                       path: paths.customer.social.path,
                       lazy: () => import('@/routes/customer/social').then(convert(queryClient)),
                     },
+                    {
+                      path: paths.customer.profile.path,
+                      lazy: () => import('@/routes/customer/profile').then(convert(queryClient)),
+                    },
                   ],
                 },
               ],

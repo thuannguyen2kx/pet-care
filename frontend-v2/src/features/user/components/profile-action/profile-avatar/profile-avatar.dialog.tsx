@@ -40,10 +40,10 @@ export function ProfileAvatarDialog({ avatarUrl, fullName }: Props) {
               {getInitials(fullName)}
             </AvatarFallback>
           </Avatar>
+
           <Button
             size="icon"
-            variant="secondary"
-            className="absolute right-0 bottom-0 h-8 w-8 rounded-full"
+            className="absolute right-0 bottom-0 h-8 w-8 cursor-pointer rounded-full"
           >
             <Camera className="h-4 w-4" />
           </Button>
@@ -67,7 +67,7 @@ export function ProfileAvatarDialog({ avatarUrl, fullName }: Props) {
             </Button>
           )}
           <DialogClose asChild>
-            <Button variant="outline" disabled={isSubmitting}>
+            <Button variant="ghost" disabled={isSubmitting}>
               Huỷ
             </Button>
           </DialogClose>

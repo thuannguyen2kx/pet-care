@@ -2,16 +2,17 @@ import { z } from "zod";
 import { Roles } from "../enums/role.enum";
 import { Gender, UserStatus } from "../enums/status-user.enum";
 
+export const updateAddressSchema = z.object({
+  province: z.string().min(1, "Tỉnh/thành phố là bắt buộc"),
+  ward: z.string().min(1, "Phường/xã là bắt buộc"),
+});
+
 export const updateProfileSchema = z.object({
   fullName: z.string().min(2).optional(),
   phoneNumber: z.string().optional(),
   gender: z.enum(Object.values(Gender) as [string, ...string[]]).optional(),
   dateOfBirth: z.string().optional(),
-});
-
-export const updateAddressSchema = z.object({
-  province: z.string().min(1, "Tỉnh/thành phố là bắt buộc"),
-  ward: z.string().min(1, "Phường/xã là bắt buộc"),
+  address: updateAddressSchema.optional(),
 });
 
 export const updatePreferencesSchema = z.object({
