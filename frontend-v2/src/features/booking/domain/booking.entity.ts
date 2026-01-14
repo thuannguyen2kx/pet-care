@@ -183,6 +183,22 @@ export const bookingDetailSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
+
+export const bookingStatisticSchema = z.object({
+  totalBookings: z.number().int().nonnegative(),
+
+  byStatus: z.object({
+    pending: z.number().int().nonnegative(),
+    confirmed: z.number().int().nonnegative(),
+    'in-progress': z.number().int().nonnegative(),
+    completed: z.number().int().nonnegative(),
+    cancelled: z.number().int().nonnegative(),
+    'no-show': z.number().int().nonnegative(),
+  }),
+
+  totalRevenue: z.number().nonnegative(),
+  averageRating: z.number().min(0).max(5),
+});
 // ============================================
 // TYPES
 // ============================================
@@ -205,6 +221,7 @@ export type ProfilePicture = z.infer<typeof imageDtoSchema>;
 
 export type Pagination = z.infer<typeof paginationSchema>;
 export type BookingDetail = z.infer<typeof bookingDetailSchema>;
+export type BookingStatistic = z.infer<typeof bookingStatisticSchema>;
 // ============================================
 // CONSTANTS
 // ============================================

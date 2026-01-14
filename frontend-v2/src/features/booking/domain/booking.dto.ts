@@ -28,6 +28,11 @@ export const bookingsQueryDtoSchema = z.object({
 export const canncelBooingDtoSchema = z.object({
   reason: z.string().min(1, 'Cancellation reason is required').max(500),
 });
+export const bookingStatisticQueryDtoSchema = z.object({
+  employeeId: mongoObjectIdSchema.optional(),
+  startDate: isoDateSchema.optional(),
+  endDate: isoDateSchema.optional(),
+});
 // =====================
 // Response DTOs (Output)
 // =====================
@@ -187,6 +192,22 @@ export const bookingDetailDtoSchema = z.object({
   updatedAt: z.string(),
   __v: z.number(),
 });
+
+export const bookingStatisticSchema = z.object({
+  totalBookings: z.number().int().nonnegative(),
+
+  byStatus: z.object({
+    pending: z.number().int().nonnegative(),
+    confirmed: z.number().int().nonnegative(),
+    'in-progress': z.number().int().nonnegative(),
+    completed: z.number().int().nonnegative(),
+    cancelled: z.number().int().nonnegative(),
+    'no-show': z.number().int().nonnegative(),
+  }),
+
+  totalRevenue: z.number().nonnegative(),
+  averageRating: z.number().min(0).max(5),
+});
 // =====================
 // Types
 // =====================
@@ -196,3 +217,5 @@ export type PaginationDto = z.infer<typeof paginationDtoSchema>;
 export type BookingQueryDto = z.infer<typeof bookingsQueryDtoSchema>;
 export type CancelBookingDto = z.infer<typeof canncelBooingDtoSchema>;
 export type BookingDetailDto = z.infer<typeof bookingDetailDtoSchema>;
+export type BookingStatisticQueryDto = z.infer<typeof bookingStatisticQueryDtoSchema>;
+export type BookingStatisticDto = z.infer<typeof bookingStatisticSchema>;

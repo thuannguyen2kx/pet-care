@@ -1,4 +1,8 @@
-import type { CustomerBookingQuery } from '@/features/booking/domain/booking.state';
+import type {
+  AdminBookingQuery,
+  BookingStatisticQuery,
+  CustomerBookingQuery,
+} from '@/features/booking/domain/booking.state';
 
 export const bookingQueryKeys = {
   all: ['bookings'] as const,
@@ -6,10 +10,14 @@ export const bookingQueryKeys = {
     all: () => [...bookingQueryKeys.all, 'admin'] as const,
 
     lists: () => [...bookingQueryKeys.admin.all(), 'list'] as const,
-    list: (params?: Record<string, string>) => [...bookingQueryKeys.admin.lists(), params] as const,
+    list: (params?: AdminBookingQuery) => [...bookingQueryKeys.admin.lists(), params] as const,
 
     details: () => [...bookingQueryKeys.admin.all(), 'detail'] as const,
     detail: (bookingId: string) => [...bookingQueryKeys.admin.details(), bookingId] as const,
+
+    statistics: () => [...bookingQueryKeys.admin.all(), 'statistics'] as const,
+    statistic: (params?: BookingStatisticQuery) =>
+      [...bookingQueryKeys.admin.statistics(), params] as const,
   },
   employee: {
     all: () => [...bookingQueryKeys.all, 'employee'] as const,

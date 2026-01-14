@@ -88,6 +88,7 @@ export const BOOKING_ENDPOINTS = {
   DETAIL: (bookingId: string) => `${API_BASE.BOOKINGS}/${bookingId}`,
   CREATE: `${API_BASE.BOOKINGS}`,
   CANCEL: (bookingId: string) => `${API_BASE.BOOKINGS}/${bookingId}/cancel`,
+  STATISTICS: `${API_BASE.BOOKINGS}/stats`,
 };
 
 /* ================= SERVICE ================= */

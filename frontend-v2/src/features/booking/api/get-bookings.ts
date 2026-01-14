@@ -3,8 +3,12 @@ import type { AxiosRequestConfig } from 'axios';
 
 import { bookingQueryKeys } from '@/features/booking/api/query-keys';
 import { getBookingsResponseDtoSchema } from '@/features/booking/domain/booking-http-schema';
-import type { CustomerBookingQuery } from '@/features/booking/domain/booking.state';
+import type {
+  AdminBookingQuery,
+  CustomerBookingQuery,
+} from '@/features/booking/domain/booking.state';
 import {
+  mapAdminBookingQueryToDto,
   mapCustomerBookingQueryToDto,
   mapGetBookingsResponseDtoToResult,
 } from '@/features/booking/domain/booking.transform';
@@ -38,6 +42,31 @@ type UseGetBookingsQueryOptions = {
 export const useBookings = ({ query, queryConfig }: UseGetBookingsQueryOptions) => {
   return useQuery({
     ...getBookingsQueryOptions(query),
+    ...queryConfig,
+  });
+};
+
+export const getAdminBookingsQueryOptions = (query: AdminBookingQuery) => {
+  return queryOptions({
+    queryKey: bookingQueryKeys.admin.list(query),
+    queryFn: async ({ signal }) => {
+      const queryDto = mapAdminBookingQueryToDto(query);
+      const config = { signal, params: queryDto };
+      const raw = await getBooking(config);
+      const response = getBookingsResponseDtoSchema.parse(raw);
+      return mapGetBookingsResponseDtoToResult(response);
+    },
+    placeholderData: keepPreviousData,
+  });
+};
+type UseAdminBookingsQueryOptions = {
+  query: AdminBookingQuery;
+  queryConfig?: QueryConfig<typeof getAdminBookingsQueryOptions>;
+};
+
+export const useAdminBookings = ({ query, queryConfig }: UseAdminBookingsQueryOptions) => {
+  return useQuery({
+    ...getAdminBookingsQueryOptions(query),
     ...queryConfig,
   });
 };

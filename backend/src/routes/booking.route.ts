@@ -19,6 +19,11 @@ router.use(passportAuthenticateJWT);
 // Customer routes
 router.post("/", createBookingController);
 router.get("/", getBookingsController);
+router.get(
+  "/stats",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getStatisticsController
+);
 router.get("/:id", getBookingByIdController);
 router.put("/:id", updateBookingController);
 router.post("/:id/cancel", cancelBookingController);
@@ -29,9 +34,5 @@ router.patch(
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   updateStatusController
 );
-router.get(
-  "/stats",
-  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  getStatisticsController
-);
+
 export default router;

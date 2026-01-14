@@ -3,12 +3,14 @@ import type {
   BookingDetailDto,
   BookingDto,
   BookingQueryDto,
+  BookingStatisticDto,
   CancelBookingDto,
   CreateBookingDto,
 } from '@/features/booking/domain/booking.dto';
 import type {
   Booking,
   BookingDetail,
+  BookingStatistic,
   BookingStatus,
   Pagination,
   PaymentStatus,
@@ -17,6 +19,7 @@ import type {
 } from '@/features/booking/domain/booking.entity';
 import {
   createBookingSchema,
+  type AdminBookingQuery,
   type CancelBooking,
   type CreateBooking,
   type CreateBookingDraft,
@@ -204,6 +207,21 @@ export function mapGetBookingsResponseDtoToResult(dto: GetBookingsResponseDto): 
     pagination: dto.pagination,
   };
 }
+export function mapBookingStatisticDtoToEntity(dto: BookingStatisticDto): BookingStatistic {
+  return {
+    totalBookings: dto.totalBookings,
+    byStatus: {
+      pending: dto.byStatus.pending,
+      confirmed: dto.byStatus.confirmed,
+      'in-progress': dto.byStatus['in-progress'],
+      completed: dto.byStatus.completed,
+      cancelled: dto.byStatus.cancelled,
+      'no-show': dto.byStatus['no-show'],
+    },
+    totalRevenue: dto.totalRevenue,
+    averageRating: dto.averageRating,
+  };
+}
 // ====================
 // State => DTO
 // ====================
@@ -227,6 +245,17 @@ export function mapCustomerBookingQueryToDto(query: CustomerBookingQuery): Booki
     view: query.view,
     page: query.page,
     limit: query.limit,
+  };
+}
+export function mapAdminBookingQueryToDto(query: AdminBookingQuery): BookingQueryDto {
+  return {
+    customerId: query.customerId,
+    employeeId: query.employeeId,
+    status: query.status,
+    view: query.view,
+    page: query.page,
+    limit: query.limit,
+    startDate: query.startDate,
   };
 }
 export function mapCancelBookingToDto(cancelBooking: CancelBooking): CancelBookingDto {

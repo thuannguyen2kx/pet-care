@@ -16,6 +16,15 @@ import { UserStatus } from "../enums/status-user.enum";
 import { endOfDay, startOfDay, startOfTomorrow } from "date-fns";
 
 export type BookingView = "today" | "upcoming" | "ongoing" | "past" | "all";
+const DEFAULT_BOOKING_STATUS_STATS: Record<BookingStatus, number> = {
+  [BookingStatus.PENDING]: 0,
+  [BookingStatus.CONFIRMED]: 0,
+  [BookingStatus.IN_PROGRESS]: 0,
+  [BookingStatus.COMPLETED]: 0,
+  [BookingStatus.CANCELLED]: 0,
+  [BookingStatus.NO_SHOW]: 0,
+};
+
 class BookingService {
   /**
    * Create a new booking with availability validation
@@ -652,12 +661,16 @@ class BookingService {
         ]),
       ]);
 
+    const byStatusMapped = byStatus.reduce((acc, item) => {
+      acc[item._id as BookingStatus] = item.count;
+      return acc;
+    }, {} as Partial<Record<BookingStatus, number>>);
     return {
       totalBookings,
-      byStatus: byStatus.reduce((acc, item) => {
-        acc[item._id] = item.count;
-        return acc;
-      }, {} as Record<string, number>),
+      byStatus: {
+        ...DEFAULT_BOOKING_STATUS_STATS,
+        ...byStatusMapped,
+      },
       totalRevenue: totalRevenue[0]?.total || 0,
       averageRating: averageRating[0]?.avg || 0,
     };

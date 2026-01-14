@@ -183,6 +183,11 @@ const createAppRouter = (queryClient: QueryClient) => {
                       lazy: () =>
                         import('@/routes/admin/employee-schedule').then(convert(queryClient)),
                     },
+                    {
+                      path: paths.admin.bookings.path,
+                      lazy: () =>
+                        import('@/routes/admin/bookings/booking-list').then(convert(queryClient)),
+                    },
                   ],
                 },
               ],
