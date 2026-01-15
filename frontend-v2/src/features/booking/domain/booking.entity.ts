@@ -238,3 +238,10 @@ export const BOOKING_STATUS = {
   COMPLETED: 'completed',
   NO_SHOW: 'no-show',
 } as const;
+
+export const PAYMENT_STATUS = {
+  PENDING: 'pending',
+  PAID: 'paid',
+  REFUNDED: 'refunded',
+  FAILED: 'failed',
+} as const;

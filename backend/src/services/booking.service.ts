@@ -285,7 +285,7 @@ class BookingService {
     // Authorization check
     const isCustomer = booking.customerId._id.toString() === userId.toString();
     const isEmployee = booking.employeeId._id.toString() === userId.toString();
-    const isAdmin = userRole === "admin";
+    const isAdmin = userRole === Roles.ADMIN;
 
     if (!isCustomer && !isEmployee && !isAdmin) {
       throw new ForbiddenException(

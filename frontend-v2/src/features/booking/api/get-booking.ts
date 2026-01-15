@@ -12,16 +12,16 @@ const getBooking = (bookingId: string, config: AxiosRequestConfig) => {
   return http.get(BOOKING_ENDPOINTS.DETAIL(bookingId), config);
 };
 
-export const getBookingQuertOptions = (bookinngId: string) => {
+export const getBookingQuertOptions = (bookingId: string) => {
   return queryOptions({
-    queryKey: bookingQueryKeys.customer.detail(bookinngId),
+    queryKey: bookingQueryKeys.customer.detail(bookingId),
     queryFn: async ({ signal }) => {
       const config = { signal };
-      const raw = await getBooking(bookinngId, config);
+      const raw = await getBooking(bookingId, config);
       const response = bookingDetailResponseDtoSchema.parse(raw);
       return mapBookingDetailDtoToEntity(response.booking);
     },
-    enabled: Boolean(bookinngId),
+    enabled: Boolean(bookingId),
   });
 };
 type UseGetBookingQueryOptions = {
@@ -31,6 +31,28 @@ type UseGetBookingQueryOptions = {
 export const useBooking = ({ bookingId, queryConfig }: UseGetBookingQueryOptions) => {
   return useQuery({
     ...getBookingQuertOptions(bookingId),
+    ...queryConfig,
+  });
+};
+
+export const getAdminBookingQueryOptions = (bookingId: string) => {
+  return queryOptions({
+    queryKey: bookingQueryKeys.admin.detail(bookingId),
+    queryFn: async ({ signal }) => {
+      const config = { signal };
+      const raw = await getBooking(bookingId, config);
+      const response = bookingDetailResponseDtoSchema.parse(raw);
+      return mapBookingDetailDtoToEntity(response.booking);
+    },
+  });
+};
+type UseAdminBookingQueryOptions = {
+  bookingId: string;
+  queryConfig?: QueryConfig<typeof getAdminBookingQueryOptions>;
+};
+export const useAdminBooking = ({ bookingId, queryConfig }: UseAdminBookingQueryOptions) => {
+  return useQuery({
+    ...getAdminBookingQueryOptions(bookingId),
     ...queryConfig,
   });
 };

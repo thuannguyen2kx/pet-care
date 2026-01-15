@@ -48,3 +48,4 @@ export const CATEGORY_CONFIG = {
   },
 } as const;
 export const getCategoryConfig = (category: TCategory) => CATEGORY_CONFIG[category];
+export const getCategoryName = (category: TCategory) => getCategoryConfig(category).label;

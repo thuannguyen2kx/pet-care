@@ -9,7 +9,7 @@ export const specialties = {
   },
   HEALTHCARE: {
     value: 'HEALTHCARE',
-    label: 'Healthcare',
+    label: 'Chăm sóc sức khoẻ',
   },
   TRAINING: {
     value: 'TRAINING',
@@ -22,3 +22,5 @@ export const specialties = {
 } as const;
 export const specialtiesList = Object.values(specialties);
 export type Specialty = (typeof specialtiesList)[number]['value'];
+
+export const getSpecialtyLabel = (specialty: Specialty) => specialties[specialty].label;

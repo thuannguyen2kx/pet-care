@@ -142,6 +142,10 @@ export const paths = {
       path: '/admin/bookings',
       getHref: () => '/admin/bookings',
     },
+    bookingDetail: {
+      path: '/admin/bookings/:bookingId',
+      getHref: (bookingId: string) => `/admin/bookings/${bookingId}`,
+    },
     schedule: {
       path: '/admin/schedule',
       getHref: () => '/admin/schedule',
