@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { bookingStatusSchema } from '@/features/booking/domain/booking.entity';
+import { BOOKING_STATUS, bookingStatusSchema } from '@/features/booking/domain/booking.entity';
 import { isoDateSchema, mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
 // ==========================
@@ -87,6 +87,18 @@ export const bookingStatisticQueryDto = z.object({
   endDate: isoDateSchema.optional(),
 });
 
+export const updateBookingStatusSchema = z.object({
+  bookingId: mongoObjectIdSchema,
+  status: z.enum([
+    BOOKING_STATUS.CONFIRMED,
+    BOOKING_STATUS.IN_PROGRESS,
+    BOOKING_STATUS.COMPLETED,
+    BOOKING_STATUS.NO_SHOW,
+  ]),
+  reason: z.string().max(500).optional(),
+  employeeNotes: z.string().max(1000).optional(),
+});
+
 export const BOOKING_VIEW = {
   TODAY: 'today',
   UPCOMMING: 'upcoming',
@@ -105,6 +117,7 @@ export type CustomerBookingQuery = z.infer<typeof customerBookingQuerySchema>;
 export type AdminBookingQuery = z.infer<typeof adminBookingQuerySchema>;
 export type CancelBooking = z.infer<typeof cancelBookingSchema>;
 export type BookingStatisticQuery = z.infer<typeof bookingStatisticQueryDto>;
+export type UpdateBookingStatus = z.infer<typeof updateBookingStatusSchema>;
 // ====================
 // DERIVED TYPES
 // ====================

@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { BOOKING_STATUS } from '@/features/booking/domain/booking.entity';
 import { isoDateSchema, mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
 // ====================
@@ -32,6 +33,17 @@ export const bookingStatisticQueryDtoSchema = z.object({
   employeeId: mongoObjectIdSchema.optional(),
   startDate: isoDateSchema.optional(),
   endDate: isoDateSchema.optional(),
+});
+
+export const updateBookingStatusDtoSchema = z.object({
+  status: z.enum([
+    BOOKING_STATUS.CONFIRMED,
+    BOOKING_STATUS.IN_PROGRESS,
+    BOOKING_STATUS.COMPLETED,
+    BOOKING_STATUS.NO_SHOW,
+  ]),
+  reason: z.string().max(500).optional(),
+  employeeNotes: z.string().max(1000).optional(),
 });
 // =====================
 // Response DTOs (Output)
@@ -219,3 +231,4 @@ export type CancelBookingDto = z.infer<typeof canncelBooingDtoSchema>;
 export type BookingDetailDto = z.infer<typeof bookingDetailDtoSchema>;
 export type BookingStatisticQueryDto = z.infer<typeof bookingStatisticQueryDtoSchema>;
 export type BookingStatisticDto = z.infer<typeof bookingStatisticSchema>;
+export type UpdateBookingStatusDto = z.infer<typeof updateBookingStatusDtoSchema>;

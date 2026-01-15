@@ -519,7 +519,7 @@ class BookingService {
 
     // Only employee/admin can update status
     const isEmployee = booking.employeeId.toString() === userId.toString();
-    const isAdmin = userRole === "admin";
+    const isAdmin = userRole === Roles.ADMIN;
 
     if (!isEmployee && !isAdmin) {
       throw new ForbiddenException(

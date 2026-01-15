@@ -6,6 +6,7 @@ import type {
   BookingStatisticDto,
   CancelBookingDto,
   CreateBookingDto,
+  UpdateBookingStatusDto,
 } from '@/features/booking/domain/booking.dto';
 import type {
   Booking,
@@ -24,6 +25,7 @@ import {
   type CreateBooking,
   type CreateBookingDraft,
   type CustomerBookingQuery,
+  type UpdateBookingStatus,
 } from '@/features/booking/domain/booking.state';
 
 // ====================
@@ -261,6 +263,15 @@ export function mapAdminBookingQueryToDto(query: AdminBookingQuery): BookingQuer
 export function mapCancelBookingToDto(cancelBooking: CancelBooking): CancelBookingDto {
   return {
     reason: cancelBooking.reason,
+  };
+}
+export function mapUpdateBookingStatusToDto(
+  updateBooking: UpdateBookingStatus,
+): UpdateBookingStatusDto {
+  return {
+    status: updateBooking.status,
+    reason: updateBooking.reason,
+    employeeNotes: updateBooking.employeeNotes,
   };
 }
 // ====================

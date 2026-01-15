@@ -1,10 +1,12 @@
 import { getPaymentStatusConfig } from '@/features/booking/config';
 import { getCancellationInitiatorConfig } from '@/features/booking/config/booking-cancellation-initiator';
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
-import { PAYMENT_STATUS, type BookingDetail } from '@/features/booking/domain/booking.entity';
+import { type BookingDetail, type BookingStatus } from '@/features/booking/domain/booking.entity';
 import { getSpecialtyLabel } from '@/features/employee/constants';
 import { formatPetType } from '@/features/pets/helpers';
 import { getCategoryName } from '@/features/service/constants';
+import { BackLink } from '@/shared/components/template/back-link';
+import { paths } from '@/shared/config/paths';
 import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
@@ -20,12 +22,14 @@ import { Separator } from '@/shared/ui/separator';
 
 type Props = {
   booking: BookingDetail;
+  onUpdateBookingStatus: (bookingId: string, status: BookingStatus) => void;
 };
 
-export function AdminBookingDetailView({ booking }: Props) {
+export function AdminBookingDetailView({ booking, onUpdateBookingStatus }: Props) {
   return (
-    <div className="bg-card space-y-8 p-6">
-      <BookingHeader booking={booking} />
+    <div className="bg-card mx-auto max-w-4xl space-y-8 p-6">
+      <BackLink to={paths.admin.bookings.path} label="Danh sách đặt lịch" />
+      <BookingHeader booking={booking} onUpdateBookingStatus={onUpdateBookingStatus} />
 
       <BookingSummary booking={booking} />
 
@@ -49,7 +53,13 @@ export function AdminBookingDetailView({ booking }: Props) {
     </div>
   );
 }
-function BookingHeader({ booking }: { booking: BookingDetail }) {
+function BookingHeader({
+  booking,
+  onUpdateBookingStatus,
+}: {
+  booking: BookingDetail;
+  onUpdateBookingStatus: (bookingId: string, status: BookingStatus) => void;
+}) {
   const bookingStatus = getStatusConfig(booking.status);
   const paymentStatus = getPaymentStatusConfig(booking.paymentStatus);
 
@@ -62,14 +72,20 @@ function BookingHeader({ booking }: { booking: BookingDetail }) {
           <Badge className={paymentStatus.className}>{paymentStatus.label}</Badge>
         </div>
 
-        <AdminActions booking={booking} />
+        <AdminActions booking={booking} onUpdateBookingStatus={onUpdateBookingStatus} />
       </div>
 
       <p className="text-muted-foreground text-sm">Mã đặt lịch: {booking.id}</p>
     </div>
   );
 }
-function AdminActions({ booking }: { booking: BookingDetail }) {
+function AdminActions({
+  booking,
+  onUpdateBookingStatus,
+}: {
+  booking: BookingDetail;
+  onUpdateBookingStatus: (bookingId: string, status: BookingStatus) => void;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -79,7 +95,9 @@ function AdminActions({ booking }: { booking: BookingDetail }) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem>Cập nhật trạng thái</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onUpdateBookingStatus(booking.id, booking.status)}>
+          Cập nhật trạng thái
+        </DropdownMenuItem>
         <DropdownMenuItem>Phân công / Đổi nhân viên</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Đổi lịch hẹn</DropdownMenuItem>

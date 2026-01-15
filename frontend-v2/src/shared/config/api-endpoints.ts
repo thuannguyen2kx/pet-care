@@ -89,6 +89,7 @@ export const BOOKING_ENDPOINTS = {
   CREATE: `${API_BASE.BOOKINGS}`,
   CANCEL: (bookingId: string) => `${API_BASE.BOOKINGS}/${bookingId}/cancel`,
   STATISTICS: `${API_BASE.BOOKINGS}/stats`,
+  UPDATE_STATUS: (bookingId: string) => `${API_BASE.BOOKINGS}/${bookingId}/status`,
 };
 
 /* ================= SERVICE ================= */
