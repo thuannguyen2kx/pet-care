@@ -6,10 +6,12 @@ import { getBookingsResponseDtoSchema } from '@/features/booking/domain/booking-
 import type {
   AdminBookingQuery,
   CustomerBookingQuery,
+  EmployeeBookingQuery,
 } from '@/features/booking/domain/booking.state';
 import {
   mapAdminBookingQueryToDto,
   mapCustomerBookingQueryToDto,
+  mapEmployeeBookingQueryToDto,
   mapGetBookingsResponseDtoToResult,
 } from '@/features/booking/domain/booking.transform';
 import { BOOKING_ENDPOINTS } from '@/shared/config/api-endpoints';
@@ -67,6 +69,31 @@ type UseAdminBookingsQueryOptions = {
 export const useAdminBookings = ({ query, queryConfig }: UseAdminBookingsQueryOptions) => {
   return useQuery({
     ...getAdminBookingsQueryOptions(query),
+    ...queryConfig,
+  });
+};
+
+export const getEmployeeBookingsQueryOptions = (query: EmployeeBookingQuery) => {
+  return queryOptions({
+    queryKey: bookingQueryKeys.employee.list(query),
+    queryFn: async ({ signal }) => {
+      const queryDto = mapEmployeeBookingQueryToDto(query);
+      const config = { signal, params: queryDto };
+      const raw = await getBooking(config);
+      const response = getBookingsResponseDtoSchema.parse(raw);
+      return mapGetBookingsResponseDtoToResult(response);
+    },
+    placeholderData: keepPreviousData,
+  });
+};
+type UseEmployeeBookingsQueryOptions = {
+  query: EmployeeBookingQuery;
+  queryConfig?: QueryConfig<typeof getEmployeeBookingsQueryOptions>;
+};
+
+export const useEmployeeBookings = ({ query, queryConfig }: UseEmployeeBookingsQueryOptions) => {
+  return useQuery({
+    ...getEmployeeBookingsQueryOptions(query),
     ...queryConfig,
   });
 };

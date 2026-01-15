@@ -3,6 +3,7 @@ import type {
   BookingStatisticQuery,
   BookingTodayStatisticQuery,
   CustomerBookingQuery,
+  EmployeeBookingQuery,
   employeeBookingScheduleQuery,
 } from '@/features/booking/domain/booking.state';
 
@@ -28,7 +29,8 @@ export const bookingQueryKeys = {
     all: () => [...bookingQueryKeys.all, 'employee'] as const,
 
     lists: () => [...bookingQueryKeys.employee.all(), 'list'] as const,
-    list: (params?: { date?: string }) => [...bookingQueryKeys.employee.lists(), params] as const,
+    list: (params?: EmployeeBookingQuery) =>
+      [...bookingQueryKeys.employee.lists(), params] as const,
 
     details: () => [...bookingQueryKeys.employee.all(), 'detail'] as const,
     detail: (bookingId: string) => [...bookingQueryKeys.employee.details(), bookingId] as const,

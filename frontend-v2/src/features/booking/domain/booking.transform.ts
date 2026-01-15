@@ -24,7 +24,10 @@ import type {
   PetType,
   ServiceCategory,
 } from '@/features/booking/domain/booking.entity';
-import type { employeeBookingScheduleQuery } from '@/features/booking/domain/booking.state';
+import type {
+  EmployeeBookingQuery,
+  employeeBookingScheduleQuery,
+} from '@/features/booking/domain/booking.state';
 import {
   createBookingSchema,
   type AdminBookingQuery,
@@ -297,6 +300,16 @@ export function mapAdminBookingQueryToDto(query: AdminBookingQuery): BookingQuer
     page: query.page,
     limit: query.limit,
     startDate: query.startDate,
+  };
+}
+export function mapEmployeeBookingQueryToDto(query: EmployeeBookingQuery): BookingQueryDto {
+  return {
+    status: query.status,
+    view: query.view,
+    page: query.page,
+    limit: query.limit,
+    startDate: query.startDate,
+    endDate: query.endDate,
   };
 }
 export function mapCancelBookingToDto(cancelBooking: CancelBooking): CancelBookingDto {

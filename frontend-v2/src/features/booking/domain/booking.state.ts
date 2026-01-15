@@ -66,6 +66,15 @@ export const customerBookingQuerySchema = z.object({
   view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional(),
 });
 
+export const employeeBookingQuerySchema = z.object({
+  status: bookingStatusSchema.optional(),
+  page: z.coerce.number().default(1),
+  limit: z.coerce.number().default(20),
+  view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional().default('today'),
+  startDate: isoDateSchema.optional(),
+  endDate: isoDateSchema.optional(),
+});
+
 export const adminBookingQuerySchema = z.object({
   status: bookingStatusSchema.optional(),
   page: z.coerce.number().default(1),
@@ -128,6 +137,7 @@ export type BookingStatisticQuery = z.infer<typeof bookingStatisticQuery>;
 export type UpdateBookingStatus = z.infer<typeof updateBookingStatusSchema>;
 export type BookingTodayStatisticQuery = z.infer<typeof bookingTodayStatisticQuery>;
 export type employeeBookingScheduleQuery = z.infer<typeof employeeBookingScheduleQuery>;
+export type EmployeeBookingQuery = z.infer<typeof employeeBookingQuerySchema>;
 // ====================
 // DERIVED TYPES
 // ====================
