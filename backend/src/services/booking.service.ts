@@ -969,6 +969,9 @@ class BookingService {
 
       case "past":
         return {
+          scheduledDate: {
+            $lt: startToday,
+          },
           status: {
             $in: [
               BookingStatus.COMPLETED,

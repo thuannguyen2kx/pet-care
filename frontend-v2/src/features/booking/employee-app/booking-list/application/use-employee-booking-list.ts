@@ -1,5 +1,5 @@
 import { useEmployeeBookings } from '@/features/booking/api/get-bookings';
-import { useEmployeeBookingListFilter } from '@/features/booking/employee-app/booking-schedule/application/use-employee-booking-list-filter';
+import { useEmployeeBookingListFilter } from '@/features/booking/employee-app/booking-schedule/application/use-today-booking-list-filter';
 
 export function useEmployeeBookingList() {
   const { filters, setFilters } = useEmployeeBookingListFilter();

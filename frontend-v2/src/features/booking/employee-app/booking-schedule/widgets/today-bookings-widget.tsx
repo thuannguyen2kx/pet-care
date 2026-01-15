@@ -4,7 +4,7 @@ import { Calendar, Clock } from 'lucide-react';
 
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import type { Booking } from '@/features/booking/domain/booking.entity';
-import { useEmployeeBookingList } from '@/features/booking/employee-app/booking-schedule/application/use-employee-booking-list';
+import { useEmployeeBookingList } from '@/features/booking/employee-app/booking-schedule/application/use-today-booking-list';
 import { EmployeeTodayBookingListPagination } from '@/features/booking/employee-app/booking-schedule/ui/today-bookings/booking-list-pagination';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';

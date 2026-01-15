@@ -3,6 +3,8 @@ import z from 'zod';
 import { BOOKING_STATUS, bookingStatusSchema } from '@/features/booking/domain/booking.entity';
 import { isoDateSchema, mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
+export const bookingViewSchema = z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']);
+
 // ==========================
 // UI STATE (Drafts, Inputs, Filters, Queries, Constants)
 // ==========================
@@ -63,14 +65,14 @@ export const customerBookingQuerySchema = z.object({
   status: bookingStatusSchema.optional(),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().default(20),
-  view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional(),
+  view: bookingViewSchema.optional(),
 });
 
 export const employeeBookingQuerySchema = z.object({
   status: bookingStatusSchema.optional(),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().default(20),
-  view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional().default('today'),
+  view: bookingViewSchema.optional().default('today'),
   startDate: isoDateSchema.optional(),
   endDate: isoDateSchema.optional(),
 });
@@ -79,7 +81,7 @@ export const adminBookingQuerySchema = z.object({
   status: bookingStatusSchema.optional(),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().default(20),
-  view: z.enum(['today', 'upcoming', 'ongoing', 'past', 'all']).optional(),
+  view: bookingViewSchema.optional(),
   employeeId: mongoObjectIdSchema.optional(),
   customerId: mongoObjectIdSchema.optional(),
   startDate: isoDateSchema.optional(),
@@ -138,6 +140,7 @@ export type UpdateBookingStatus = z.infer<typeof updateBookingStatusSchema>;
 export type BookingTodayStatisticQuery = z.infer<typeof bookingTodayStatisticQuery>;
 export type employeeBookingScheduleQuery = z.infer<typeof employeeBookingScheduleQuery>;
 export type EmployeeBookingQuery = z.infer<typeof employeeBookingQuerySchema>;
+export type BookingView = z.infer<typeof bookingViewSchema>;
 // ====================
 // DERIVED TYPES
 // ====================
