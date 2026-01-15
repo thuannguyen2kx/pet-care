@@ -40,3 +40,26 @@ export const useCancelBooking = ({ mutationOptions }: UseCancelBookingMutationOp
     ...restConfig,
   });
 };
+
+export const useAdminCancelBooking = ({
+  mutationOptions,
+}: UseCancelBookingMutationOptions = {}) => {
+  const queryClient = useQueryClient();
+  const { onSuccess, ...restConfig } = mutationOptions ?? {};
+  return useMutation({
+    mutationFn: (cancelBookingData: CancelBooking) => {
+      const validateInput = cancelBookingSchema.parse(cancelBookingData);
+      const cancelBookingDto = mapCancelBookingToDto(validateInput);
+      return cancelBooking({
+        bookingId: validateInput.bookingId,
+        cancelBookingDto,
+      });
+    },
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: bookingQueryKeys.admin.lists() });
+      queryClient.invalidateQueries({ queryKey: bookingQueryKeys.admin.detail(args[1].bookingId) });
+      onSuccess?.(...args);
+    },
+    ...restConfig,
+  });
+};

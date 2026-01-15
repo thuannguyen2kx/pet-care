@@ -1,8 +1,10 @@
 import { Calendar } from 'lucide-react';
 import { useParams } from 'react-router';
 
-import { AdminUpdateBookingStatusDialog } from '@/features/booking/admin-app/booking-detail/dialog/update-booking-status-dialog';
-import { useUpdateBookingStatusController } from '@/features/booking/admin-app/booking-detail/dialog/use-update-booking-status-controller';
+import { AdminCancelBookingDialog } from '@/features/booking/admin-app/booking-detail/dialog/cancel-booking/cancel-booking-dialog';
+import { useAdminCancelBookingController } from '@/features/booking/admin-app/booking-detail/dialog/cancel-booking/use-cancel-booking.controller';
+import { AdminUpdateBookingStatusDialog } from '@/features/booking/admin-app/booking-detail/dialog/update-status/update-booking-status-dialog';
+import { useUpdateBookingStatusController } from '@/features/booking/admin-app/booking-detail/dialog/update-status/use-update-booking-status-controller';
 import { AdminBookingDetailView } from '@/features/booking/admin-app/booking-detail/ui/booking-detail-view';
 import { useAdminBooking } from '@/features/booking/api/get-booking';
 import { EmptyState } from '@/shared/components/template/empty-state';
@@ -14,6 +16,7 @@ export default function AdminBookingDetailPage() {
 
   const bookingQuery = useAdminBooking({ bookingId });
   const updateBookingStatusController = useUpdateBookingStatusController();
+  const cancelBookingController = useAdminCancelBookingController();
 
   if (bookingQuery.isLoading) {
     return <SectionSpinner />;
@@ -32,6 +35,7 @@ export default function AdminBookingDetailPage() {
       <AdminBookingDetailView
         booking={bookingQuery.data}
         onUpdateBookingStatus={updateBookingStatusController.actions.openUpdateBookingStatusDialog}
+        onCancelBooking={cancelBookingController.actions.openCancelDialog}
       />
       {updateBookingStatusController.state.isOpen && (
         <AdminUpdateBookingStatusDialog
@@ -41,6 +45,15 @@ export default function AdminBookingDetailPage() {
           allowedStatuses={updateBookingStatusController.data.allowedStatuses}
           onSubmit={updateBookingStatusController.actions.submitUpdateBookingStatus}
           isSubmitting={updateBookingStatusController.state.isSubmitting}
+        />
+      )}
+      {cancelBookingController.state.isOpen && (
+        <AdminCancelBookingDialog
+          open={cancelBookingController.state.isOpen}
+          onOpenChange={cancelBookingController.actions.onOpenChange}
+          form={cancelBookingController.form}
+          onSubmit={cancelBookingController.actions.submitCancelBooking}
+          isSubmitting={cancelBookingController.state.isSubmitting}
         />
       )}
     </>

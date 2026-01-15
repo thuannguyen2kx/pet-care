@@ -439,7 +439,7 @@ class BookingService {
     let initiator: "customer" | "employee" | "admin" | "system" = "customer";
     const isCustomer = booking.customerId.toString() === userId.toString();
     const isEmployee = booking.employeeId.toString() === userId.toString();
-    const isAdmin = userRole === "admin";
+    const isAdmin = userRole === Roles.ADMIN;
 
     if (isAdmin) {
       initiator = "admin";

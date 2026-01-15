@@ -1,7 +1,13 @@
+import { AlertCircle } from 'lucide-react';
+
 import { getPaymentStatusConfig } from '@/features/booking/config';
 import { getCancellationInitiatorConfig } from '@/features/booking/config/booking-cancellation-initiator';
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
-import { type BookingDetail, type BookingStatus } from '@/features/booking/domain/booking.entity';
+import {
+  BOOKING_STATUS,
+  type BookingDetail,
+  type BookingStatus,
+} from '@/features/booking/domain/booking.entity';
 import { getSpecialtyLabel } from '@/features/employee/constants';
 import { formatPetType } from '@/features/pets/helpers';
 import { getCategoryName } from '@/features/service/constants';
@@ -23,13 +29,19 @@ import { Separator } from '@/shared/ui/separator';
 type Props = {
   booking: BookingDetail;
   onUpdateBookingStatus: (bookingId: string, status: BookingStatus) => void;
+  onCancelBooking: (bookingId: string) => void;
 };
 
-export function AdminBookingDetailView({ booking, onUpdateBookingStatus }: Props) {
+export function AdminBookingDetailView({ booking, onUpdateBookingStatus, onCancelBooking }: Props) {
   return (
     <div className="bg-card mx-auto max-w-4xl space-y-8 p-6">
       <BackLink to={paths.admin.bookings.path} label="Danh sách đặt lịch" />
-      <BookingHeader booking={booking} onUpdateBookingStatus={onUpdateBookingStatus} />
+
+      <BookingHeader
+        booking={booking}
+        onUpdateBookingStatus={onUpdateBookingStatus}
+        onCancelBooking={onCancelBooking}
+      />
 
       <BookingSummary booking={booking} />
 
@@ -56,23 +68,41 @@ export function AdminBookingDetailView({ booking, onUpdateBookingStatus }: Props
 function BookingHeader({
   booking,
   onUpdateBookingStatus,
+  onCancelBooking,
 }: {
   booking: BookingDetail;
   onUpdateBookingStatus: (bookingId: string, status: BookingStatus) => void;
+  onCancelBooking: (bookingId: string) => void;
 }) {
   const bookingStatus = getStatusConfig(booking.status);
   const paymentStatus = getPaymentStatusConfig(booking.paymentStatus);
 
   return (
     <div className="space-y-3">
+      {booking.isPast && (
+        <div className="bg-warning/10 border-muted border-b p-6 sm:p-8">
+          <div className="flex gap-3">
+            <AlertCircle className="text-warning/80 mt-0.5 h-5 w-5 shrink-0" />
+            <div>
+              <p className="text-warning text-sm font-medium">Lịch đã qua</p>
+              <p className="text-warning/80 mt-1 text-xs">
+                Đặt lịch này đã diễn ra hoặc sắp kết thúc.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="h5-bold text-foreground">Chi tiết đặt lịch</h1>
           <Badge className={bookingStatus.className}>{bookingStatus.label}</Badge>
           <Badge className={paymentStatus.className}>{paymentStatus.label}</Badge>
         </div>
-
-        <AdminActions booking={booking} onUpdateBookingStatus={onUpdateBookingStatus} />
+        <AdminActions
+          booking={booking}
+          onUpdateBookingStatus={onUpdateBookingStatus}
+          onCancelBooking={onCancelBooking}
+        />
       </div>
 
       <p className="text-muted-foreground text-sm">Mã đặt lịch: {booking.id}</p>
@@ -82,13 +112,16 @@ function BookingHeader({
 function AdminActions({
   booking,
   onUpdateBookingStatus,
+  onCancelBooking,
 }: {
   booking: BookingDetail;
   onUpdateBookingStatus: (bookingId: string, status: BookingStatus) => void;
+  onCancelBooking: (bookingId: string) => void;
 }) {
+  const disableActions = booking.isPast || booking.status === BOOKING_STATUS.CANCELLED;
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild disabled={disableActions}>
         <Button size="sm" variant="outline">
           Thao tác quản trị
         </Button>
@@ -106,7 +139,12 @@ function AdminActions({
         {booking.isCancellable && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Huỷ lịch hẹn</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => onCancelBooking(booking.id)}
+            >
+              Huỷ lịch hẹn
+            </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>
