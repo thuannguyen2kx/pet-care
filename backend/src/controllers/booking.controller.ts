@@ -10,6 +10,7 @@ import {
   updateBookingSchema,
   updateStatusSchema,
 } from "../validation/booking.validation";
+import { getCurrentWeekRange, getWeekRange } from "../utils/format-date";
 /**
 
 @desc    Create new booking
@@ -74,9 +75,38 @@ export const getBookingsController = asyncHandler(
     });
   }
 );
+export const getBookingScheduleController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user!;
+    const now = new Date();
+
+    const baseDate = req.query.date ? new Date(req.query.date as string) : now;
+
+    const { startDate, endDate } = getWeekRange(baseDate);
+
+    const filters: any = {
+      startDate,
+      endDate,
+    };
+
+    if (user.role === Roles.EMPLOYEE) {
+      filters.employeeId = user._id;
+    }
+
+    if (user.role === Roles.ADMIN && req.query.employeeId) {
+      filters.employeeId = req.query.employeeId;
+    }
+
+    const schedule = await bookingService.getSchedule(filters);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Lấy lịch làm việc thành công",
+      data: schedule,
+    });
+  }
+);
 
 /**
-
 @desc    Get booking by ID
 @route   GET /api/bookings/:id
 @access  Private
@@ -214,6 +244,27 @@ export const getStatisticsController = asyncHandler(
     const stats = await bookingService.getStatistics(filters);
     return res.status(HTTPSTATUS.OK).json({
       message: "Thống kê được truy xuất thành công",
+      stats,
+    });
+  }
+);
+
+export const getTodayStatisticsController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userRole = req.user?.role;
+    const userId = req.user?._id;
+    const filters: any = {};
+    // Employee can only see their own stats
+    if (userRole === Roles.EMPLOYEE) {
+      filters.employeeId = userId;
+    }
+    // Admin can filter by employeeId
+    if (userRole === Roles.ADMIN && req.query.employeeId) {
+      filters.employeeId = req.query.employeeId;
+    }
+    const stats = await bookingService.getTodayStatistics(filters);
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Thống kê được truy xuất cá ngày",
       stats,
     });
   }

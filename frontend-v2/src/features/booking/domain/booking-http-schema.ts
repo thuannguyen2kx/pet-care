@@ -3,9 +3,11 @@ import z from 'zod';
 import {
   bookingDetailDtoSchema,
   bookingDtoSchema,
+  bookingScheduleDayDtoSchema,
+  bookingStatisticDtoSchema,
+  bookingTodayStatisticDtoSchema,
   paginationDtoSchema,
 } from '@/features/booking/domain/booking.dto';
-import { bookingStatisticSchema } from '@/features/booking/domain/booking.entity';
 
 export const getBookingsResponseDtoSchema = z.object({
   bookings: z.array(bookingDtoSchema),
@@ -15,7 +17,16 @@ export const bookingDetailResponseDtoSchema = z.object({
   booking: bookingDetailDtoSchema,
 });
 export const bookingStatisticResponseSchema = z.object({
-  stats: bookingStatisticSchema,
+  stats: bookingStatisticDtoSchema,
+});
+
+export const bookingTodayStatisticResponseSchema = z.object({
+  stats: bookingTodayStatisticDtoSchema,
+});
+export const bookingScheduleResponseSchema = z.object({
+  data: z.object({
+    days: z.array(bookingScheduleDayDtoSchema),
+  }),
 });
 export type GetBookingsResponseDto = z.infer<typeof getBookingsResponseDtoSchema>;
 export type BookingDetailResponseDto = z.infer<typeof bookingDetailResponseDtoSchema>;

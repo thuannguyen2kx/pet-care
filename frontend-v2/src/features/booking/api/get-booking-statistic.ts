@@ -29,10 +29,36 @@ type UseAdminBookingStatisticQueryOptions = {
   query?: BookingStatisticQuery;
   queryConfig?: QueryConfig<typeof getBookingStatisticQueryOptions>;
 };
-export const useAdminBookingStatistic = ({
+export const useEmployeeBookingStatistic = ({
   query,
   queryConfig,
 }: UseAdminBookingStatisticQueryOptions = {}) => {
+  return useQuery({
+    ...getBookingStatisticQueryOptions(query),
+    ...queryConfig,
+  });
+};
+
+export const getEmployeeBookingStatisticQueryOptions = (query?: BookingStatisticQuery) => {
+  return queryOptions({
+    queryKey: bookingQueryKeys.employee.statistic(query),
+    queryFn: async ({ signal }) => {
+      const config = { signal, params: query };
+      const raw = await getBookingStatistic(config);
+      const response = bookingStatisticResponseSchema.parse(raw);
+      return mapBookingStatisticDtoToEntity(response.stats);
+    },
+  });
+};
+
+type UseEmployeeBookingStatisticQueryOptions = {
+  query?: BookingStatisticQuery;
+  queryConfig?: QueryConfig<typeof getBookingStatisticQueryOptions>;
+};
+export const useAdminBookingStatistic = ({
+  query,
+  queryConfig,
+}: UseEmployeeBookingStatisticQueryOptions = {}) => {
   return useQuery({
     ...getBookingStatisticQueryOptions(query),
     ...queryConfig,

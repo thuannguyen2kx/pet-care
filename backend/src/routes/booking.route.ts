@@ -6,8 +6,10 @@ import {
   cancelBookingController,
   createBookingController,
   getBookingByIdController,
+  getBookingScheduleController,
   getBookingsController,
   getStatisticsController,
+  getTodayStatisticsController,
   updateBookingController,
   updateStatusController,
 } from "../controllers/booking.controller";
@@ -20,9 +22,19 @@ router.use(passportAuthenticateJWT);
 router.post("/", createBookingController);
 router.get("/", getBookingsController);
 router.get(
+  "/schedule",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getBookingScheduleController
+);
+router.get(
   "/stats",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   getStatisticsController
+);
+router.get(
+  "/stats/today",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getTodayStatisticsController
 );
 router.get("/:id", getBookingByIdController);
 router.put("/:id", updateBookingController);

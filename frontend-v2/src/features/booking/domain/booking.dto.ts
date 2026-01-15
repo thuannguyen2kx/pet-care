@@ -35,6 +35,10 @@ export const bookingStatisticQueryDtoSchema = z.object({
   endDate: isoDateSchema.optional(),
 });
 
+export const bookingTodayStatisticQueryDtoSchema = z.object({
+  employeeId: mongoObjectIdSchema.optional(),
+});
+
 export const updateBookingStatusDtoSchema = z.object({
   status: z.enum([
     BOOKING_STATUS.CONFIRMED,
@@ -44,6 +48,10 @@ export const updateBookingStatusDtoSchema = z.object({
   ]),
   reason: z.string().max(500).optional(),
   employeeNotes: z.string().max(1000).optional(),
+});
+export const bookingScheduleQueryDto = z.object({
+  date: isoDateSchema.optional(),
+  employeeId: mongoObjectIdSchema?.optional(),
 });
 // =====================
 // Response DTOs (Output)
@@ -205,7 +213,7 @@ export const bookingDetailDtoSchema = z.object({
   __v: z.number(),
 });
 
-export const bookingStatisticSchema = z.object({
+export const bookingStatisticDtoSchema = z.object({
   totalBookings: z.number().int().nonnegative(),
 
   byStatus: z.object({
@@ -220,6 +228,28 @@ export const bookingStatisticSchema = z.object({
   totalRevenue: z.number().nonnegative(),
   averageRating: z.number().min(0).max(5),
 });
+
+export const bookingTodayStatisticDtoSchema = z.object({
+  date: z.string(),
+  totalBookings: z.number().int().nonnegative(),
+
+  byStatus: z.object({
+    pending: z.number().int().nonnegative(),
+    confirmed: z.number().int().nonnegative(),
+    'in-progress': z.number().int().nonnegative(),
+    completed: z.number().int().nonnegative(),
+    cancelled: z.number().int().nonnegative(),
+    'no-show': z.number().int().nonnegative(),
+  }),
+
+  totalRevenue: z.number().nonnegative(),
+  averageRating: z.number().min(0).max(5),
+});
+export const bookingScheduleDayDtoSchema = z.object({
+  dayOfWeek: z.number().min(0).max(6),
+  date: z.string(),
+  bookings: z.array(bookingDtoSchema),
+});
 // =====================
 // Types
 // =====================
@@ -230,5 +260,9 @@ export type BookingQueryDto = z.infer<typeof bookingsQueryDtoSchema>;
 export type CancelBookingDto = z.infer<typeof canncelBooingDtoSchema>;
 export type BookingDetailDto = z.infer<typeof bookingDetailDtoSchema>;
 export type BookingStatisticQueryDto = z.infer<typeof bookingStatisticQueryDtoSchema>;
-export type BookingStatisticDto = z.infer<typeof bookingStatisticSchema>;
+export type BookingTodayStatisticQueryDto = z.infer<typeof bookingTodayStatisticQueryDtoSchema>;
+export type BookingStatisticDto = z.infer<typeof bookingStatisticDtoSchema>;
+export type BookingTodayStatisticDto = z.infer<typeof bookingTodayStatisticDtoSchema>;
 export type UpdateBookingStatusDto = z.infer<typeof updateBookingStatusDtoSchema>;
+export type BookingScheduleQueryDto = z.infer<typeof bookingScheduleQueryDto>;
+export type BookingScheduleDayDto = z.infer<typeof bookingScheduleDayDtoSchema>;

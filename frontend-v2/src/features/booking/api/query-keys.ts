@@ -1,7 +1,9 @@
 import type {
   AdminBookingQuery,
   BookingStatisticQuery,
+  BookingTodayStatisticQuery,
   CustomerBookingQuery,
+  employeeBookingScheduleQuery,
 } from '@/features/booking/domain/booking.state';
 
 export const bookingQueryKeys = {
@@ -18,6 +20,9 @@ export const bookingQueryKeys = {
     statistics: () => [...bookingQueryKeys.admin.all(), 'statistics'] as const,
     statistic: (params?: BookingStatisticQuery) =>
       [...bookingQueryKeys.admin.statistics(), params] as const,
+    today_statistics: () => [...bookingQueryKeys.admin.all(), 'statistics', 'today'] as const,
+    today_statistic: (params?: BookingTodayStatisticQuery) =>
+      [...bookingQueryKeys.admin.statistics(), params] as const,
   },
   employee: {
     all: () => [...bookingQueryKeys.all, 'employee'] as const,
@@ -27,6 +32,16 @@ export const bookingQueryKeys = {
 
     details: () => [...bookingQueryKeys.employee.all(), 'detail'] as const,
     detail: (bookingId: string) => [...bookingQueryKeys.employee.details(), bookingId] as const,
+
+    statistics: () => [...bookingQueryKeys.employee.all(), 'statistics'] as const,
+    statistic: (params?: BookingStatisticQuery) =>
+      [...bookingQueryKeys.admin.statistics(), params] as const,
+    today_statistics: () => [...bookingQueryKeys.employee.all(), 'statistics', 'today'] as const,
+    booking_schedules: () => [...bookingQueryKeys.employee.all(), 'schedules'] as const,
+    booking_schedule: (params?: employeeBookingScheduleQuery) => [
+      ...bookingQueryKeys.employee.booking_schedules(),
+      params,
+    ],
   },
   customer: {
     all: () => [...bookingQueryKeys.all, 'customer'] as const,

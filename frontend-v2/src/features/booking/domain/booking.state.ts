@@ -81,10 +81,14 @@ export const cancelBookingSchema = z.object({
   reason: z.string().min(1, 'Cần nêu lý do huỷ lịch').max(500),
 });
 
-export const bookingStatisticQueryDto = z.object({
+export const bookingStatisticQuery = z.object({
   employeeId: mongoObjectIdSchema.optional(),
   startDate: isoDateSchema.optional(),
   endDate: isoDateSchema.optional(),
+});
+
+export const bookingTodayStatisticQuery = z.object({
+  employeeId: mongoObjectIdSchema.optional(),
 });
 
 export const updateBookingStatusSchema = z.object({
@@ -97,6 +101,10 @@ export const updateBookingStatusSchema = z.object({
   ]),
   reason: z.string().max(500).optional(),
   employeeNotes: z.string().max(1000).optional(),
+});
+
+export const employeeBookingScheduleQuery = z.object({
+  date: isoDateSchema.optional(),
 });
 
 export const BOOKING_VIEW = {
@@ -116,8 +124,10 @@ export type CreateBooking = z.infer<typeof createBookingSchema>;
 export type CustomerBookingQuery = z.infer<typeof customerBookingQuerySchema>;
 export type AdminBookingQuery = z.infer<typeof adminBookingQuerySchema>;
 export type CancelBooking = z.infer<typeof cancelBookingSchema>;
-export type BookingStatisticQuery = z.infer<typeof bookingStatisticQueryDto>;
+export type BookingStatisticQuery = z.infer<typeof bookingStatisticQuery>;
 export type UpdateBookingStatus = z.infer<typeof updateBookingStatusSchema>;
+export type BookingTodayStatisticQuery = z.infer<typeof bookingTodayStatisticQuery>;
+export type employeeBookingScheduleQuery = z.infer<typeof employeeBookingScheduleQuery>;
 // ====================
 // DERIVED TYPES
 // ====================

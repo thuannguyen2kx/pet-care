@@ -2,6 +2,7 @@ import mongoose, { Types } from "mongoose";
 import {
   BookingModel,
   BookingStatus,
+  IBooking,
   PaymentStatus,
 } from "../models/booking.model";
 import {
@@ -13,7 +14,14 @@ import { AvailabilityCalculator } from "./availability.service";
 import ServiceModel from "../models/service.model";
 import { Roles } from "../enums/role.enum";
 import { UserStatus } from "../enums/status-user.enum";
-import { endOfDay, startOfDay, startOfTomorrow } from "date-fns";
+import {
+  differenceInCalendarDays,
+  endOfDay,
+  format,
+  startOfDay,
+  startOfTomorrow,
+} from "date-fns";
+import { parseDateOnly } from "../utils/format-date";
 
 export type BookingView = "today" | "upcoming" | "ongoing" | "past" | "all";
 const DEFAULT_BOOKING_STATUS_STATS: Record<BookingStatus, number> = {
@@ -262,6 +270,36 @@ class BookingService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async getSchedule(filters: {
+    startDate: Date;
+    endDate: Date;
+    employeeId?: string;
+  }) {
+    const query: any = {
+      scheduledDate: {
+        $gte: filters.startDate,
+        $lte: filters.endDate,
+      },
+    };
+
+    if (filters.employeeId) {
+      query.employeeId = filters.employeeId;
+    }
+
+    const bookings = await BookingModel.find(query)
+      .populate("customerId", "fullName email phoneNumber profilePicture")
+      .populate("petId", "name type breed image")
+      .populate(
+        "employeeId",
+        "fullName profilePicture employeeInfo.specialties"
+      )
+      .populate("serviceId", "name category duration price")
+      .sort({ scheduledDate: 1, startTime: 1 })
+      .lean();
+
+    return this.groupBookingsByWeek(bookings, filters.startDate);
   }
 
   /**
@@ -676,6 +714,82 @@ class BookingService {
     };
   }
 
+  async getTodayStatistics(filters?: { employeeId?: string }) {
+    const { start, end } = this.getTodayRange();
+
+    const query: any = {
+      scheduledDate: {
+        $gte: start,
+        $lte: end,
+      },
+    };
+
+    if (filters?.employeeId) {
+      query.employeeId = filters.employeeId;
+    }
+
+    const [totalBookings, byStatus, totalRevenue, averageRating] =
+      await Promise.all([
+        BookingModel.countDocuments(query),
+
+        BookingModel.aggregate([
+          { $match: query },
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+
+        BookingModel.aggregate([
+          {
+            $match: {
+              ...query,
+              status: BookingStatus.COMPLETED,
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$totalAmount" },
+            },
+          },
+        ]),
+
+        BookingModel.aggregate([
+          {
+            $match: {
+              ...query,
+              "rating.score": { $exists: true },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              avg: { $avg: "$rating.score" },
+            },
+          },
+        ]),
+      ]);
+
+    const byStatusMapped = byStatus.reduce((acc, item) => {
+      acc[item._id as BookingStatus] = item.count;
+      return acc;
+    }, {} as Partial<Record<BookingStatus, number>>);
+
+    return {
+      date: start,
+      totalBookings,
+      byStatus: {
+        ...DEFAULT_BOOKING_STATUS_STATS,
+        ...byStatusMapped,
+      },
+      totalRevenue: totalRevenue[0]?.total ?? 0,
+      averageRating: averageRating[0]?.avg ?? 0,
+    };
+  }
+
   /**
    * Tính giờ kết thúc của booking
    * @param startTime ví dụ "09:30"
@@ -868,6 +982,63 @@ class BookingService {
       default:
         return {};
     }
+  }
+
+  private getTodayRange() {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
+  }
+
+  private groupBookingsByWeek<T extends { scheduledDate: Date }>(
+    bookings: T[],
+    weekStart: Date
+  ) {
+    const normalizedWeekStart = startOfDay(weekStart);
+
+    const days: {
+      dayOfWeek: number; // 0 = Monday
+      date: string;
+      bookings: T[];
+    }[] = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(normalizedWeekStart);
+      date.setDate(normalizedWeekStart.getDate() + index);
+
+      return {
+        dayOfWeek: index,
+        date: format(date, "yyyy-MM-dd"),
+        bookings: [],
+      };
+    });
+
+    bookings.forEach((booking) => {
+      const bookingDate = startOfDay(new Date(booking.scheduledDate));
+
+      const diffDays = differenceInCalendarDays(
+        bookingDate,
+        normalizedWeekStart
+      );
+
+      if (diffDays >= 0 && diffDays < 7) {
+        days[diffDays].bookings.push(booking);
+      }
+    });
+
+    return {
+      range: {
+        startDate: normalizedWeekStart,
+        endDate: new Date(
+          new Date(normalizedWeekStart).setDate(
+            normalizedWeekStart.getDate() + 6
+          )
+        ),
+      },
+      days,
+    };
   }
 }
 

@@ -3,7 +3,11 @@ import type {
   BookingDetailDto,
   BookingDto,
   BookingQueryDto,
+  BookingScheduleDayDto,
+  BookingScheduleQueryDto,
   BookingStatisticDto,
+  BookingTodayStatisticDto,
+  BookingTodayStatisticQueryDto,
   CancelBookingDto,
   CreateBookingDto,
   UpdateBookingStatusDto,
@@ -11,16 +15,20 @@ import type {
 import type {
   Booking,
   BookingDetail,
+  BookingScheduleDay,
   BookingStatistic,
   BookingStatus,
+  BookingTodayStatistic,
   Pagination,
   PaymentStatus,
   PetType,
   ServiceCategory,
 } from '@/features/booking/domain/booking.entity';
+import type { employeeBookingScheduleQuery } from '@/features/booking/domain/booking.state';
 import {
   createBookingSchema,
   type AdminBookingQuery,
+  type BookingTodayStatisticQuery,
   type CancelBooking,
   type CreateBooking,
   type CreateBookingDraft,
@@ -224,6 +232,37 @@ export function mapBookingStatisticDtoToEntity(dto: BookingStatisticDto): Bookin
     averageRating: dto.averageRating,
   };
 }
+
+export function mapBookingTodayStatisticDtoToEntity(
+  dto: BookingTodayStatisticDto,
+): BookingTodayStatistic {
+  return {
+    date: dto.date,
+    totalBookings: dto.totalBookings,
+    byStatus: {
+      pending: dto.byStatus.pending,
+      confirmed: dto.byStatus.confirmed,
+      'in-progress': dto.byStatus['in-progress'],
+      completed: dto.byStatus.completed,
+      cancelled: dto.byStatus.cancelled,
+      'no-show': dto.byStatus['no-show'],
+    },
+    totalRevenue: dto.totalRevenue,
+    averageRating: dto.averageRating,
+  };
+}
+export function mapBookingScheduleDayDtoToEntity(dto: BookingScheduleDayDto): BookingScheduleDay {
+  return {
+    date: dto.date,
+    dayOfWeek: dto.dayOfWeek,
+    bookings: mapBookingsDtoToEntities(dto.bookings),
+  };
+}
+export function mapBookingScheduleDaysDtoToEntities(
+  dtos: BookingScheduleDayDto[],
+): BookingScheduleDay[] {
+  return dtos.map(mapBookingScheduleDayDtoToEntity);
+}
 // ====================
 // State => DTO
 // ====================
@@ -272,6 +311,20 @@ export function mapUpdateBookingStatusToDto(
     status: updateBooking.status,
     reason: updateBooking.reason,
     employeeNotes: updateBooking.employeeNotes,
+  };
+}
+export function mapBookingTodayStatisticQueryToDto(
+  query: BookingTodayStatisticQuery,
+): BookingTodayStatisticQueryDto {
+  return {
+    employeeId: query.employeeId,
+  };
+}
+export function mapEmployeeBookingScheduleQueryToDto(
+  employeeBookingScheduleQuery: employeeBookingScheduleQuery,
+): BookingScheduleQueryDto {
+  return {
+    date: employeeBookingScheduleQuery.date,
   };
 }
 // ====================
