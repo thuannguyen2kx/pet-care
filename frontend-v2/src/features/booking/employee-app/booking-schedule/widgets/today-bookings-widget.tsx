@@ -11,7 +11,10 @@ import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
 
-export function EmployeeTodayBookingsWidget() {
+type Props = {
+  onViewDetail: (bookingId: string) => void;
+};
+export function EmployeeTodayBookingsWidget({ onViewDetail }: Props) {
   const bookingCtrl = useEmployeeBookingList();
 
   const sortedBookings = [...bookingCtrl.data].sort((a, b) =>
@@ -31,7 +34,11 @@ export function EmployeeTodayBookingsWidget() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TodayBookingList isLoading={bookingCtrl.isLoading} bookings={sortedBookings} />
+          <TodayBookingList
+            isLoading={bookingCtrl.isLoading}
+            bookings={sortedBookings}
+            onViewDetail={onViewDetail}
+          />
         </CardContent>
       </Card>
 
@@ -47,9 +54,11 @@ export function EmployeeTodayBookingsWidget() {
 export function TodayBookingList({
   bookings,
   isLoading,
+  onViewDetail,
 }: {
   bookings: Booking[];
   isLoading: boolean;
+  onViewDetail: (bookingId: string) => void;
 }) {
   if (isLoading) {
     return <TodayBookingListSkeleton />;
@@ -61,17 +70,24 @@ export function TodayBookingList({
   return (
     <div className="space-y-4">
       {bookings.map((booking) => (
-        <TodayBookingItem key={booking.id} booking={booking} />
+        <TodayBookingItem key={booking.id} booking={booking} onViewDetail={onViewDetail} />
       ))}
     </div>
   );
 }
-export function TodayBookingItem({ booking }: { booking: Booking }) {
+export function TodayBookingItem({
+  booking,
+  onViewDetail,
+}: {
+  booking: Booking;
+  onViewDetail: (bookingId: string) => void;
+}) {
   const status = getStatusConfig(booking.status);
 
   return (
     <div
       className={`bg-muted/30 flex items-center gap-4 rounded-xl border-l-4 p-4 ${status.className}`}
+      onClick={() => onViewDetail(booking.id)}
     >
       <div className="min-w-16 text-center">
         <p className="text-primary text-lg font-bold">{booking.startTime}</p>

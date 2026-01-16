@@ -15,9 +15,10 @@ import { Card, CardContent } from '@/shared/ui/card';
 type Props = {
   bookings: Booking[];
   isLoading: boolean;
+  onViewDetail: (bookingId: string) => void;
 };
 
-export function EmployeeBookingListContent({ bookings, isLoading }: Props) {
+export function EmployeeBookingListContent({ bookings, isLoading, onViewDetail }: Props) {
   if (isLoading) {
     return <SectionSpinner />;
   }
@@ -52,7 +53,11 @@ export function EmployeeBookingListContent({ bookings, isLoading }: Props) {
         const categoryConfig = getCategoryConfig(booking.service.category);
 
         return (
-          <Card key={booking.id} className="rounded-none border-none shadow-none">
+          <Card
+            key={booking.id}
+            className="rounded-none border-none shadow-none"
+            onClick={() => onViewDetail(booking.id)}
+          >
             <CardContent className="p-4">
               <div className="hidden lg:grid lg:grid-cols-12 lg:items-center lg:gap-4">
                 <div className="col-span-3 flex min-w-0 items-center gap-3">

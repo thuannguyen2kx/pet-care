@@ -4,7 +4,15 @@ import type { BookingScheduleDay } from '@/features/booking/domain/booking.entit
 import { DayColumn } from '@/features/booking/employee-app/booking-schedule/ui/week-schedule/day-cols';
 
 const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-export function WeekGrid({ weekDates, days }: { weekDates: Date[]; days: BookingScheduleDay[] }) {
+export function WeekGrid({
+  weekDates,
+  days,
+  onViewDetail,
+}: {
+  weekDates: Date[];
+  days: BookingScheduleDay[];
+  onViewDetail: (bookingId: string) => void;
+}) {
   const bookingsMap = useMemo(() => {
     return Object.fromEntries(days.map((d) => [d.dayOfWeek, d.bookings]));
   }, [days]);
@@ -18,6 +26,7 @@ export function WeekGrid({ weekDates, days }: { weekDates: Date[]; days: Booking
           date={date}
           dayName={dayNames[dateOfWeek]}
           bookings={getBookingsForDate(dateOfWeek)}
+          onViewDetail={onViewDetail}
         />
       ))}
     </div>

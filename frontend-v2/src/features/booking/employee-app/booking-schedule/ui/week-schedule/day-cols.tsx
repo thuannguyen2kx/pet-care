@@ -8,10 +8,12 @@ export function DayColumn({
   date,
   dayName,
   bookings,
+  onViewDetail,
 }: {
   date: Date;
   dayName: string;
   bookings: Booking[];
+  onViewDetail: (bookingId: string) => void;
 }) {
   const isTodayDate = isToday(date);
 
@@ -31,7 +33,7 @@ export function DayColumn({
 
       <div className="space-y-2">
         {bookings.length > 0 ? (
-          bookings.map((b) => <BookingItem key={b.id} booking={b} />)
+          bookings.map((b) => <BookingItem key={b.id} booking={b} onViewDetail={onViewDetail} />)
         ) : (
           <p className="text-muted-foreground py-4 text-center text-xs">Trống</p>
         )}

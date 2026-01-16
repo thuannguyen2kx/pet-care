@@ -2,12 +2,15 @@ import { EmployeeTodayBookingsWidget } from '@/features/booking/employee-app/boo
 import { TodaySummary } from '@/features/booking/employee-app/booking-schedule/widgets/today-summar';
 import { WeekScheduleWidget } from '@/features/booking/employee-app/booking-schedule/widgets/week-schedule-widget';
 
-export function EmployeeBookingScheduleView() {
+type Props = {
+  onViewDetail: (bookingId: string) => void;
+};
+export function EmployeeBookingScheduleView({ onViewDetail }: Props) {
   return (
     <>
       <TodaySummary />
-      <WeekScheduleWidget />
-      <EmployeeTodayBookingsWidget />
+      <WeekScheduleWidget onViewDetail={onViewDetail} />
+      <EmployeeTodayBookingsWidget onViewDetail={onViewDetail} />
     </>
   );
 }

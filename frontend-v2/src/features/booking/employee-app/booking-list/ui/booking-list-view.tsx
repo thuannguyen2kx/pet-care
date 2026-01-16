@@ -11,6 +11,7 @@ type Props = {
   page: number;
   totalPages: number;
   onFilter: (next: Partial<EmployeeBookingQuery>) => void;
+  onViewDetail: (bookingId: string) => void;
 };
 export function EmployeeBookingListView({
   bookings,
@@ -19,11 +20,16 @@ export function EmployeeBookingListView({
   page,
   totalPages,
   onFilter,
+  onViewDetail,
 }: Props) {
   return (
     <>
       <EmployeeBookingFilters filter={filter} onFilter={onFilter} />
-      <EmployeeBookingListContent bookings={bookings} isLoading={isLoading} />
+      <EmployeeBookingListContent
+        bookings={bookings}
+        isLoading={isLoading}
+        onViewDetail={onViewDetail}
+      />
       <EmployeeBookingListPagination
         page={page}
         totalPages={totalPages}

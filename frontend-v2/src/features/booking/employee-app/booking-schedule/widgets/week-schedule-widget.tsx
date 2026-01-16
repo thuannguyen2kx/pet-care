@@ -8,7 +8,10 @@ import { WeekGrid } from '@/features/booking/employee-app/booking-schedule/ui/we
 import { SectionSpinner } from '@/shared/components/template/loading';
 import { Card, CardContent, CardHeader } from '@/shared/ui/card';
 
-export function WeekScheduleWidget() {
+type Props = {
+  onViewDetail: (bookingId: string) => void;
+};
+export function WeekScheduleWidget({ onViewDetail }: Props) {
   const { weekDates, weekRangeLabel, isCurrentWeek, weekStart, goToWeek } = useWeekNavigator();
   const bookingsQuery = useEmployeeBookingSchedule({
     query: { date: format(weekStart, 'yyyy-MM-dd') },
@@ -29,7 +32,11 @@ export function WeekScheduleWidget() {
         {bookingsQuery.isLoading ? (
           <SectionSpinner />
         ) : (
-          <WeekGrid weekDates={weekDates} days={bookingsQuery.data ?? []} />
+          <WeekGrid
+            weekDates={weekDates}
+            days={bookingsQuery.data ?? []}
+            onViewDetail={onViewDetail}
+          />
         )}
       </CardContent>
 

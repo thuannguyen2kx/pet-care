@@ -56,3 +56,26 @@ export const useAdminBooking = ({ bookingId, queryConfig }: UseAdminBookingQuery
     ...queryConfig,
   });
 };
+
+export const getEmployeeBookingQueryOptions = (bookingId: string) => {
+  return queryOptions({
+    queryKey: bookingQueryKeys.employee.detail(bookingId),
+    queryFn: async ({ signal }) => {
+      const config = { signal };
+      const raw = await getBooking(bookingId, config);
+      const response = bookingDetailResponseDtoSchema.parse(raw);
+      return mapBookingDetailDtoToEntity(response.booking);
+    },
+    enabled: Boolean(bookingId),
+  });
+};
+type UseEmployeeBookingQueryOptions = {
+  bookingId: string;
+  queryConfig?: QueryConfig<typeof getEmployeeBookingQueryOptions>;
+};
+export const useEmployeeBooking = ({ bookingId, queryConfig }: UseEmployeeBookingQueryOptions) => {
+  return useQuery({
+    ...getEmployeeBookingQueryOptions(bookingId),
+    ...queryConfig,
+  });
+};

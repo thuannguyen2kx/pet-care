@@ -4,10 +4,10 @@ import { cn } from '@/shared/lib/utils';
 
 export function BookingItem({
   booking,
-  onClick,
+  onViewDetail,
 }: {
   booking: Booking;
-  onClick?: (id: string) => void;
+  onViewDetail: (id: string) => void;
 }) {
   const status = getStatusConfig(booking.status);
 
@@ -17,7 +17,7 @@ export function BookingItem({
         'bg-card hover:bg-muted/40 cursor-pointer rounded-md border-l-4 p-2',
         status.className,
       )}
-      onClick={() => onClick?.(booking.id)}
+      onClick={() => onViewDetail(booking.id)}
     >
       <p className="truncate text-xs font-medium">{booking.service.name}</p>
 
