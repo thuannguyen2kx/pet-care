@@ -44,3 +44,30 @@ export const useAdminUpdateBookingStatus = ({
     },
   });
 };
+
+type UseEmployeeUpdateBookingStatusOptions = {
+  mutationOptions?: UseMutationOptions<unknown, unknown, UpdateBookingStatus, unknown>;
+};
+export const useEmployeeUpdateBookingStatus = ({
+  mutationOptions,
+}: UseEmployeeUpdateBookingStatusOptions = {}) => {
+  const queryClient = useQueryClient();
+
+  const { onSuccess, ...restConfig } = mutationOptions ?? {};
+
+  return useMutation({
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: bookingQueryKeys.employee.lists() });
+      queryClient.invalidateQueries({
+        queryKey: bookingQueryKeys.employee.detail(args[1].bookingId),
+      });
+      onSuccess?.(...args);
+    },
+    ...restConfig,
+    mutationFn: (updateBookingStatusData: UpdateBookingStatus) => {
+      const validateInput = updateBookingStatusSchema.parse(updateBookingStatusData);
+      const updateBookingStatusDto = mapUpdateBookingStatusToDto(validateInput);
+      return updateBookingStatus({ bookingId: validateInput.bookingId, updateBookingStatusDto });
+    },
+  });
+};

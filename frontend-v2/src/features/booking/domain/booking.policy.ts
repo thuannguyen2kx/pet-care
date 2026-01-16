@@ -13,3 +13,6 @@ export const BOOKING_STATUS_TRANSITIONS: Record<BookingStatus, BookingStatus[]> 
 
   [BOOKING_STATUS.CANCELLED]: [],
 };
+export const getAvailableStatusActions = (status: BookingStatus) => {
+  return BOOKING_STATUS_TRANSITIONS[status];
+};

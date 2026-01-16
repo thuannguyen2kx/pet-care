@@ -1,7 +1,8 @@
 import { Calendar } from 'lucide-react';
 
-import type { BookingDetail } from '@/features/booking/domain/booking.entity';
-import { EmployeeBookingDetailContent } from '@/features/booking/employee-app/booking-schedule/dialog/booking-detail/booking-detail-content';
+import type { BookingDetail, BookingStatus } from '@/features/booking/domain/booking.entity';
+import type { UpdateBookingStatus } from '@/features/booking/domain/booking.state';
+import { EmployeeBookingDetailContent } from '@/features/booking/employee-app/booking-list/dialog/booking-detail/booking-detail-content';
 import { EmptyState } from '@/shared/components/template/empty-state';
 import { SectionSpinner } from '@/shared/components/template/loading';
 import { Button } from '@/shared/ui/button';
@@ -21,9 +22,20 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   booking?: BookingDetail;
   isLoading: boolean;
+  onUpdateBookingStatus: (
+    bookingId: string,
+    status: BookingStatus,
+    nextStatus: UpdateBookingStatus['status'],
+  ) => void;
 };
 
-export function EmployeeBookingDetailDialog({ open, onOpenChange, booking, isLoading }: Props) {
+export function EmployeeBookingDetailDialog({
+  open,
+  onOpenChange,
+  booking,
+  isLoading,
+  onUpdateBookingStatus,
+}: Props) {
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,7 +76,10 @@ export function EmployeeBookingDetailDialog({ open, onOpenChange, booking, isLoa
         </DialogHeader>
 
         <ScrollArea className="max-h-[70vh] pr-4">
-          <EmployeeBookingDetailContent booking={booking} />
+          <EmployeeBookingDetailContent
+            booking={booking}
+            onUpdateBookingStatus={onUpdateBookingStatus}
+          />
         </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>

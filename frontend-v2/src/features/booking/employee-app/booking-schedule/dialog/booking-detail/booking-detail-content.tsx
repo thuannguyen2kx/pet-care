@@ -2,24 +2,33 @@ import { AlertCircle } from 'lucide-react';
 
 import { getCancellationInitiatorConfig, getPaymentStatusConfig } from '@/features/booking/config';
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
-import type { BookingDetail } from '@/features/booking/domain/booking.entity';
+import type { BookingDetail, BookingStatus } from '@/features/booking/domain/booking.entity';
+import { getAvailableStatusActions } from '@/features/booking/domain/booking.policy';
+import type { UpdateBookingStatus } from '@/features/booking/domain/booking.state';
 import { getSpecialtyLabel } from '@/features/employee/constants';
 import { formatPetType } from '@/features/pets/helpers';
 import { getCategoryName } from '@/features/service/constants';
 import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
+import { Button } from '@/shared/ui/button';
 import { Separator } from '@/shared/ui/separator';
 
 type Props = {
   booking: BookingDetail;
+  onUpdateBookingStatus: (
+    bookingId: string,
+    status: BookingStatus,
+    nextStatus: UpdateBookingStatus['status'],
+  ) => void;
 };
-export function EmployeeBookingDetailContent({ booking }: Props) {
+export function EmployeeBookingDetailContent({ booking, onUpdateBookingStatus }: Props) {
   return (
     <div className="space-y-6">
       <BookingHeader booking={booking} />
 
       <BookingSummary booking={booking} />
+      <EmployeeBookingActions booking={booking} onUpdateBookingStatus={onUpdateBookingStatus} />
 
       <Separator />
 
@@ -74,6 +83,59 @@ function BookingHeader({ booking }: { booking: BookingDetail }) {
   );
 }
 
+function EmployeeBookingActions({
+  booking,
+  onUpdateBookingStatus,
+}: {
+  booking: BookingDetail;
+  onUpdateBookingStatus: (
+    bookingId: string,
+    status: BookingStatus,
+    nextStatus: UpdateBookingStatus['status'],
+  ) => void;
+}) {
+  const availableStatuses = getAvailableStatusActions(booking.status);
+
+  if (!availableStatuses.length) return null;
+  return (
+    <Section title="Thao tác">
+      <div className="flex gap-2">
+        {availableStatuses.map((status) => (
+          <UpdateBookingStatusButton
+            key={status}
+            disabled={booking.isPast}
+            nextStatus={status}
+            onUpdate={() => {
+              onUpdateBookingStatus(
+                booking.id,
+                booking.status,
+                status as UpdateBookingStatus['status'],
+              );
+            }}
+          />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function UpdateBookingStatusButton({
+  nextStatus,
+  disabled,
+  onUpdate,
+}: {
+  disabled?: boolean;
+  nextStatus: BookingStatus;
+  onUpdate: () => void;
+}) {
+  const statusConfig = getStatusConfig(nextStatus);
+  return (
+    <Button className={statusConfig.className} disabled={disabled} onClick={onUpdate}>
+      <statusConfig.icon className="size-4.5" />
+      {statusConfig.label}
+    </Button>
+  );
+}
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
