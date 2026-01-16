@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 
-import EmployeeDashboardPage from '@/features/dashboard/page';
+import EmployeeDashboardPage from '@/features/dashboard/employee-app/page';
 import { getEmployeeDashboardStatsQueryOptions } from '@/features/employee/api/get-employee-dashboard-stats';
 import EmployeeLayout from '@/routes/employee/layout';
 import { useUser } from '@/shared/lib/auth';

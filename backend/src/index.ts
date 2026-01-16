@@ -55,13 +55,8 @@ app.use(`${BASE_PATH}/services`, serviceRoutes);
 app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
 app.use(`${BASE_PATH}/availability`, availabilityRoutes);
 app.use(`${BASE_PATH}/bookings`, bookingRoutes);
-// app.use(
-//   `${BASE_PATH}/appointments`,
-//   passportAuthenticateJWT,
-//   appointmentRoutes
-// );
 // app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes);
-// app.use(`${BASE_PATH}/reports`, passportAuthenticateJWT, reportRoutes);
+app.use(`${BASE_PATH}/reports`, passportAuthenticateJWT, reportRoutes);
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {

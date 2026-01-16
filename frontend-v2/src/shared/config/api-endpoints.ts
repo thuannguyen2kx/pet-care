@@ -11,6 +11,7 @@ export const API_BASE = {
   ADMIN: `${API_VERSION}/admin`,
   EMPLOYEE: `${API_VERSION}/employees`,
   AVAILABILITY: `${API_VERSION}/availability`,
+  REPORT: `${API_VERSION}/reports`,
 };
 
 /* ================= AUTH ================= */
@@ -130,4 +131,10 @@ export const EMPLOYEE_ENDPOINTS = {
   BOOKINGS: `${API_BASE.EMPLOYEE}/bookings`,
   UPDATE_STATUS: (bookingId: string) => `${API_BASE.EMPLOYEE}/bookings/${bookingId}/status`,
   DASHBOARD_STATS: `${API_BASE.EMPLOYEE}/dashboard/stats`,
+};
+
+/* ================= REPORT ================= */
+export const REPORT_ENDPOINTS = {
+  DASHBOARD: `${API_BASE.REPORT}/dashboard/stats`,
+  TOP_EMPLOYEES: `${API_BASE.REPORT}/employees/top`,
 };
