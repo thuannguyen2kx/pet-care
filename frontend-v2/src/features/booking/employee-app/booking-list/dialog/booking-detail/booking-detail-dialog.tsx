@@ -27,6 +27,7 @@ type Props = {
     status: BookingStatus,
     nextStatus: UpdateBookingStatus['status'],
   ) => void;
+  onCancelBooking: (bookingId: string) => void;
 };
 
 export function EmployeeBookingDetailDialog({
@@ -35,6 +36,7 @@ export function EmployeeBookingDetailDialog({
   booking,
   isLoading,
   onUpdateBookingStatus,
+  onCancelBooking,
 }: Props) {
   if (isLoading) {
     return (
@@ -79,6 +81,7 @@ export function EmployeeBookingDetailDialog({
           <EmployeeBookingDetailContent
             booking={booking}
             onUpdateBookingStatus={onUpdateBookingStatus}
+            onCancelBooking={onCancelBooking}
           />
         </ScrollArea>
         <DialogFooter>

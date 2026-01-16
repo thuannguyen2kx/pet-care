@@ -1,5 +1,7 @@
 import { EmployeeBookingDetailDialog } from '@/features/booking/employee-app/booking-schedule/dialog/booking-detail/booking-detail-dialog';
 import { useEmployeeBookingDetailDialog } from '@/features/booking/employee-app/booking-schedule/dialog/booking-detail/use-booking-detail-dialog';
+import { EmployeeCancelBookingDialog } from '@/features/booking/employee-app/booking-schedule/dialog/cancel-booking/cancel-booking-dialog';
+import { useEmployeeCancelBookingController } from '@/features/booking/employee-app/booking-schedule/dialog/cancel-booking/use-cancel-booking.controller';
 import { EmployeeUpdateBookingStatusDialog } from '@/features/booking/employee-app/booking-schedule/dialog/update-status/update-booking-status-dialog';
 import { useEmployeeUpdateBookingStatusController } from '@/features/booking/employee-app/booking-schedule/dialog/update-status/use-update-booking-status-controller';
 import { EmployeeBookingScheduleView } from '@/features/booking/employee-app/booking-schedule/ui/booking-schedule-view';
@@ -7,6 +9,8 @@ import { EmployeeBookingScheduleView } from '@/features/booking/employee-app/boo
 export default function EmployeeBookingSchedulePage() {
   const bookingDetailCtrl = useEmployeeBookingDetailDialog();
   const updateBookingStatusCtrl = useEmployeeUpdateBookingStatusController();
+  const cancelBookingCtrl = useEmployeeCancelBookingController();
+
   return (
     <>
       <EmployeeBookingScheduleView onViewDetail={bookingDetailCtrl.actions.open} />
@@ -16,6 +20,7 @@ export default function EmployeeBookingSchedulePage() {
         booking={bookingDetailCtrl.data.booking}
         isLoading={bookingDetailCtrl.state.isLoading}
         onUpdateBookingStatus={updateBookingStatusCtrl.actions.openUpdateBookingStatusDialog}
+        onCancelBooking={cancelBookingCtrl.actions.openCancelDialog}
       />
       <EmployeeUpdateBookingStatusDialog
         open={updateBookingStatusCtrl.state.isOpen}
@@ -24,6 +29,13 @@ export default function EmployeeBookingSchedulePage() {
         allowedStatuses={updateBookingStatusCtrl.data.allowedStatuses}
         onSubmit={updateBookingStatusCtrl.actions.submitUpdateBookingStatus}
         isSubmitting={updateBookingStatusCtrl.state.isSubmitting}
+      />
+      <EmployeeCancelBookingDialog
+        open={cancelBookingCtrl.state.isOpen}
+        onOpenChange={cancelBookingCtrl.actions.onOpenChange}
+        form={cancelBookingCtrl.form}
+        onSubmit={cancelBookingCtrl.actions.submitCancelBooking}
+        isSubmitting={cancelBookingCtrl.state.isSubmitting}
       />
     </>
   );

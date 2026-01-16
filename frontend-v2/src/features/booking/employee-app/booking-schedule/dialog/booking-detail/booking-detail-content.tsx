@@ -21,14 +21,23 @@ type Props = {
     status: BookingStatus,
     nextStatus: UpdateBookingStatus['status'],
   ) => void;
+  onCancellBooking: (bookingId: string) => void;
 };
-export function EmployeeBookingDetailContent({ booking, onUpdateBookingStatus }: Props) {
+export function EmployeeBookingDetailContent({
+  booking,
+  onUpdateBookingStatus,
+  onCancellBooking,
+}: Props) {
   return (
     <div className="space-y-6">
       <BookingHeader booking={booking} />
 
       <BookingSummary booking={booking} />
-      <EmployeeBookingActions booking={booking} onUpdateBookingStatus={onUpdateBookingStatus} />
+      <EmployeeBookingActions
+        booking={booking}
+        onUpdateBookingStatus={onUpdateBookingStatus}
+        onCancelBooking={onCancellBooking}
+      />
 
       <Separator />
 
@@ -86,6 +95,7 @@ function BookingHeader({ booking }: { booking: BookingDetail }) {
 function EmployeeBookingActions({
   booking,
   onUpdateBookingStatus,
+  onCancelBooking,
 }: {
   booking: BookingDetail;
   onUpdateBookingStatus: (
@@ -93,6 +103,7 @@ function EmployeeBookingActions({
     status: BookingStatus,
     nextStatus: UpdateBookingStatus['status'],
   ) => void;
+  onCancelBooking: (bookingId: string) => void;
 }) {
   const availableStatuses = getAvailableStatusActions(booking.status);
 
@@ -114,6 +125,13 @@ function EmployeeBookingActions({
             }}
           />
         ))}
+
+        <CancelBookingButton
+          disabled={booking.isPast || !booking.isCancellable}
+          onCancellBooking={() => {
+            onCancelBooking(booking.id);
+          }}
+        />
       </div>
     </Section>
   );
@@ -133,6 +151,24 @@ function UpdateBookingStatusButton({
     <Button className={statusConfig.className} disabled={disabled} onClick={onUpdate}>
       <statusConfig.icon className="size-4.5" />
       {statusConfig.label}
+    </Button>
+  );
+}
+function CancelBookingButton({
+  onCancellBooking,
+  disabled,
+}: {
+  onCancellBooking: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Button
+      variant="destructive"
+      onClick={onCancellBooking}
+      disabled={disabled}
+      className="cursor-pointer"
+    >
+      Huỷ lịch
     </Button>
   );
 }
