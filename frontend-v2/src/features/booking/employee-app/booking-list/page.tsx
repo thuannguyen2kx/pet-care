@@ -31,6 +31,7 @@ export default function EmployeeBookingList() {
         booking={bookingDetailCtrl.data.booking}
         isLoading={bookingDetailCtrl.state.isLoading}
         onUpdateBookingStatus={updateBookingStatusCtrl.actions.openUpdateBookingStatusDialog}
+        onCancelBooking={cancelBookingCtrl.actions.openCancelDialog}
       />
       <EmployeeUpdateBookingStatusDialog
         open={updateBookingStatusCtrl.state.isOpen}

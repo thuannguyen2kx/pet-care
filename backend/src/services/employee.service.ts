@@ -11,7 +11,14 @@ import {
   parseDateOnly,
 } from "../utils/format-date";
 import { UserStatus } from "../enums/status-user.enum";
-import { format } from "date-fns";
+import {
+  endOfMonth,
+  endOfToday,
+  format,
+  startOfMonth,
+  startOfToday,
+} from "date-fns";
+import { BookingModel } from "../models/booking.model";
 
 class EmployeeService {
   /**
@@ -802,6 +809,109 @@ class EmployeeService {
     }
 
     return stats;
+  }
+
+  async getEmployeeDashboardStat(employeeId: Types.ObjectId) {
+    const now = new Date();
+
+    const todayStart = startOfToday();
+    const todayEnd = endOfToday();
+
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+
+    const [
+      todayBookingStats,
+      ratingStats,
+      completedTotal,
+      completedThisMonthStats,
+    ] = await Promise.all([
+      BookingModel.aggregate([
+        {
+          $match: {
+            employeeId,
+            scheduledDate: {
+              $gte: todayStart,
+              $lt: todayEnd,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            pending: {
+              $sum: {
+                $cond: [{ $eq: ["$status", "pending"] }, 1, 0],
+              },
+            },
+          },
+        },
+      ]),
+
+      BookingModel.aggregate([
+        {
+          $match: {
+            employeeId,
+            "rating.score": { $exists: true },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            averageRating: { $avg: "$rating.score" },
+            totalRatings: { $sum: 1 },
+          },
+        },
+      ]),
+
+      BookingModel.countDocuments({
+        employeeId,
+        status: "completed",
+      }),
+
+      BookingModel.aggregate([
+        {
+          $match: {
+            employeeId,
+            status: "completed",
+            completedAt: {
+              $gte: monthStart,
+              $lt: monthEnd,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalCompleted: { $sum: 1 },
+            totalRevenue: { $sum: "$totalPrice" },
+          },
+        },
+      ]),
+    ]);
+
+    return {
+      rating: {
+        average: ratingStats[0]?.averageRating ?? 0,
+        totalReviews: ratingStats[0]?.totalRatings ?? 0,
+      },
+
+      todayBookings: {
+        total: todayBookingStats[0]?.total ?? 0,
+        pending: todayBookingStats[0]?.pending ?? 0,
+      },
+
+      completedServices: {
+        total: completedTotal,
+        thisMonth: completedThisMonthStats[0]?.totalCompleted ?? 0,
+      },
+
+      revenue: {
+        thisMonth: completedThisMonthStats[0]?.totalRevenue ?? 0,
+        currency: "VND",
+      },
+    };
   }
 
   /**

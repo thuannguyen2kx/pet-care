@@ -13,6 +13,7 @@ import {
   updateEmployeeProfileSchema,
 } from "../validation/employee.validation";
 import { getCurrentWeekRange, parseDateOnly } from "../utils/format-date";
+import { Roles } from "../enums/role.enum";
 /**
  * @desc    Get employees
  * @route   GET /api/employees
@@ -373,26 +374,34 @@ export const deleteBreakTemplateController = asyncHandler(
 
 /**
  * @desc    Get employee schedule (calendar view)
- * @route   GET /api/employees/:id/schedule
+ * @route   GET /api/employees/schedule?startDate&endDate&employeeId
  * @access  Private (All)
  */
 export const getEmployeeScheduleController = asyncHandler(
   async (req: Request, res: Response) => {
-    const employeeId = req.params.id;
+    const user = req.user;
+    const filters: any = {};
+    if (user?.role === Roles.EMPLOYEE) {
+      filters["employeeId"] = user._id.toString();
+    }
+
+    if (user?.role === Roles.ADMIN && req.query.employeeId) {
+      filters["employeeId"] = req.query.employeeId;
+    }
 
     const now = new Date();
-    const startDate = req.query.startDate
+    filters["startDate"] = req.query.startDate
       ? parseDateOnly(req.query.startDate as string)
       : new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const endDate = req.query.endDate
+    filters["endDate"] = req.query.endDate
       ? parseDateOnly(req.query.endDate as string)
       : new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     const schedule = await employeeService.getEmployeeSchedule(
-      employeeId,
-      startDate,
-      endDate
+      filters.employeeId,
+      filters.startDate,
+      filters.endDate
     );
 
     return res.status(HTTPSTATUS.OK).json({
@@ -432,6 +441,18 @@ export const getTeamWeekScheduleController = asyncHandler(
 export const getEmployeeWorkingTodayController = asyncHandler(
   async (req: Request, res: Response) => {
     const result = await employeeService.getEmployeesWorkingToday();
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Đã lấy lịch làm việc của nhân viên trong ngày",
+      data: result,
+    });
+  }
+);
+
+export const getEmployeeDashboardStatController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const employeeId = req.user!._id;
+    const result = await employeeService.getEmployeeDashboardStat(employeeId);
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Đã lấy lịch làm việc của nhân viên trong ngày",

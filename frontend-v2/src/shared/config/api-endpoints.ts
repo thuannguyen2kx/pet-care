@@ -46,7 +46,7 @@ export const USER_ENDPOINTS = {
 /* ================= EMPLOYEE SCHEDULE ================= */
 export const EMPLOYEE_SCHEDULE_ENDPOINTS = {
   GET_EMPLOYEE: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}`,
-  SCHEDULE: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/schedule`,
+  SCHEDULE: `${API_BASE.EMPLOYEE}/schedule`,
   TEAM_SCHEDULE: `${API_BASE.EMPLOYEE}/schedule/week`,
   SCHEDULE_TODAY: `${API_BASE.EMPLOYEE}/schedule/today`,
   CREATE_SHIFT: (employeeId: string) => `${API_BASE.EMPLOYEE}/${employeeId}/shifts`,
@@ -129,4 +129,5 @@ export const EMPLOYEE_ENDPOINTS = {
   SCHEDULE: `${API_BASE.EMPLOYEE}/schedule`,
   BOOKINGS: `${API_BASE.EMPLOYEE}/bookings`,
   UPDATE_STATUS: (bookingId: string) => `${API_BASE.EMPLOYEE}/bookings/${bookingId}/status`,
+  DASHBOARD_STATS: `${API_BASE.EMPLOYEE}/dashboard/stats`,
 };

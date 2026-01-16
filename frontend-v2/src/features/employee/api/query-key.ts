@@ -8,4 +8,6 @@ export const employeeKeys = {
   list: (filter: TEmployeeFilter) => [...employeeKeys.lists(), filter] as const,
   details: () => [...employeeKeys.all, 'detail'] as const,
   detail: (id: string) => [...employeeKeys.details(), id] as const,
+
+  dashboard_stats: () => [...employeeKeys.all, 'dashboard_stats'] as const,
 };

@@ -1,6 +1,6 @@
 export const employeeScheduleKeys = {
   schedule: ['schedule'],
-  detail: (employeeId: string, startDate?: string, endDate?: string) => [
+  detail: (employeeId?: string, startDate?: string, endDate?: string) => [
     ...employeeScheduleKeys.schedule,
     employeeId,
     startDate,

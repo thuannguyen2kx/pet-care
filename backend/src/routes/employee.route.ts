@@ -8,6 +8,7 @@ import {
   deleteShiftTemplateController,
   disableShiftTemplateController,
   getEmployeeByIdController,
+  getEmployeeDashboardStatController,
   getEmployeeScheduleController,
   getEmployeesController,
   getEmployeeShiftsController,
@@ -27,11 +28,14 @@ const router = Router();
 
 // Employee
 router.get("/", getEmployeesController);
-router.get("/:id", getEmployeeByIdController);
-router.put("/:id/profile", updateEmployeeProfileController);
-
+// Dashboard Start
+router.get(
+  "/dashboard/stats",
+  authorizeRoles([Roles.EMPLOYEE]),
+  getEmployeeDashboardStatController
+);
 // Schedule
-router.get("/:id/schedule", getEmployeeScheduleController);
+router.get("/schedule", getEmployeeScheduleController);
 router.get(
   "/schedule/week",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
@@ -42,6 +46,9 @@ router.get(
   authorizeRoles([Roles.ADMIN]),
   getEmployeeWorkingTodayController
 );
+
+router.get("/:id", getEmployeeByIdController);
+router.put("/:id/profile", updateEmployeeProfileController);
 
 // Shifts
 router.post(

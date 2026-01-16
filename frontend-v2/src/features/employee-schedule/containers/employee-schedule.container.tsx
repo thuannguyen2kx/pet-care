@@ -31,8 +31,8 @@ export default function EmploeeScheduleContainer() {
   };
 
   const scheduleDays = useMemo<TCalendarScheduleDay[]>(() => {
-    return mapScheduleToCalendarDays(employeeScheduleQuery.data?.data || []);
-  }, [employeeScheduleQuery.data?.data]);
+    return mapScheduleToCalendarDays(employeeScheduleQuery.data || []);
+  }, [employeeScheduleQuery.data]);
 
   return (
     <EmployeeSchedulePrecenter
