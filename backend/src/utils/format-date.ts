@@ -1,3 +1,5 @@
+import { startOfYear, subDays, subMonths } from "date-fns";
+
 /**
  * Get all dates in range that match a specific day of week
  */
@@ -99,4 +101,27 @@ export function parseDateOnly(input: string): Date {
   }
 
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function resolveDateRange(timeRange: string) {
+  const now = new Date();
+
+  switch (timeRange) {
+    case "week":
+      return { from: subDays(now, 7), to: now };
+    case "month":
+      return { from: subDays(now, 30), to: now };
+    case "quarter":
+      return { from: subMonths(now, 3), to: now };
+    case "year":
+      return { from: startOfYear(now), to: now };
+    default:
+      return { from: subDays(now, 30), to: now };
+  }
+}
+export function calcChange(current: number, previous: number) {
+  if (previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
+  return Number((((current - previous) / previous) * 100).toFixed(1));
 }

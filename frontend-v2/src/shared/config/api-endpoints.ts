@@ -137,4 +137,7 @@ export const EMPLOYEE_ENDPOINTS = {
 export const REPORT_ENDPOINTS = {
   DASHBOARD: `${API_BASE.REPORT}/dashboard/stats`,
   TOP_EMPLOYEES: `${API_BASE.REPORT}/employees/top`,
+  OVERVIEW: `${API_BASE.REPORT}/overview`,
+  REVENUE_CHART: `${API_BASE.REPORT}/revenue-chart`,
+  SERVICES: `${API_BASE.REPORT}/services`,
 };

@@ -193,6 +193,10 @@ const createAppRouter = (queryClient: QueryClient) => {
                       lazy: () =>
                         import('@/routes/admin/bookings/booking-detail').then(convert(queryClient)),
                     },
+                    {
+                      path: paths.admin.reports.path,
+                      lazy: () => import('@/routes/admin/reports').then(convert(queryClient)),
+                    },
                   ],
                 },
               ],

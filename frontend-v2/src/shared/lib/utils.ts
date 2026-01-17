@@ -32,3 +32,10 @@ export function removeUndefined<T extends Record<string, unknown>>(obj: T): Part
     Object.entries(obj).filter(([, value]) => value !== undefined),
   ) as Partial<T>;
 }
+
+export function formatCurrency(number: number) {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(number);
+}
