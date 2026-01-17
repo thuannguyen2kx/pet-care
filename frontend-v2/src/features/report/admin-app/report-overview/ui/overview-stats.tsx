@@ -1,9 +1,8 @@
-import { Calendar, DollarSign, PawPrint, Star, TrendingUp } from 'lucide-react';
+import { Calendar, DollarSign, PawPrint, Star } from 'lucide-react';
 
 import { useReportOverviewController } from '@/features/report/admin-app/report-overview/application/use-report-overview-controller';
 import { StatCard } from '@/features/report/admin-app/report-overview/ui/stat-card';
 import { TimeFilter } from '@/features/report/admin-app/report-overview/ui/time-filter';
-import { Card, CardContent } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 export function OverviewStats() {

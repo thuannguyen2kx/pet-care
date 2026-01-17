@@ -108,3 +108,23 @@ export const getServiceReportController = asyncHandler(
     });
   },
 );
+
+export const getCustomerReportController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { from, to, limit } = req.query;
+
+    const fromDate = parseDateOnly(from as string);
+    const toDate = parseDateOnly(to as string);
+
+    const data = await reportService.getCustomerStats({
+      from: fromDate,
+      to: toDate,
+      limit: Number(limit) || 5,
+    });
+
+    res.json({
+      range: { from, to },
+      data,
+    });
+  },
+);

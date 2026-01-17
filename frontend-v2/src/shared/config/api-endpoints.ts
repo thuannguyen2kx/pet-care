@@ -140,4 +140,5 @@ export const REPORT_ENDPOINTS = {
   OVERVIEW: `${API_BASE.REPORT}/overview`,
   REVENUE_CHART: `${API_BASE.REPORT}/revenue-chart`,
   SERVICES: `${API_BASE.REPORT}/services`,
+  CUSTOMERS: `${API_BASE.REPORT}/customers`,
 };

@@ -10,14 +10,19 @@ import {
 
 import type {
   AdminDashboardStat,
+  ReportCustomerStat,
   ReportOverview,
   ReportServiceStat,
   RevenueChart,
   RevenueChartPoint,
   TopEmployee,
 } from '@/features/report/domain/report-entity';
-import type { RevenueChartResponseDto } from '@/features/report/domain/report-http-schema';
 import type {
+  ReportCustomerResponseDto,
+  RevenueChartResponseDto,
+} from '@/features/report/domain/report-http-schema';
+import type {
+  ReportCustomersQuery,
   ReportOverviewQuery,
   ReportServicesQuery,
   RevenueChartQuery,
@@ -25,6 +30,8 @@ import type {
 } from '@/features/report/domain/report-state';
 import type {
   AdminDashboardStatDto,
+  ReportCustomerQueryDto,
+  ReportCustomerStatDto,
   ReportOverviewDto,
   ReportOverviewQueryDto,
   ReportServicesQueryDto,
@@ -126,6 +133,27 @@ export const mapReportServicesDtoToEntities = (
   return dtos.map(mapReportServiceDtoToEntity);
 };
 
+export const mapCustomerStatDtoToEntity = (dto: ReportCustomerStatDto): ReportCustomerStat => {
+  return {
+    id: dto._id,
+    fullName: dto.fullName,
+    avatar: dto.profilePicture?.url ?? null,
+    totalSpent: dto.stats.totalSpent,
+    totalBookings: dto.stats.completedBookings,
+    averageRating: dto.stats.averageRating,
+  };
+};
+export const mapCustomerReportResponseDtoToEnity = (dto: ReportCustomerResponseDto) => {
+  return {
+    range: dto.range,
+    overview: dto.data.overview,
+    topCustomers: {
+      bySpent: dto.data.topCustomers.bySpent.map(mapCustomerStatDtoToEntity),
+      byBookings: dto.data.topCustomers.byBookings.map(mapCustomerStatDtoToEntity),
+    },
+  };
+};
+
 //=========================
 // State => DTO
 //=========================
@@ -194,5 +222,14 @@ export const mapReportServiceQueryToDto = (state: ReportServicesQuery): ReportSe
     limit: state.limit,
     employeeId: state.employeeId,
     sortBy: state.sortBy,
+  };
+};
+
+export const mapReportCustomerQueryToDto = (
+  state: ReportCustomersQuery,
+): ReportCustomerQueryDto => {
+  return {
+    ...mapPresetToDateRange(state.preset),
+    limit: state.limit,
   };
 };

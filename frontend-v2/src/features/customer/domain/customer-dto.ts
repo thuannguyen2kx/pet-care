@@ -2,6 +2,17 @@ import { z } from 'zod';
 
 import { imageDtoSchema } from '@/shared/lib/zod-primitives';
 
+export const CustomersQueryDtoSchema = z.object({
+  search: z.string().optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).optional(),
+  memberShipTier: z.enum(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']).optional(),
+  page: z.number().optional(),
+  limit: z.number().optional(),
+});
+
+// ====================
+// DTOs (Response from API)
+// ====================
 export const CommunicationPreferencesDtoSchema = z.object({
   email: z.boolean(),
   sms: z.boolean(),
@@ -67,3 +78,4 @@ export const UpdateCustomerProfileDtoSchema = z.object({
 
 export type CustomerUserDto = z.infer<typeof CustomerUserDtoSchema>;
 export type UpdateCustomerProfileDto = z.infer<typeof UpdateCustomerProfileDtoSchema>;
+export type CustomersQueryDto = z.infer<typeof CustomersQueryDtoSchema>;

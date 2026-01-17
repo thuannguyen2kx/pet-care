@@ -2,6 +2,7 @@ import z from 'zod';
 
 import {
   AdminDashboardStatDtoSchema,
+  ReportCustomerStatDtoSchema,
   ReportOverviewDtoSchema,
   reportServiceStatDtoSchema,
   revenueChartItemDtoSchema,
@@ -41,4 +42,28 @@ export const reportServicesResponseSchema = z.object({
   data: z.array(reportServiceStatDtoSchema),
 });
 
+export const reportCustomerResponseSchema = z.object({
+  range: z.object({
+    from: isoDateSchema,
+    to: isoDateSchema,
+  }),
+  data: z.object({
+    overview: z.object({
+      totalCustomers: z.number(),
+      activeCustomers: z.number(),
+      newCustomers: z.number(),
+      returningCustomers: z.number(),
+      totalBookings: z.number(),
+      completedBookings: z.number(),
+      completionRate: z.number(),
+      totalSpent: z.number(),
+      averageRating: z.number(),
+    }),
+    topCustomers: z.object({
+      bySpent: z.array(ReportCustomerStatDtoSchema),
+      byBookings: z.array(ReportCustomerStatDtoSchema),
+    }),
+  }),
+});
 export type RevenueChartResponseDto = z.infer<typeof revenueChartResponseDtoSchema>;
+export type ReportCustomerResponseDto = z.infer<typeof reportCustomerResponseSchema>;

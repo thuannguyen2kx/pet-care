@@ -24,7 +24,7 @@ export const getCurrentUserService = async (userId: Types.ObjectId) => {
 
   if (user.status === UserStatus.INACTIVE) {
     throw new UnauthorizedException(
-      "Tài khoản của bạn đã bị ngừng hoạt động. Vui lòng liên hệ với quản trị viên để được hổ trợ."
+      "Tài khoản của bạn đã bị ngừng hoạt động. Vui lòng liên hệ với quản trị viên để được hổ trợ.",
     );
   }
 
@@ -52,7 +52,7 @@ export const updateProfileService = async (
       province: string;
       ward: string;
     };
-  }
+  },
 ) => {
   const user = await UserModel.findById(userId);
 
@@ -82,7 +82,7 @@ export const updateAddressService = async (
   address: {
     province: string;
     ward: string;
-  }
+  },
 ) => {
   const user = await UserModel.findById(userId);
 
@@ -109,7 +109,7 @@ export const updatePreferencesService = async (
       sms?: boolean;
       push?: boolean;
     };
-  }
+  },
 ) => {
   const user = await UserModel.findById(userId);
 
@@ -119,7 +119,7 @@ export const updatePreferencesService = async (
 
   if (preferences.preferredEmployeeId) {
     user.customerInfo.preferredEmployeeId = new mongoose.Types.ObjectId(
-      preferences.preferredEmployeeId
+      preferences.preferredEmployeeId,
     );
   }
 
@@ -137,7 +137,7 @@ export const updatePreferencesService = async (
 
 export const changeProfilePictureService = async (
   userId: Types.ObjectId,
-  file?: Express.Multer.File
+  file?: Express.Multer.File,
 ) => {
   const user = await UserModel.findById(userId);
   if (!user) {
@@ -270,7 +270,7 @@ export const createEmployeeService = async (data: {
 
     // Check if email exists
     const existingUser = await UserModel.findOne({ email: data.email }).session(
-      session
+      session,
     );
     if (existingUser) {
       throw new BadRequestException("Email đã tồn tại");
@@ -371,7 +371,7 @@ export const updateEmployeeService = async (userId: string, data: any) => {
 
 export const changeUserStatusService = async (
   userId: string,
-  status: UserStatusType
+  status: UserStatusType,
 ) => {
   const user = await UserModel.findById(userId);
 
@@ -387,7 +387,7 @@ export const changeUserStatusService = async (
 
 export const changeUserRoleService = async (
   userId: string,
-  newRole: RoleType
+  newRole: RoleType,
 ) => {
   const user = await UserModel.findById(userId);
 
@@ -448,7 +448,7 @@ export const deleteUserService = async (userId: string) => {
 
   if (hasActiveAppointments) {
     throw new BadRequestException(
-      "Không thể xóa người dùng khi có lịch hẹn đang hoạt động."
+      "Không thể xóa người dùng khi có lịch hẹn đang hoạt động.",
     );
   }
 
@@ -496,14 +496,14 @@ export const getEmployeeListService = async (filters: {
 // Get customer list
 export const getCustomerListService = async (filters: {
   search?: string;
-  status?: UserStatusType;
+  status?: string;
   membershipTier?: string;
   page?: number;
   limit?: number;
 }) => {
   const { search, status, membershipTier, page = 1, limit = 20 } = filters;
 
-  const query: any = {
+  const query: Record<string, unknown> = {
     role: Roles.CUSTOMER,
   };
 
@@ -522,16 +522,32 @@ export const getCustomerListService = async (filters: {
     query["customerInfo.membershipTier"] = membershipTier;
   }
 
-  const total = await UserModel.countDocuments(query);
-  const customers = await UserModel.find(query)
-    .select("-password")
-    .sort({ "customerInfo.stats.totalSpent": -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
+  const [{ data, meta }] = await UserModel.aggregate([
+    { $match: query },
+    { $sort: { "customerInfo.stats.totalSpent": -1 } },
+    {
+      $facet: {
+        data: [
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          { $project: { password: 0 } },
+        ],
+        meta: [{ $count: "total" }],
+      },
+    },
+  ]);
+  const total = meta[0]?.total ?? 0;
 
+  const customers = data;
   return {
     customers,
-    total,
-    pages: Math.ceil(total / limit),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasNext: page * limit < total,
+      hasPrev: page > 1,
+    },
   };
 };

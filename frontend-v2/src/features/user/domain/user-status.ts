@@ -1,4 +1,4 @@
-import { UserCheck, UserX } from 'lucide-react';
+import { Award, Crown, Medal, Star, UserCheck, UserX } from 'lucide-react';
 
 export const USER_STATUS = {
   ACTIVE: 'ACTIVE',
@@ -21,6 +21,83 @@ export const MEMBER_SHIP_TIER = {
   PLATINUM: 'PLATINUM',
 } as const;
 export type TMemberShipTier = (typeof MEMBER_SHIP_TIER)[keyof typeof MEMBER_SHIP_TIER];
+export type MembershipTier = (typeof MEMBER_SHIP_TIER)[keyof typeof MEMBER_SHIP_TIER];
+export type MembershipTierUIConfig = {
+  value: MembershipTier;
+  label: string;
+  shortLabel?: string;
+  rank: number;
+  color: {
+    text: string;
+    bg: string;
+    border?: string;
+  };
+  icon: React.ComponentType<{ className?: string }>;
+};
+export const MEMBERSHIP_TIER_UI_CONFIG: Record<MembershipTier, MembershipTierUIConfig> = {
+  BRONZE: {
+    value: 'BRONZE',
+    label: 'Đồng',
+    shortLabel: 'Bronze',
+    rank: 1,
+    color: {
+      text: 'text-amber-700',
+      bg: 'bg-amber-100',
+      border: 'border-amber-300',
+    },
+    icon: Medal,
+  },
+
+  SILVER: {
+    value: 'SILVER',
+    label: 'Bạc',
+    shortLabel: 'Silver',
+    rank: 2,
+    color: {
+      text: 'text-slate-600',
+      bg: 'bg-slate-100',
+      border: 'border-slate-300',
+    },
+    icon: Award,
+  },
+
+  GOLD: {
+    value: 'GOLD',
+    label: 'Vàng',
+    shortLabel: 'Gold',
+    rank: 3,
+    color: {
+      text: 'text-yellow-700',
+      bg: 'bg-yellow-100',
+      border: 'border-yellow-300',
+    },
+    icon: Star,
+  },
+
+  PLATINUM: {
+    value: 'PLATINUM',
+    label: 'Bạch kim',
+    shortLabel: 'Platinum',
+    rank: 4,
+    color: {
+      text: 'text-indigo-700',
+      bg: 'bg-indigo-100',
+      border: 'border-indigo-300',
+    },
+    icon: Crown,
+  },
+};
+export const getMembershipTierConfig = (tier: MembershipTier) => {
+  return MEMBERSHIP_TIER_UI_CONFIG[tier];
+};
+
+export const getMembershipTierOptions = () =>
+  Object.values(MEMBERSHIP_TIER_UI_CONFIG)
+    .sort((a, b) => a.rank - b.rank)
+    .map(({ value, label }) => ({
+      value,
+      label,
+    }));
 
 export const USER_STATUS_UI: Record<
   TUserStatus,

@@ -4,6 +4,7 @@ import { Roles } from "../enums/role.enum";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import {
   getAdminDashboardStatsController,
+  getCustomerReportController,
   getReportOverviewController,
   getRevenueChartController,
   getServiceReportController,
@@ -18,4 +19,5 @@ reportRoutes.get("/dashboard/stats", getAdminDashboardStatsController);
 reportRoutes.get("/employees/top", getTopEmployeesController);
 reportRoutes.get("/revenue-chart", getRevenueChartController);
 reportRoutes.get("/services", getServiceReportController);
+reportRoutes.get("/customers", getCustomerReportController);
 export default reportRoutes;

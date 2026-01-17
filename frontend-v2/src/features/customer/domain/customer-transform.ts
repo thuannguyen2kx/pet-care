@@ -1,10 +1,12 @@
 import {
   CustomerUserDtoSchema,
+  type CustomersQueryDto,
+  type CustomerUserDto,
   type UpdateCustomerProfileDto,
 } from '@/features/customer/domain/customer-dto';
-import { CustomerSchema } from '@/features/customer/domain/customer-entity';
+import { CustomerSchema, type CustomerListItem } from '@/features/customer/domain/customer-entity';
 import { GetCurrentCustomerResponseSchema } from '@/features/customer/domain/customer-http-schema';
-import type { UpdateProfile } from '@/features/customer/domain/customer-state';
+import type { CustomersQuery, UpdateProfile } from '@/features/customer/domain/customer-state';
 
 /**
  * DTO → Entity (parse + transform)
@@ -53,3 +55,40 @@ export const mapUpdateProfileToDto = (entity: UpdateProfile): UpdateCustomerProf
   dateOfBirth: entity.dateOfBirth ? entity.dateOfBirth.toISOString() : null,
   address: entity.address ?? null,
 });
+
+// ==================
+// Entity → DTO
+// ==================
+export const mapCustomersQueryToDto = (state: CustomersQuery): CustomersQueryDto => {
+  return {
+    search: state.search,
+    limit: state.limit,
+    page: state.page,
+    status: state.status,
+    memberShipTier: state.memberShipTier,
+  };
+};
+
+export const mapCustomerListItemDtoToEntity = (dto: CustomerUserDto): CustomerListItem => {
+  return {
+    id: dto._id,
+    fullName: dto.fullName,
+    email: dto.email,
+    status: dto.status,
+    phoneNumber: dto.phoneNumber ?? null,
+    profilePicture: dto.profilePicture.url,
+    customerInfo: {
+      communicationPreferences: dto.customerInfo.communicationPreferences,
+      stats: dto.customerInfo.stats,
+      loyaltyPoints: dto.customerInfo.loyaltyPoints,
+      membershipTier: dto.customerInfo.membershipTier,
+      memberSince: new Date(dto.customerInfo.memberSince),
+      isVip: dto.customerInfo.isVip,
+      hasOutstandingBalance: dto.customerInfo.hasOutstandingBalance,
+    },
+  };
+};
+
+export const mapCustomerListDtoToEntity = (dtos: CustomerUserDto[]): CustomerListItem[] => {
+  return dtos.map((dto) => mapCustomerListItemDtoToEntity(dto));
+};

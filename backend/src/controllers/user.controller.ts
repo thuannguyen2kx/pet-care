@@ -47,7 +47,7 @@ export const getCurrentUserController = asyncHandler(
         user,
       },
     });
-  }
+  },
 );
 export const getProfileByIdController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -59,7 +59,7 @@ export const getProfileByIdController = asyncHandler(
       message: "Lấy thông tin người dùng thành công",
       user,
     });
-  }
+  },
 );
 export const updateProfileController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -68,14 +68,14 @@ export const updateProfileController = asyncHandler(
 
     const { updatedUser } = await updateProfileService(
       new Types.ObjectId(userId),
-      body
+      body,
     );
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Cập nhật thông tin người dùng thành công",
       data: { user: updatedUser },
     });
-  }
+  },
 );
 
 export const updateAddressController = asyncHandler(
@@ -91,7 +91,7 @@ export const updateAddressController = asyncHandler(
         user: updatedUser,
       },
     });
-  }
+  },
 );
 
 export const updatePreferencesController = asyncHandler(
@@ -105,7 +105,7 @@ export const updatePreferencesController = asyncHandler(
       message: "Cập nhật tuỳ chọn thành công",
       data: { user: updatedUser },
     });
-  }
+  },
 );
 export const updateProfilePictureController = [
   uploadProfilePicture.single("profilePicture"),
@@ -131,7 +131,7 @@ export const deleteProfilePictureController = asyncHandler(
       message: "Xoá ảnh người dùng thành công",
       data: { user: updatedUser },
     });
-  }
+  },
 );
 
 // ========================================
@@ -148,7 +148,7 @@ export const getAllUsersController = asyncHandler(
       message: "Lấy danh sách người dùng thành công",
       data: result,
     });
-  }
+  },
 );
 
 // Get customer by ID
@@ -162,7 +162,7 @@ export const getUserByIdController = asyncHandler(
       message: "Lấy thông tin người dùng thành công",
       data: { user },
     });
-  }
+  },
 );
 export const createEmployeeController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -174,7 +174,7 @@ export const createEmployeeController = asyncHandler(
       message: "Tạo nhân viên thành công",
       data: { employee },
     });
-  }
+  },
 );
 
 export const updateEmployeeController = asyncHandler(
@@ -188,7 +188,7 @@ export const updateEmployeeController = asyncHandler(
       message: "Cập nhật thông tin nhân viên thành công",
       data: { employee: updatedUser },
     });
-  }
+  },
 );
 export const changeUserStatusController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -197,14 +197,14 @@ export const changeUserStatusController = asyncHandler(
 
     const { updatedUser } = await changeUserStatusService(
       userId,
-      status as UserStatusType
+      status as UserStatusType,
     );
 
     return res.status(HTTPSTATUS.OK).json({
       message: `Trạng thái người dùng đã thành đổi thành ${status} thành công`,
       data: { user: updatedUser },
     });
-  }
+  },
 );
 export const changeUserRoleController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -217,7 +217,7 @@ export const changeUserRoleController = asyncHandler(
       message: `Quyền người dùng đã thay đổi từ ${result.oldRole} thành ${result.newRole}`,
       data: { user: result.updatedUser },
     });
-  }
+  },
 );
 export const deleteUserController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -228,7 +228,7 @@ export const deleteUserController = asyncHandler(
     return res.status(HTTPSTATUS.OK).json({
       message: "Xoá tài khoản thành công",
     });
-  }
+  },
 );
 
 export const getEmployeeListController = asyncHandler(
@@ -241,12 +241,12 @@ export const getEmployeeListController = asyncHandler(
       message: "Lấy danh sách nhân viên thành công",
       data: result,
     });
-  }
+  },
 );
 
 export const getCustomerListController = asyncHandler(
   async (req: Request, res: Response) => {
-    const filters = req.query;
+    const filters = getAllUsersSchema.parse(req.query);
 
     const result = await getCustomerListService(filters);
 
@@ -254,5 +254,5 @@ export const getCustomerListController = asyncHandler(
       message: "Lấy danh sách người dùng thành công",
       data: result,
     });
-  }
+  },
 );

@@ -22,8 +22,13 @@ export const ReportServicesQuerySchema = z.object({
   employeeId: mongoObjectIdSchema.optional(),
   sortBy: z.enum(['bookingCount', 'revenue']).optional(),
 });
+export const ReportCustomersQuerySchema = z.object({
+  preset: z.enum(['7d', '30d', 'quarter', 'year']).default('30d'),
+  limit: z.coerce.number().optional().default(5),
+});
 
 export type TopEmployeeQuery = z.infer<typeof TopEmployeeQuerySchema>;
 export type ReportOverviewQuery = z.infer<typeof ReportOverviewQuerySchema>;
 export type RevenueChartQuery = z.infer<typeof RevenueChartQuerySchema>;
 export type ReportServicesQuery = z.infer<typeof ReportServicesQuerySchema>;
+export type ReportCustomersQuery = z.infer<typeof ReportCustomersQuerySchema>;

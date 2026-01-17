@@ -24,6 +24,12 @@ export const ReportServicesQueryDtoSchema = z.object({
   sortBy: z.enum(['bookingCount', 'revenue']).optional(),
 });
 
+export const ReportCustomerQueryDtoSchema = z.object({
+  from: isoDateSchema,
+  to: isoDateSchema,
+  limit: z.number().optional(),
+});
+
 export const AdminDashboardStatDtoSchema = z.object({
   employees: z.object({
     active: z.number(),
@@ -85,6 +91,20 @@ export const reportServiceStatDtoSchema = z.object({
   revenue: z.number(),
 });
 
+export const ReportCustomerStatDtoSchema = z.object({
+  _id: z.string(),
+  fullName: z.string(),
+  profilePicture: z.object({
+    url: z.url().nullable(),
+    publicId: z.string().nullable(),
+  }),
+  stats: z.object({
+    totalSpent: z.number(),
+    completedBookings: z.number(),
+    averageRating: z.number(),
+  }),
+});
+
 export type AdminDashboardStatDto = z.infer<typeof AdminDashboardStatDtoSchema>;
 export type TopEmployeeQueryDto = z.infer<typeof TopEmployeeQueryDtoSchema>;
 export type TopEmployeeDto = z.infer<typeof TopEmployeeDtoSchema>;
@@ -94,3 +114,5 @@ export type RevenueChartQueryDto = z.infer<typeof RevenueChartQueryDtoSchema>;
 export type RevenueChartItemDto = z.infer<typeof revenueChartItemDtoSchema>;
 export type ReportServicesQueryDto = z.infer<typeof ReportServicesQueryDtoSchema>;
 export type ReportServiceStatDto = z.infer<typeof reportServiceStatDtoSchema>;
+export type ReportCustomerQueryDto = z.infer<typeof ReportCustomerQueryDtoSchema>;
+export type ReportCustomerStatDto = z.infer<typeof ReportCustomerStatDtoSchema>;

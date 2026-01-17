@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { mongoObjectIdSchema } from '@/shared/lib/zod-primitives';
+
 export const ProfilePictureSchema = z.object({
   url: z.url().nullable(),
   publicId: z.string().nullable(),
@@ -55,7 +57,18 @@ export const CustomerSchema = z.object({
   updatedAt: z.date(),
 });
 
+export const CustomerListItemSchema = z.object({
+  id: mongoObjectIdSchema,
+  fullName: z.string(),
+  email: z.email(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  phoneNumber: z.string().nullable(),
+  profilePicture: z.url().nullable(),
+  customerInfo: CustomerInfoSchema,
+});
+
 /* =====================
  * Types
  * ===================== */
 export type Customer = z.infer<typeof CustomerSchema>;
+export type CustomerListItem = z.infer<typeof CustomerListItemSchema>;

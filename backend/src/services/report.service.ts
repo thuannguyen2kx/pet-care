@@ -347,6 +347,107 @@ class ReportService {
       { $limit: params.limit },
     ]);
   }
+
+  async getCustomerStats(params: { from: Date; to: Date; limit?: number }) {
+    const { from, to, limit = 5 } = params;
+
+    /** ---------- OVERVIEW ---------- */
+    const overviewAgg = await UserModel.aggregate([
+      { $match: { role: Roles.CUSTOMER } },
+      {
+        $facet: {
+          totalCustomers: [{ $count: "count" }],
+
+          activeCustomers: [
+            { $match: { status: UserStatus.ACTIVE } },
+            { $count: "count" },
+          ],
+
+          newCustomers: [
+            {
+              $match: {
+                createdAt: { $gte: from, $lte: to },
+              },
+            },
+            { $count: "count" },
+          ],
+
+          returningCustomers: [
+            {
+              $match: {
+                "customerInfo.stats.completedBookings": { $gte: 2 },
+              },
+            },
+            { $count: "count" },
+          ],
+
+          behavior: [
+            {
+              $group: {
+                _id: null,
+                totalBookings: {
+                  $sum: "$customerInfo.stats.totalBookings",
+                },
+                completedBookings: {
+                  $sum: "$customerInfo.stats.completedBookings",
+                },
+                totalSpent: {
+                  $sum: "$customerInfo.stats.totalSpent",
+                },
+                avgRating: {
+                  $avg: "$customerInfo.stats.averageRating",
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const overviewRaw = overviewAgg[0];
+
+    /** ---------- TOP CUSTOMERS ---------- */
+    const topCustomers = await UserModel.aggregate([
+      { $match: { role: "CUSTOMER" } },
+      {
+        $project: {
+          fullName: 1,
+          profilePicture: 1,
+          stats: "$customerInfo.stats",
+        },
+      },
+      {
+        $facet: {
+          bySpent: [{ $sort: { "stats.totalSpent": -1 } }, { $limit: limit }],
+          byBookings: [
+            { $sort: { "stats.completedBookings": -1 } },
+            { $limit: limit },
+          ],
+        },
+      },
+    ]);
+
+    return {
+      overview: {
+        totalCustomers: overviewRaw.totalCustomers[0]?.count ?? 0,
+        activeCustomers: overviewRaw.activeCustomers[0]?.count ?? 0,
+        newCustomers: overviewRaw.newCustomers[0]?.count ?? 0,
+        returningCustomers: overviewRaw.returningCustomers[0]?.count ?? 0,
+
+        totalBookings: overviewRaw.behavior[0]?.totalBookings ?? 0,
+        completedBookings: overviewRaw.behavior[0]?.completedBookings ?? 0,
+        completionRate:
+          overviewRaw.behavior[0]?.totalBookings > 0
+            ? overviewRaw.behavior[0].completedBookings /
+              overviewRaw.behavior[0].totalBookings
+            : 0,
+        totalSpent: overviewRaw.behavior[0]?.totalSpent ?? 0,
+        averageRating: overviewRaw.behavior[0]?.avgRating ?? 0,
+      },
+
+      topCustomers: topCustomers[0],
+    };
+  }
 }
 
 export const reportService = new ReportService();

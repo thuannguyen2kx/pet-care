@@ -1,4 +1,5 @@
 import type {
+  ReportCustomersQuery,
   ReportOverviewQuery,
   ReportServicesQuery,
   RevenueChartQuery,
@@ -16,4 +17,6 @@ export const reportQueryKeys = {
   revenue_chart: (params?: RevenueChartQuery) => [...reportQueryKeys.revenue_charts, params],
   services: ['report', 'services'],
   service: (params: ReportServicesQuery) => [...reportQueryKeys.services, params],
+  customers: ['report', 'customers'],
+  customer: (params: ReportCustomersQuery) => [...reportQueryKeys.customers, params],
 };

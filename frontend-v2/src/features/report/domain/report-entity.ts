@@ -71,6 +71,15 @@ export const ReportServiceStatSchema = z.object({
   revenueInMillion: z.number(),
 });
 
+export const ReportCustomerStatSchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  avatar: z.url().nullable(),
+  totalSpent: z.number(),
+  totalBookings: z.number(),
+  averageRating: z.number(),
+});
+
 export type AdminDashboardStat = z.infer<typeof AdminDashboardStatSchema>;
 export type TopEmployee = z.infer<typeof TopEmployeeSchema>;
 export type ReportOverview = z.infer<typeof ReportOverviewSchema>;
@@ -79,3 +88,4 @@ export type RevenueChartPoint = z.infer<typeof RevenueChartPointSchema>;
 export type RevenueChartSummary = z.infer<typeof RevenueChartSummarySchema>;
 export type RevenueChartRange = z.infer<typeof RevenueChartRangeSchema>;
 export type ReportServiceStat = z.infer<typeof ReportServiceStatSchema>;
+export type ReportCustomerStat = z.infer<typeof ReportCustomerStatSchema>;
