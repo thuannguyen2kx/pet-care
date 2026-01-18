@@ -14,10 +14,8 @@ import postRoutes from "./routes/post.route";
 import "./config/passport.config";
 import { passportAuthenticateJWT } from "./config/passport.config";
 import commentRoutes from "./routes/comment.route";
-import reactionRoutes from "./routes/reaction.route";
 import serviceRoutes from "./routes/service.route";
 import employeeRoutes from "./routes/employee.route";
-import appointmentRoutes from "./routes/appointment.route";
 import paymentRoutes from "./routes/payment.route";
 // import webhookRoutes from "./routes/webhook.route";
 import reportRoutes from "./routes/report.route";
@@ -36,7 +34,7 @@ app.use(
   cors({
     origin: config.FRONTEND_ORIGIN,
     credentials: true,
-  })
+  }),
 );
 
 app.get("/health", (req, res) => {
@@ -48,9 +46,8 @@ app.get("/health", (req, res) => {
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/users`, passportAuthenticateJWT, userRoutes);
 app.use(`${BASE_PATH}/pets`, passportAuthenticateJWT, petRoutes);
-// app.use(`${BASE_PATH}`, passportAuthenticateJWT, commentRoutes);
-// app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
-// app.use(`${BASE_PATH}/reactions`, passportAuthenticateJWT, reactionRoutes);
+app.use(`${BASE_PATH}/comments`, passportAuthenticateJWT, commentRoutes);
+app.use(`${BASE_PATH}/posts`, passportAuthenticateJWT, postRoutes);
 app.use(`${BASE_PATH}/services`, serviceRoutes);
 app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
 app.use(`${BASE_PATH}/availability`, availabilityRoutes);

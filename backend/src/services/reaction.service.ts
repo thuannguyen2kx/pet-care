@@ -1,7 +1,8 @@
-import Reaction from "../models/reaction.model";
-import PostModel from "../models/post.model";
-import CommentModel from "../models/comment.model";
+import { CommentModel } from "../models/comment.model";
+import { PostModel } from "../models/post.model";
+import { ReactionModel } from "../models/reaction.model";
 import { NotFoundException } from "../utils/app-error";
+import { Types } from "mongoose";
 
 type ReactionType = "like" | "love" | "laugh" | "sad" | "angry";
 type ContentType = "post" | "comment";
@@ -22,30 +23,30 @@ export const addReactionService = async ({
   contentType,
   contentId,
   userId,
-  reactionType
+  reactionType,
 }: {
   contentType: ContentType;
   contentId: string;
-  userId: string;
+  userId: Types.ObjectId;
   reactionType: ReactionType;
 }) => {
   // Check if the content exists
   await checkContentExists(contentType, contentId);
-  
+
   // Check if user already reacted to this content
-  const existingReaction = await Reaction.findOne({
+  const existingReaction = await ReactionModel.findOne({
     contentType,
     contentId,
-    userId
+    userId,
   });
-  
+
   let reaction;
   let previousReactionType: ReactionType | null = null;
-  
+
   if (existingReaction) {
     // Store previous reaction type for stats update
     previousReactionType = existingReaction.reactionType as ReactionType;
-    
+
     // Only update if reaction type changed
     if (previousReactionType !== reactionType) {
       // Update existing reaction
@@ -57,21 +58,23 @@ export const addReactionService = async ({
     }
   } else {
     // Create new reaction
-    reaction = await Reaction.create({
+    reaction = await ReactionModel.create({
       contentType,
       contentId,
       userId,
-      reactionType
+      reactionType,
     });
-    
+
     // Update content stats - increment total count
     await updateContentStats(contentType, contentId, 1);
   }
-  
+
   // Return reaction with user info
-  const populatedReaction = await Reaction.findById(reaction._id)
-    .populate("userId", "fullName profilePicture");
-  
+  const populatedReaction = await ReactionModel.findById(reaction._id).populate(
+    "userId",
+    "fullName profilePicture",
+  );
+
   return { reaction: populatedReaction };
 };
 
@@ -81,29 +84,29 @@ export const addReactionService = async ({
 export const removeReactionService = async ({
   contentType,
   contentId,
-  userId
+  userId,
 }: {
   contentType: ContentType;
   contentId: string;
-  userId: string;
+  userId: Types.ObjectId;
 }) => {
   // Check if the content exists
   await checkContentExists(contentType, contentId);
-  
+
   // Find and delete the reaction
-  const reaction = await Reaction.findOneAndDelete({
+  const reaction = await ReactionModel.findOneAndDelete({
     contentType,
     contentId,
-    userId
+    userId,
   });
-  
+
   if (!reaction) {
     throw new NotFoundException("Reaction not found");
   }
-  
+
   // Update content stats - decrement count
   await updateContentStats(contentType, contentId, -1);
-  
+
   return { success: true };
 };
 
@@ -112,20 +115,20 @@ export const removeReactionService = async ({
  */
 export const getReactionsService = async ({
   contentType,
-  contentId
+  contentId,
 }: {
   contentType: ContentType;
   contentId: string;
 }) => {
   // Check if the content exists
   await checkContentExists(contentType, contentId);
-  
+
   // Get all reactions for this content
-  const reactions = await Reaction.find({
+  const reactions = await ReactionModel.find({
     contentType,
-    contentId
+    contentId,
   }).populate("userId", "fullName profilePicture");
-  
+
   // Count by type
   const counts: ReactionCounts = {
     like: 0,
@@ -133,22 +136,22 @@ export const getReactionsService = async ({
     laugh: 0,
     sad: 0,
     angry: 0,
-    total: reactions.length
+    total: reactions.length,
   };
-  
-  reactions.forEach(reaction => {
+
+  reactions.forEach((reaction) => {
     counts[reaction.reactionType as ReactionType] += 1;
   });
-  
+
   // Get top reactors (for display in UI)
-  const topReactors = reactions.slice(0, 10).map(reaction => ({
+  const topReactors = reactions.slice(0, 10).map((reaction) => ({
     userId: reaction.userId,
-    reactionType: reaction.reactionType
+    reactionType: reaction.reactionType,
   }));
-  
+
   return {
     counts,
-    topReactors
+    topReactors,
   };
 };
 
@@ -160,7 +163,7 @@ export const getReactorsService = async ({
   contentId,
   reactionType,
   page = 1,
-  limit = 20
+  limit = 20,
 }: {
   contentType: ContentType;
   contentId: string;
@@ -170,39 +173,39 @@ export const getReactorsService = async ({
 }) => {
   // Check if the content exists
   await checkContentExists(contentType, contentId);
-  
+
   // Build query
   const query: any = {
     contentType,
-    contentId
+    contentId,
   };
-  
+
   // Add reaction type filter if provided
   if (reactionType) {
     query.reactionType = reactionType;
   }
-  
+
   // Calculate pagination
   const skip = (page - 1) * limit;
-  
+
   // Get total count
-  const total = await Reaction.countDocuments(query);
-  
+  const total = await ReactionModel.countDocuments(query);
+
   // Get paginated reactors
-  const reactors = await Reaction.find(query)
+  const reactors = await ReactionModel.find(query)
     .populate("userId", "fullName profilePicture")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
-  
+
   return {
     reactors,
     pagination: {
       total,
       page,
       limit,
-      hasMore: skip + reactors.length < total
-    }
+      hasMore: skip + reactors.length < total,
+    },
   };
 };
 
@@ -212,24 +215,24 @@ export const getReactorsService = async ({
 export const getUserReactionService = async ({
   contentType,
   contentId,
-  userId
+  userId,
 }: {
   contentType: ContentType;
   contentId: string;
-  userId: string;
+  userId: Types.ObjectId;
 }) => {
   // Check if the content exists
   await checkContentExists(contentType, contentId);
-  
+
   // Get user's reaction
-  const reaction = await Reaction.findOne({
+  const reaction = await ReactionModel.findOne({
     contentType,
     contentId,
-    userId
+    userId,
   });
-  
+
   return {
-    reaction: reaction || null
+    reaction: reaction || null,
   };
 };
 
@@ -238,10 +241,10 @@ export const getUserReactionService = async ({
  */
 const checkContentExists = async (
   contentType: ContentType,
-  contentId: string
+  contentId: string,
 ): Promise<void> => {
   let content;
-  
+
   if (contentType === "post") {
     content = await PostModel.findById(contentId);
     if (!content) {
@@ -261,18 +264,18 @@ const checkContentExists = async (
 const updateContentStats = async (
   contentType: ContentType,
   contentId: string,
-  change: number
+  change: number,
 ): Promise<void> => {
   if (contentType === "post") {
     // Update post's likeCount
     await PostModel.findByIdAndUpdate(contentId, {
-      $inc: { "stats.likeCount": change }
+      $inc: { "stats.likeCount": change },
     });
   } else if (contentType === "comment") {
     // For comments, initialize stats object if it doesn't exist
     // and then update likeCount
     const comment = await CommentModel.findById(contentId);
-    
+
     if (comment) {
       if (!comment.stats) {
         // If stats doesn't exist, create it with initial values
@@ -280,14 +283,14 @@ const updateContentStats = async (
           $set: {
             stats: {
               likeCount: Math.max(0, change), // Ensure it's not negative
-              replyCount: 0
-            }
-          }
+              replyCount: 0,
+            },
+          },
         });
       } else {
         // If stats exists, just increment likeCount
         await CommentModel.findByIdAndUpdate(contentId, {
-          $inc: { "stats.likeCount": change }
+          $inc: { "stats.likeCount": change },
         });
       }
     }

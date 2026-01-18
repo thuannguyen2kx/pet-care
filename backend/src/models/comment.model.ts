@@ -1,64 +1,47 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { Schema, model, Types, HydratedDocument } from "mongoose";
 
-export interface IComment extends Document {
-  postId: mongoose.Types.ObjectId | string;
-  authorId: mongoose.Types.ObjectId | string;
-  content: string;
-  parentCommentId?: mongoose.Types.ObjectId | string;
-  status: 'active' | 'blocked' | 'deleted';
-  stats?: {
-    likeCount: number;
-    replyCount: number;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  replies?: IComment[];
+export interface ICommentStats {
+  likeCount: number;
+  replyCount: number;
 }
 
-const CommentSchema = new Schema({
-  postId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Post',
-    required: true
-  },
-  authorId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  content: {
-    type: String,
-    required: true
-  },
-  parentCommentId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Comment'
-  },
-  status: {
-    type: String,
-    enum: ['active', 'blocked', 'deleted'],
-    default: 'active'
-  },
-  // Add stats for reactions and replies
-  stats: {
-    likeCount: {
-      type: Number,
-      default: 0
+export interface IComment {
+  postId: Types.ObjectId;
+  authorId: Types.ObjectId;
+  content: string;
+  parentCommentId?: Types.ObjectId;
+  status: "active" | "blocked" | "deleted";
+  stats: ICommentStats;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type CommentDocument = HydratedDocument<IComment>;
+
+const CommentSchema = new Schema<IComment>(
+  {
+    postId: { type: Schema.Types.ObjectId, ref: "Post", required: true },
+    authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    content: { type: String, required: true },
+    parentCommentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
     },
-    replyCount: {
-      type: Number,
-      default: 0
-    }
-  }
-}, {
-  timestamps: true
-});
+    status: {
+      type: String,
+      enum: ["active", "blocked", "deleted"],
+      default: "active",
+    },
+    stats: {
+      likeCount: { type: Number, default: 0 },
+      replyCount: { type: Number, default: 0 },
+    },
+  },
+  { timestamps: true },
+);
 
-// Indexes for better query performance
 CommentSchema.index({ postId: 1, createdAt: -1 });
+CommentSchema.index({ parentCommentId: 1 });
 CommentSchema.index({ authorId: 1 });
-CommentSchema.index({ parentCommentId: 1 }); // For finding replies
 
-const CommentModel = mongoose.model<IComment>('Comment', CommentSchema);
-
-export default CommentModel;
+export const CommentModel = model<IComment>("Comment", CommentSchema);

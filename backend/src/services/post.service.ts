@@ -1,6 +1,3 @@
-import PostModel, { IPost, IMedia, IReport } from "../models/post.model";
-import CommentModel, { IComment } from "../models/comment.model";
-import ReactionModel from "../models/reaction.model";
 import UserModel from "../models/user.model";
 import PetModel from "../models/pet.model";
 import { deleteFile } from "../utils/file-uploade";
@@ -10,6 +7,10 @@ import {
   NotFoundException,
 } from "../utils/app-error";
 import { Roles } from "../enums/role.enum";
+import { CommentModel } from "../models/comment.model";
+import { IMedia, IReport, PostModel } from "../models/post.model";
+import { ReactionModel } from "../models/reaction.model";
+import { Types } from "mongoose";
 
 interface PostQuery {
   page?: number;
@@ -39,11 +40,6 @@ interface ReportedPostsQuery {
   status?: string;
   sortBy?: string;
   sortDirection?: "asc" | "desc";
-}
-
-// Tạo interface cho comment với replies
-interface CommentWithReplies extends IComment {
-  replies: IComment[];
 }
 
 // Get all posts (with filtering, pagination)
@@ -183,14 +179,12 @@ export const getPostByIdService = async ({
   }).populate("authorId", "fullName profilePicture");
 
   // Organize replies by parent comment
-  const commentsWithReplies: CommentWithReplies[] = comments.map((comment) => {
-    const commentObj = comment.toObject() as CommentWithReplies;
-    commentObj.replies = replies.filter(
-      (reply) =>
-        reply.parentCommentId?.toString() === (comment._id as unknown as string)
-    );
-    return commentObj;
-  });
+  const commentsWithReplies = comments.map((comment) => ({
+    ...comment,
+    replies: replies.filter(
+      (reply) => reply.parentCommentId?.toString() === comment._id.toString(),
+    ),
+  }));
 
   // Get reactions for the post
   const reactions = await ReactionModel.find({
@@ -215,7 +209,7 @@ export const getPostByIdService = async ({
       acc[type] = reactions.filter((r) => r.reactionType === type).length;
       return acc;
     },
-    {}
+    {},
   );
 
   return {
@@ -266,10 +260,11 @@ export const createPostService = async ({
 
       if (
         pet.ownerId.toString() !== user._id.toString() &&
-        user.role !== Roles.ADMIN && user.role !== Roles.EMPLOYEE
+        user.role !== Roles.ADMIN &&
+        user.role !== Roles.EMPLOYEE
       ) {
         throw new BadRequestException(
-          `Pet with ID ${petId} does not belong to you`
+          `Pet with ID ${petId} does not belong to you`,
         );
       }
     }
@@ -363,7 +358,7 @@ export const updatePostService = async ({
 
       if (pet.ownerId.toString() !== user?._id.toString()) {
         throw new BadRequestException(
-          `Pet with ID ${petId} does not belong to you`
+          `Pet with ID ${petId} does not belong to you`,
         );
       }
     }
@@ -594,7 +589,7 @@ export const reportPostService = async ({
   if (
     post.reports &&
     post.reports.some(
-      (report) => report.userId.toString() === user._id.toString()
+      (report) => report.userId.toString() === user._id.toString(),
     )
   ) {
     throw new BadRequestException("You have already reported this post");
@@ -700,96 +695,96 @@ export const getReportedPostsService = async ({
 };
 
 // Admin: Resolve a post report
-export const resolveReportService = async ({ 
-  postId, 
-  reportId, 
-  body, 
-  user 
-}: { 
-  postId: string; 
+export const resolveReportService = async ({
+  postId,
+  reportId,
+  body,
+  user,
+}: {
+  postId: string;
   reportId: string;
-  body: any; 
+  body: any;
   user?: any;
 }) => {
   // Check if user is admin
   if (user?.role !== Roles.ADMIN && user?.role !== Roles.EMPLOYEE) {
-    throw new ForbiddenException('Admin access required');
+    throw new ForbiddenException("Admin access required");
   }
-  
+
   const { status, response } = body;
-  
-  if (!['resolved', 'rejected'].includes(status)) {
-    throw new BadRequestException('Invalid status value');
+
+  if (!["resolved", "rejected"].includes(status)) {
+    throw new BadRequestException("Invalid status value");
   }
-  
+
   const post = await PostModel.findById(postId);
-  
+
   if (!post) {
-    throw new NotFoundException('Post not found');
+    throw new NotFoundException("Post not found");
   }
-  
+
   // Find the specific report
   const reportIndex = post.reports?.findIndex(
-    report => (report._id as unknown as string)=== reportId
+    (report) => (report._id as unknown as string) === reportId,
   );
-  
+
   if (reportIndex === undefined || reportIndex === -1) {
-    throw new NotFoundException('Report not found');
+    throw new NotFoundException("Report not found");
   }
-  
+
   // Update report status
   if (post.reports) {
     post.reports[reportIndex].status = status;
-    post.reports[reportIndex].response = response || '';
+    post.reports[reportIndex].response = response || "";
     post.reports[reportIndex].resolvedAt = new Date();
     post.reports[reportIndex].resolvedBy = user._id;
   }
-  
+
   await post.save();
-  
+
   return {
     message: `Report marked as ${status}`,
-    post
+    post,
   };
 };
 
 // Get featured posts (for homepage)
-export const getFeaturedPostsService = async ({ 
-  limit = 5 
-}: { 
+export const getFeaturedPostsService = async ({
+  limit = 5,
+}: {
   limit?: number;
 }) => {
   // Get most popular posts (by view count, likes, comments)
   const featuredPosts = await PostModel.find({
-    status: 'active',
-    visibility: 'public',
-    isFeatured: true // You'd need to add this field to your schema
+    status: "active",
+    visibility: "public",
+    isFeatured: true, // You'd need to add this field to your schema
   })
-    .populate('authorId', 'fullName profilePicture')
-    .populate('petIds', 'name species breed profilePicture')
-    .sort({ 'stats.viewCount': -1, 'stats.likeCount': -1 })
+    .populate("authorId", "fullName profilePicture")
+    .populate("petIds", "name species breed profilePicture")
+    .sort({ "stats.viewCount": -1, "stats.likeCount": -1 })
     .limit(limit);
-  
+
   // If not enough featured posts, add popular ones
   if (featuredPosts.length < limit) {
     const remainingLimit = limit - featuredPosts.length;
-    
+
     // Get popular posts that aren't already featured
-    const featuredIds = featuredPosts.map(post => post._id);
-    
+    const featuredIds = featuredPosts.map((post) => post._id);
+
     const popularPosts = await PostModel.find({
       _id: { $nin: featuredIds },
-      status: 'active',
-      visibility: 'public'
+      status: "active",
+      visibility: "public",
     })
-      .populate('authorId', 'fullName profilePicture')
-      .populate('petIds', 'name species breed profilePicture')
-      .sort({ 'stats.viewCount': -1, 'stats.likeCount': -1 })
+      .populate("authorId", "fullName profilePicture")
+      .populate("petIds", "name species breed profilePicture")
+      .sort({ "stats.viewCount": -1, "stats.likeCount": -1 })
       .limit(remainingLimit);
-    
+
     featuredPosts.push(...popularPosts);
   }
-  
+
   return { posts: featuredPosts };
 };
 
@@ -827,7 +822,7 @@ export const setPostFeatureService = async ({
 
 export const getUserPostsService = async ({
   query,
-  userId
+  userId,
 }: {
   query: PostQuery;
   userId?: string;
@@ -873,22 +868,24 @@ export const getUserPostsService = async ({
   // Get engagement stats for each post
   const postsWithStats = await Promise.all(
     posts.map(async (post) => {
-      const commentCount = await CommentModel.countDocuments({
-        postId: post._id,
-      });
-      const reactionCount = await ReactionModel.countDocuments({
-        contentType: "post",
-        contentId: post._id,
-      });
+      const postId = post._id;
 
-      const postObj = post.toObject();
-      postObj.engagementStats = {
-        commentCount,
-        reactionCount,
+      const [commentCount, reactionCount] = await Promise.all([
+        CommentModel.countDocuments({ postId }),
+        ReactionModel.countDocuments({
+          contentType: "post",
+          contentId: postId,
+        }),
+      ]);
+
+      return {
+        ...post.toObject(),
+        engagementStats: {
+          commentCount,
+          reactionCount,
+        },
       };
-
-      return postObj;
-    })
+    }),
   );
 
   return {

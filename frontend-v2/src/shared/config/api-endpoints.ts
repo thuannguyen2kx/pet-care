@@ -12,6 +12,7 @@ export const API_BASE = {
   EMPLOYEE: `${API_VERSION}/employees`,
   AVAILABILITY: `${API_VERSION}/availability`,
   REPORT: `${API_VERSION}/reports`,
+  POST: `${API_VERSION}/posts`,
 };
 
 /* ================= AUTH ================= */
@@ -141,4 +142,13 @@ export const REPORT_ENDPOINTS = {
   REVENUE_CHART: `${API_BASE.REPORT}/revenue-chart`,
   SERVICES: `${API_BASE.REPORT}/services`,
   CUSTOMERS: `${API_BASE.REPORT}/customers`,
+};
+
+/* ================= POST ================= */
+export const POST_ENDPOINTS = {
+  CREATE: `${API_BASE.POST}`,
+  LIST: `${API_BASE.POST}`,
+  DETAIL: (postId: string) => `${API_BASE.POST}/${postId}`,
+  UPDATE: (postId: string) => `${API_BASE.POST}/${postId}`,
+  DELETE: (postId: string) => `${API_BASE.POST}/${postId}`,
 };

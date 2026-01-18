@@ -1,41 +1,47 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { Schema, model, Types, HydratedDocument } from "mongoose";
 
-export interface IReaction extends Document {
-  contentType: 'post' | 'comment';
-  contentId: mongoose.Types.ObjectId | string;
-  userId: mongoose.Types.ObjectId | string;
-  reactionType: 'like' | 'love' | 'laugh' | 'sad' | 'angry';
+export interface IReaction {
+  contentType: "Post" | "Comment";
+  contentId: Types.ObjectId;
+  userId: Types.ObjectId;
+  reactionType: "like" | "love" | "laugh" | "sad" | "angry";
   createdAt: Date;
+  updatedAt: Date;
 }
 
-const ReactionSchema = new Schema({
-  contentType: {
-    type: String,
-    enum: ['post', 'comment'],
-    required: true
-  },
-  contentId: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    refPath: 'contentType'
-  },
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  reactionType: {
-    type: String,
-    enum: ['like', 'love', 'laugh', 'sad', 'angry'],
-    default: 'like'
-  }
-}, {
-  timestamps: true
-});
+export type ReactionDocument = HydratedDocument<IReaction>;
 
-// Đảm bảo một người dùng chỉ có thể có một reaction trên mỗi nội dung
-ReactionSchema.index({ contentType: 1, contentId: 1, userId: 1 }, { unique: true });
+const ReactionSchema = new Schema<IReaction>(
+  {
+    contentType: {
+      type: String,
+      enum: ["Post", "Comment"],
+      required: true,
+    },
+    contentId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      refPath: "contentType",
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    reactionType: {
+      type: String,
+      enum: ["like", "love", "laugh", "sad", "angry"],
+      default: "like",
+    },
+  },
+  { timestamps: true },
+);
 
-const ReactionModel = mongoose.model<IReaction>('Reaction', ReactionSchema);
+ReactionSchema.index(
+  { contentType: 1, contentId: 1, userId: 1 },
+  { unique: true },
+);
+ReactionSchema.index({ contentId: 1, reactionType: 1 });
+ReactionSchema.index({ userId: 1, createdAt: -1 });
 
-export default ReactionModel;
+export const ReactionModel = model<IReaction>("Reaction", ReactionSchema);

@@ -1,5 +1,4 @@
-
-import express from 'express';
+import express from "express";
 import {
   getPostsController,
   getPostByIdController,
@@ -13,30 +12,83 @@ import {
   resolveReportController,
   getFeaturedPostsController,
   setPostFeatureController,
-  getUserPostsController
-} from '../controllers/post.controller';
-import { authorizeRoles } from '../middlewares/auth.middleware';
-import { Roles } from '../enums/role.enum';
+  getUserPostsController,
+} from "../controllers/post.controller";
+import { authorizeRoles } from "../middlewares/auth.middleware";
+import { Roles } from "../enums/role.enum";
+import {
+  addCommentController,
+  getPostCommentsController,
+} from "../controllers/comment.controller";
+import {
+  addReactionController,
+  getReactionsController,
+  getReactorsController,
+  getUserReactionController,
+  removeReactionController,
+} from "../controllers/reaction.controller";
 
 const postRoutes = express.Router();
 
-// Public routes
-postRoutes.get('/', getPostsController);
-postRoutes.get('/featured', getFeaturedPostsController);
-postRoutes.get('/:id', getPostByIdController);
+// -------- Public --------
+postRoutes.get("/", getPostsController);
+postRoutes.get("/featured", getFeaturedPostsController);
+postRoutes.get("/:postId", getPostByIdController);
 
-// Protected routes (require authentication)
-postRoutes.post('/', createPostController);
-postRoutes.put('/:id', updatePostController);
-postRoutes.delete('/:id', deletePostController);
-postRoutes.post('/:id/report', reportPostController);
-postRoutes.get('/user/:userId', getUserPostsController);
+// -------- Authenticated --------
+postRoutes.post("/", createPostController);
+postRoutes.put("/:postId", updatePostController);
+postRoutes.delete("/:postId", deletePostController);
+postRoutes.post("/:postId/reports", reportPostController);
 
-// Admin routes
-postRoutes.get('/admin/moderation', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getPostsForModerationController);
-postRoutes.get('/admin/reported', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), getReportedPostsController);
-postRoutes.put('/:id/status', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), updatePostStatusController);
-postRoutes.put('/:id/featured', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), setPostFeatureController);
-postRoutes.put('/:id/reports/:reportId', authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]), resolveReportController);
+// -------- User context --------
+postRoutes.get("/user/:userId/posts", getUserPostsController);
+
+// -------- Admin / Moderator --------
+postRoutes.get(
+  "/admin/posts/moderation",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getPostsForModerationController,
+);
+
+postRoutes.get(
+  "/admin/posts/reports",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  getReportedPostsController,
+);
+
+postRoutes.put(
+  "/admin/posts/:postId/status",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  updatePostStatusController,
+);
+
+postRoutes.put(
+  "/admin/posts/:postId/featured",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  setPostFeatureController,
+);
+
+postRoutes.put(
+  "/admin/posts/:postId/reports/:reportId",
+  authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
+  resolveReportController,
+);
+
+// -------- Comments by post --------
+postRoutes.post("/posts/:postId/comments", addCommentController);
+
+postRoutes.get("/posts/:postId/comments", getPostCommentsController);
+
+// -------- Post reactions --------
+postRoutes.get("/posts/:postId/reactions", getReactionsController);
+
+postRoutes.post("/posts/:postId/reactions", addReactionController);
+
+postRoutes.delete("/posts/:postId/reactions", removeReactionController);
+
+postRoutes.get("/posts/:postId/reactions/me", getUserReactionController);
+
+postRoutes.get("/posts/:postId/reactions/users", getReactorsController);
 
 export default postRoutes;

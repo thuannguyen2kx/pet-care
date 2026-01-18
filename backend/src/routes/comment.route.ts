@@ -1,36 +1,39 @@
 import express from "express";
-import { createCommentSchema, updateCommentSchema } from "../validation/comment.validation";
 import {
   addCommentController,
+  deleteCommentController,
   getPostCommentsController,
   updateCommentController,
-  deleteCommentController
 } from "../controllers/comment.controller";
+import {
+  addReactionController,
+  getReactionsController,
+  getReactorsController,
+  getUserReactionController,
+  removeReactionController,
+} from "../controllers/reaction.controller";
 
+const commentRoutes = express.Router();
 
-const commentRoutes= express.Router();
+// -------- Comment resource --------
+commentRoutes.put("/:commentId", updateCommentController);
 
-// Comment routes
-commentRoutes.post(
-  "/posts/:id/comments", 
-  addCommentController
-);
+commentRoutes.delete("/:commentId", deleteCommentController);
 
-commentRoutes.get(
-  "/posts/:id/comments", 
-  getPostCommentsController
-);
+// -------- Replies --------
+commentRoutes.post("/:commentId/replies", addCommentController);
 
-commentRoutes.put(
-  "/posts/comments/:id", 
-  updateCommentController
-);
+commentRoutes.get("/:commentId/replies", getPostCommentsController);
 
-commentRoutes.delete(
-  "/posts/comments/:id", 
-  deleteCommentController
-);
+// -------- Comment reactions --------
+commentRoutes.get("/:commentId/reactions", getReactionsController);
 
+commentRoutes.post("/:commentId/reactions", addReactionController);
 
+commentRoutes.delete("/:commentId/reactions", removeReactionController);
+
+commentRoutes.get("/:commentId/reactions/me", getUserReactionController);
+
+commentRoutes.get("/:commentId/reactions/users", getReactorsController);
 
 export default commentRoutes;
