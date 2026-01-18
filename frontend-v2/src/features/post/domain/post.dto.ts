@@ -5,12 +5,17 @@ import { mongoObjectIdSchema } from '@/shared/lib/zod-primitives';
 export const VisibilitySchema = z.enum(['public', 'private']);
 
 export const PostStatusSchema = z.enum(['active', 'inactive', 'pending', 'rejected']);
+const ReactionTypeSchema = z.enum(['like', 'love', 'laugh', 'sad', 'angry']);
 // ====================
 // Request to API
 // ====================
 export const PostsQuerySchema = z.object({
   page: z.coerce.number().optional(),
   limit: z.coerce.number().optional(),
+});
+
+export const AddReactionDtoSchema = z.object({
+  reactionType: ReactionTypeSchema,
 });
 // ====================
 // Response from API
@@ -55,6 +60,17 @@ export const PostDtoSchema = z.object({
   reports: z.array(z.unknown()),
   moderationNotes: z.array(z.unknown()),
 
+  reactionSummary: z.object({
+    total: z.number(),
+    byType: z.object({
+      like: z.number(),
+      love: z.number(),
+      laugh: z.number(),
+      sad: z.number(),
+      angry: z.number(),
+    }),
+    userReaction: ReactionTypeSchema.nullable(),
+  }),
   createdAt: z.string(),
   updatedAt: z.string(),
   __v: z.number(),

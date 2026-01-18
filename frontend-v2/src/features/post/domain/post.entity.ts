@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { ReactionTypeSchema } from '@/features/reaction/domain/reaction-entity';
 import { mongoObjectIdSchema } from '@/shared/lib/zod-primitives';
 
 const VisibilitySchema = z.enum(['public', 'private']);
@@ -40,6 +41,17 @@ export const PostSchema = z.object({
     }),
   ),
 
+  reactionSummary: z.object({
+    total: z.number(),
+    byType: z.object({
+      like: z.number(),
+      love: z.number(),
+      laugh: z.number(),
+      sad: z.number(),
+      angry: z.number(),
+    }),
+    userReaction: ReactionTypeSchema.nullable(),
+  }),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

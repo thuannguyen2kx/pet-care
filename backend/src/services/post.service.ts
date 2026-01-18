@@ -6,7 +6,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from "../utils/app-error";
-import { Roles } from "../enums/role.enum";
+import { Roles, RoleType } from "../enums/role.enum";
 import { CommentModel } from "../models/comment.model";
 import { IMedia, IReport, PostModel } from "../models/post.model";
 import { ReactionModel } from "../models/reaction.model";
@@ -41,14 +41,26 @@ interface ReportedPostsQuery {
   sortBy?: string;
   sortDirection?: "asc" | "desc";
 }
+type ReactionType = "like" | "love" | "laugh" | "sad" | "angry";
 
+export const createEmptyReactionSummary = () => ({
+  total: 0,
+  byType: {
+    like: 0,
+    love: 0,
+    laugh: 0,
+    sad: 0,
+    angry: 0,
+  } satisfies Record<ReactionType, number>,
+  userReaction: null as ReactionType | null,
+});
 // Get all posts (with filtering, pagination)
 export const getPostsService = async ({
   query,
   user,
 }: {
   query: PostQuery;
-  user?: any;
+  user?: { _id: Types.ObjectId; role: RoleType };
 }) => {
   const {
     page = 1,
@@ -113,13 +125,63 @@ export const getPostsService = async ({
     .populate("petIds", "name species breed profilePicture")
     .sort(sort)
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   // Get total count for pagination
   const totalPosts = await PostModel.countDocuments(filter);
 
+  if (!posts.length) {
+    return {
+      posts: [],
+      pagination: {
+        totalPosts,
+        totalPages: Math.ceil(totalPosts / limit),
+        currentPage: page,
+        hasNextPage: false,
+        hasPrevPage: page > 1,
+      },
+    };
+  }
+  const postIds = posts.map((p) => p._id);
+
+  /* ---------------- reactions ---------------- */
+  const reactions = await ReactionModel.find({
+    contentType: "Post",
+    contentId: { $in: postIds },
+  }).select("contentId reactionType userId");
+
+  /* ---------------- aggregate ---------------- */
+  const reactionMap = new Map<
+    string,
+    ReturnType<typeof createEmptyReactionSummary>
+  >();
+
+  posts.forEach((post) => {
+    reactionMap.set(post._id.toString(), createEmptyReactionSummary());
+  });
+
+  reactions.forEach((reaction) => {
+    const postId = reaction.contentId.toString();
+    const summary = reactionMap.get(postId);
+    if (!summary) return;
+
+    summary.total += 1;
+    summary.byType[reaction.reactionType as ReactionType] += 1;
+
+    if (reaction.userId.toString() === user?._id.toString()) {
+      summary.userReaction = reaction.reactionType as ReactionType;
+    }
+  });
+
+  /* ---------------- attach to post ---------------- */
+  const enrichedPosts = posts.map((post) => ({
+    ...post,
+    reactionSummary: reactionMap.get(post._id.toString()),
+  }));
+
   return {
-    posts,
+    posts: enrichedPosts,
     pagination: {
       totalPosts,
       totalPages: Math.ceil(totalPosts / limit),

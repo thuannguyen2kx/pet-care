@@ -27,6 +27,7 @@ import {
   getUserReactionController,
   removeReactionController,
 } from "../controllers/reaction.controller";
+import { postContext } from "../middlewares/post-context";
 
 const postRoutes = express.Router();
 
@@ -76,19 +77,19 @@ postRoutes.put(
 );
 
 // -------- Comments by post --------
-postRoutes.post("/posts/:postId/comments", addCommentController);
+postRoutes.post("/:postId/comments", addCommentController);
 
-postRoutes.get("/posts/:postId/comments", getPostCommentsController);
+postRoutes.get("/:postId/comments", getPostCommentsController);
 
 // -------- Post reactions --------
-postRoutes.get("/posts/:postId/reactions", getReactionsController);
+postRoutes.get("/:postId/reactions", postContext, getReactionsController);
 
-postRoutes.post("/posts/:postId/reactions", addReactionController);
+postRoutes.post("/:postId/reactions", postContext, addReactionController);
 
-postRoutes.delete("/posts/:postId/reactions", removeReactionController);
+postRoutes.delete("/:postId/reactions", postContext, removeReactionController);
 
-postRoutes.get("/posts/:postId/reactions/me", getUserReactionController);
+postRoutes.get("/:postId/reactions/me", postContext, getUserReactionController);
 
-postRoutes.get("/posts/:postId/reactions/users", getReactorsController);
+postRoutes.get("/:postId/reactions/users", postContext, getReactorsController);
 
 export default postRoutes;

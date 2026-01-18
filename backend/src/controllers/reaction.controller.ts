@@ -22,10 +22,13 @@ import {
  */
 export const addReactionController = asyncHandler(
   async (req: Request, res: Response) => {
-    const contentId = contentIdSchema.parse(req.params.id);
-    const contentType = contentTypeSchema.parse(req.params.contentType);
+    const contentType = req.contentType!;
     const userId = req.user!._id;
     const reactionType = reactionTypeSchema.parse(req.body.reactionType);
+    const contentId =
+      contentType === "Post"
+        ? contentIdSchema.parse(req.params.postId)
+        : contentIdSchema.parse(req.params.commentId);
 
     const { reaction } = await addReactionService({
       contentType,
@@ -48,9 +51,12 @@ export const addReactionController = asyncHandler(
  */
 export const removeReactionController = asyncHandler(
   async (req: Request, res: Response) => {
-    const contentId = contentIdSchema.parse(req.params.id);
-    const contentType = contentTypeSchema.parse(req.params.contentType);
+    const contentType = req.contentType!;
     const userId = req.user!._id;
+    const contentId =
+      contentType === "Post"
+        ? contentIdSchema.parse(req.params.postId)
+        : contentIdSchema.parse(req.params.commentId);
 
     await removeReactionService({
       contentType,
@@ -71,8 +77,11 @@ export const removeReactionController = asyncHandler(
  */
 export const getReactionsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const contentId = contentIdSchema.parse(req.params.id);
-    const contentType = contentTypeSchema.parse(req.params.contentType);
+    const contentType = req.contentType!;
+    const contentId =
+      contentType === "Post"
+        ? contentIdSchema.parse(req.params.postId)
+        : contentIdSchema.parse(req.params.commentId);
 
     const { counts, topReactors } = await getReactionsService({
       contentType,
@@ -94,8 +103,12 @@ export const getReactionsController = asyncHandler(
  */
 export const getReactorsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const contentId = contentIdSchema.parse(req.params.id);
-    const contentType = contentTypeSchema.parse(req.params.contentType);
+    const contentType = req.contentType!;
+    const contentId =
+      contentType === "Post"
+        ? contentIdSchema.parse(req.params.postId)
+        : contentIdSchema.parse(req.params.commentId);
+
     const reactionType = req.query.reactionType as string | undefined;
 
     const { page = 1, limit = 20 } = paginationSchema.parse({
@@ -126,8 +139,11 @@ export const getReactorsController = asyncHandler(
  */
 export const getUserReactionController = asyncHandler(
   async (req: Request, res: Response) => {
-    const contentId = contentIdSchema.parse(req.params.id);
-    const contentType = contentTypeSchema.parse(req.params.contentType);
+    const contentType = req.contentType!;
+    const contentId =
+      contentType === "Post"
+        ? contentIdSchema.parse(req.params.postId)
+        : contentIdSchema.parse(req.params.commentId);
     const userId = req.user!._id;
 
     const { reaction } = await getUserReactionService({

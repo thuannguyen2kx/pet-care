@@ -63,6 +63,8 @@ export const mapPostDtoToEntity = (dto: PostDto): Post => {
       type: m.type,
     })),
 
+    reactionSummary: dto.reactionSummary,
+
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

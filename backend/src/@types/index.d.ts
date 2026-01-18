@@ -5,6 +5,7 @@ declare global {
     interface User extends UserDocument {}
     interface Request {
       jwt?: string;
+      contentType?: "Post" | "Comment";
     }
   }
 }

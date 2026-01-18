@@ -5,7 +5,7 @@ import { NotFoundException } from "../utils/app-error";
 import { Types } from "mongoose";
 
 type ReactionType = "like" | "love" | "laugh" | "sad" | "angry";
-type ContentType = "post" | "comment";
+type ContentType = "Post" | "Comment";
 
 interface ReactionCounts {
   like: number;
@@ -245,7 +245,7 @@ const checkContentExists = async (
 ): Promise<void> => {
   let content;
 
-  if (contentType === "post") {
+  if (contentType === "Post") {
     content = await PostModel.findById(contentId);
     if (!content) {
       throw new NotFoundException("Post not found");
@@ -266,12 +266,12 @@ const updateContentStats = async (
   contentId: string,
   change: number,
 ): Promise<void> => {
-  if (contentType === "post") {
+  if (contentType === "Post") {
     // Update post's likeCount
     await PostModel.findByIdAndUpdate(contentId, {
       $inc: { "stats.likeCount": change },
     });
-  } else if (contentType === "comment") {
+  } else if (contentType === "Comment") {
     // For comments, initialize stats object if it doesn't exist
     // and then update likeCount
     const comment = await CommentModel.findById(contentId);

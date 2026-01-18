@@ -1,15 +1,21 @@
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { MessageCircle } from 'lucide-react';
 import { useCallback, useRef } from 'react';
 
+import { usePostReactionController } from '@/features/post/customer-app/feeds/application/use-post-reaction-controller';
 import { usePostsController } from '@/features/post/customer-app/feeds/application/use-posts';
 import type { Post } from '@/features/post/domain/post.entity';
+import { ReactionPicker } from '@/features/reaction/components/reaction-picker';
+import { getReactionMeta } from '@/features/reaction/config';
+import type { ReactionType } from '@/features/reaction/domain/reaction-entity';
 import { BlurImage } from '@/shared/components/blur-image';
 import { SectionSpinner } from '@/shared/components/template/loading';
 import { getInitials } from '@/shared/lib/utils';
 import { AspectRatio } from '@/shared/ui/aspect-ratio';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
+import { Button } from '@/shared/ui/button';
 import {
   Carousel,
   CarouselContent,
@@ -80,6 +86,15 @@ export function PostList() {
 }
 
 export function PostItem({ post }: { post: Post }) {
+  const { onReact } = usePostReactionController(post);
+
+  const reactions = post.reactionSummary;
+  const stats = post.stats;
+
+  const handleCommentClick = () => {
+    // open comment panel
+  };
+
   return (
     <article className="border-border border-b py-8 last:border-b-0">
       {/* Post header - author and timestamp */}
@@ -126,14 +141,14 @@ export function PostItem({ post }: { post: Post }) {
         </div>
       )}
 
-      {/* Reactions and interactions */}
-      {/* <PostReactions
-        likes={post.likes}
-        comments={post.comments}
-        liked={post.liked}
-        onLike={handleLike}
-        onComment={() => setShowComments(!showComments)}
-      /> */}
+      <PostReactions
+        reactions={reactions.byType}
+        totalReactions={reactions.total}
+        userReaction={reactions.userReaction}
+        comments={stats.commentCount}
+        onReactionChange={onReact}
+        onComment={handleCommentClick}
+      />
 
       {/* Comments section - collapsible */}
       {/* {showComments && <PostComments />} */}
@@ -226,6 +241,63 @@ function MediaCarousel({ media }: { media: Post['media'] }) {
       </Carousel>
       <div className="bg-muted text-muted-foreground absolute right-2 bottom-2 rounded-md px-2 py-1 text-xs">
         {media.length} đính kèm
+      </div>
+    </div>
+  );
+}
+
+interface PostReactionsProps {
+  reactions: Record<ReactionType, number>;
+  totalReactions: number;
+  userReaction: ReactionType | null;
+  comments: number;
+  onReactionChange: (reactionType: ReactionType) => void;
+  onComment: () => void;
+}
+export function PostReactions({
+  reactions,
+  totalReactions,
+  userReaction,
+  comments,
+  onReactionChange,
+  onComment,
+}: PostReactionsProps) {
+  // Get non-zero reactions for display
+  const activeReactions = Object.entries(reactions)
+    .filter(([, r]) => r > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  return (
+    <div className="border-border/50 border-t pt-6">
+      {/* Reaction counts summary - click to show who reacted */}
+      {totalReactions > 0 && (
+        <div className="text-muted-foreground mb-4 flex items-center gap-2 text-sm">
+          <div className="flex -space-x-1">
+            {activeReactions.slice(0, 3).map(([type]) => (
+              <span key={type} className="text-lg">
+                {getReactionMeta(type as ReactionType).emoji}
+              </span>
+            ))}
+          </div>
+          <span className="text-xs">{totalReactions} tương tác</span>
+        </div>
+      )}
+
+      {/* Reaction and interaction buttons */}
+      <div className="flex items-center gap-4">
+        {/* Reaction picker */}
+        <ReactionPicker currentReaction={userReaction} onReactionSelect={onReactionChange} />
+
+        {/* Comment button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-accent h-auto gap-2.5 px-0 py-1 transition-colors"
+          onClick={onComment}
+        >
+          <MessageCircle size={20} />
+          <span className="text-sm font-medium">{comments}</span>
+        </Button>
       </div>
     </div>
   );

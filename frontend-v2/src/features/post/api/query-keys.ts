@@ -1,11 +1,12 @@
 import type { CustomerPostsQuery } from '@/features/post/domain/post.state';
 
 export const postQueryKeys = {
-  all: ['posts'],
+  root: ['posts'] as const,
 
   customer: {
-    lists: () => [...postQueryKeys.all, 'customer', 'list'],
-    list: (params: CustomerPostsQuery) => [...postQueryKeys.all, 'customer', 'list', params],
-    detail: (id: string) => [...postQueryKeys.all, 'customer', 'detail', id],
+    root: () => [...postQueryKeys.root, 'customer'] as const,
+    lists: () => [...postQueryKeys.customer.root(), 'list'] as const,
+    list: (params: CustomerPostsQuery) => [...postQueryKeys.customer.lists(), params] as const,
+    detail: (id: string) => [...postQueryKeys.customer.root(), 'detail', id] as const,
   },
 };
