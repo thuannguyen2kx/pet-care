@@ -14,11 +14,7 @@ interface PaginationResult {
   totalItems: number;
   hasNextPage: boolean;
 }
-
-/**
- * Add a comment to a post
- */
-export const addCommentService = async ({
+const addCommentInternal = async ({
   postId,
   userId,
   content,
@@ -29,14 +25,12 @@ export const addCommentService = async ({
   content: string;
   parentCommentId?: string;
 }) => {
-  // Check if post exists
   const post = await PostModel.findById(postId);
 
   if (!post) {
     throw new NotFoundException("Post not found");
   }
 
-  // Check if post is public or if user is the author
   if (
     post.visibility !== "public" &&
     post.authorId.toString() !== userId.toString()
@@ -44,44 +38,71 @@ export const addCommentService = async ({
     throw new ForbiddenException("Cannot comment on this post");
   }
 
-  // If it's a reply, check if parent comment exists
-  if (parentCommentId) {
-    const parentComment = await CommentModel.findOne({
-      _id: parentCommentId,
-      postId,
-      status: "active",
-    });
-
-    if (!parentComment) {
-      throw new NotFoundException("Parent comment not found");
-    }
-
-    // Ensure we're not replying to a reply (max 2 levels)
-    if (parentComment.parentCommentId) {
-      throw new BadRequestException("Cannot reply to a reply");
-    }
-  }
-
-  // Create comment
   const comment = await CommentModel.create({
     postId,
     authorId: userId,
     content,
-    parentCommentId: parentCommentId || undefined,
+    parentCommentId,
     status: "active",
   });
 
-  // Update post comment count
-  post.stats.commentCount += 1;
-  await post.save();
-
-  // Return populated comment
-  const populatedComment = await CommentModel.findById(comment._id).populate(
-    "authorId",
-    "fullName profilePicture",
+  await PostModel.updateOne(
+    { _id: postId },
+    { $inc: { "stats.commentCount": 1 } },
   );
 
-  return { comment: populatedComment };
+  return {
+    comment: await CommentModel.findById(comment._id).populate(
+      "authorId",
+      "fullName profilePicture",
+    ),
+  };
+};
+
+/**
+ * Add a comment to a post
+ */
+export const addPostCommentService = async ({
+  postId,
+  userId,
+  content,
+}: {
+  postId: string;
+  userId: Types.ObjectId;
+  content: string;
+}) => {
+  return addCommentInternal({
+    postId,
+    userId,
+    content,
+  });
+};
+
+export const addReplyService = async ({
+  parentCommentId,
+  userId,
+  content,
+}: {
+  parentCommentId: string;
+  userId: Types.ObjectId;
+  content: string;
+}) => {
+  const parentComment = await CommentModel.findById(parentCommentId);
+
+  if (!parentComment || parentComment.status !== "active") {
+    throw new NotFoundException("Parent comment not found");
+  }
+
+  if (parentComment.parentCommentId) {
+    throw new BadRequestException("Cannot reply to a reply");
+  }
+
+  return addCommentInternal({
+    postId: parentComment.postId.toString(),
+    parentCommentId,
+    userId,
+    content,
+  });
 };
 
 /**

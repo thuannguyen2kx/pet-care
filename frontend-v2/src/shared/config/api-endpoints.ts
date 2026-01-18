@@ -152,4 +152,5 @@ export const POST_ENDPOINTS = {
   UPDATE: (postId: string) => `${API_BASE.POST}/${postId}`,
   DELETE: (postId: string) => `${API_BASE.POST}/${postId}`,
   REACTION: (postId: string) => `${API_BASE.POST}/${postId}/reactions`,
+  COMMENTS: (postId: string) => `${API_BASE.POST}/${postId}/comments`,
 };

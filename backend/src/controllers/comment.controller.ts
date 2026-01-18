@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { HTTPSTATUS } from "../config/http.config";
 import {
-  addCommentService,
   getPostCommentsService,
   updateCommentService,
   deleteCommentService,
+  addReplyService,
+  addPostCommentService,
 } from "../services/comment.service";
 import {
   commentContentSchema,
@@ -19,28 +20,39 @@ import {
  * @route   POST /api/posts/:id/comments
  * @access  Private
  */
-export const addCommentController = asyncHandler(
-  async (req: Request, res: Response) => {
-    const postId = postIdSchema.parse(req.params.id);
-    const userId = req.user!._id;
-    const content = commentContentSchema.parse(req.body.content);
-    const parentCommentId = req.body.parentCommentId
-      ? parentCommentIdSchema.parse(req.body.parentCommentId)
-      : undefined;
+export const addPostCommentController = asyncHandler(async (req, res) => {
+  const postId = postIdSchema.parse(req.params.postId);
+  const userId = req.user!._id;
+  const content = commentContentSchema.parse(req.body.content);
 
-    const { comment } = await addCommentService({
-      postId,
-      userId,
-      content,
-      parentCommentId,
-    });
+  const { comment } = await addPostCommentService({
+    postId,
+    userId,
+    content,
+  });
 
-    return res.status(HTTPSTATUS.CREATED).json({
-      message: "Comment added successfully",
-      comment,
-    });
-  },
-);
+  res.status(201).json({
+    message: "Comment added successfully",
+    comment,
+  });
+});
+
+export const addReplyController = asyncHandler(async (req, res) => {
+  const commentId = parentCommentIdSchema.parse(req.params.commentId);
+  const userId = req.user!._id;
+  const content = commentContentSchema.parse(req.body.content);
+
+  const { comment } = await addReplyService({
+    parentCommentId: commentId,
+    userId,
+    content,
+  });
+
+  res.status(201).json({
+    message: "Reply added successfully",
+    comment,
+  });
+});
 
 /**
  * @desc    Get comments for a post with pagination
@@ -49,7 +61,7 @@ export const addCommentController = asyncHandler(
  */
 export const getPostCommentsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const postId = postIdSchema.parse(req.params.id);
+    const postId = postIdSchema.parse(req.params.postId);
     const userId = req.user?._id;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;

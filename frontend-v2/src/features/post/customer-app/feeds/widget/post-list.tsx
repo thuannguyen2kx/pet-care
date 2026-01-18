@@ -1,10 +1,11 @@
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { MessageCircle } from 'lucide-react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { usePostReactionController } from '@/features/post/customer-app/feeds/application/use-post-reaction-controller';
 import { usePostsController } from '@/features/post/customer-app/feeds/application/use-posts';
+import { PostComments } from '@/features/post/customer-app/feeds/widget/post-comment';
 import type { Post } from '@/features/post/domain/post.entity';
 import { ReactionPicker } from '@/features/reaction/components/reaction-picker';
 import { getReactionMeta } from '@/features/reaction/config';
@@ -86,18 +87,18 @@ export function PostList() {
 }
 
 export function PostItem({ post }: { post: Post }) {
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
   const { onReact } = usePostReactionController(post);
 
   const reactions = post.reactionSummary;
   const stats = post.stats;
 
   const handleCommentClick = () => {
-    // open comment panel
+    setIsCommentOpen((v) => !v);
   };
 
   return (
     <article className="border-border border-b py-8 last:border-b-0">
-      {/* Post header - author and timestamp */}
       <div className="mb-6 flex items-center gap-3">
         <Avatar className="h-9 w-9">
           <AvatarImage src={post.author.avatarUrl ?? undefined} />
@@ -114,14 +115,12 @@ export function PostItem({ post }: { post: Post }) {
         </div>
       </div>
 
-      {/* Post title - if present */}
       {post.title && (
         <div className="mb-4">
           <h2 className="text-foreground text-lg font-semibold">{post.title}</h2>
         </div>
       )}
 
-      {/* Post content - emphasis on readability */}
       <div className="mb-6">
         <p className="text-foreground text-base leading-relaxed text-pretty">{post.content}</p>
       </div>
@@ -151,7 +150,7 @@ export function PostItem({ post }: { post: Post }) {
       />
 
       {/* Comments section - collapsible */}
-      {/* {showComments && <PostComments />} */}
+      {isCommentOpen && <PostComments postId={post.id} commentCount={stats.commentCount} />}
     </article>
   );
 }
@@ -283,18 +282,10 @@ export function PostReactions({
         </div>
       )}
 
-      {/* Reaction and interaction buttons */}
       <div className="flex items-center gap-4">
-        {/* Reaction picker */}
         <ReactionPicker currentReaction={userReaction} onReactionSelect={onReactionChange} />
 
-        {/* Comment button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground hover:text-accent h-auto gap-2.5 px-0 py-1 transition-colors"
-          onClick={onComment}
-        >
+        <Button variant="ghost" size="sm" onClick={onComment}>
           <MessageCircle size={20} />
           <span className="text-sm font-medium">{comments}</span>
         </Button>

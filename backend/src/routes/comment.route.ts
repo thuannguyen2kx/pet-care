@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  addCommentController,
+  addReplyController,
   deleteCommentController,
   getPostCommentsController,
   updateCommentController,
@@ -22,7 +22,7 @@ commentRoutes.put("/:commentId", updateCommentController);
 commentRoutes.delete("/:commentId", deleteCommentController);
 
 // -------- Replies --------
-commentRoutes.post("/:commentId/replies", addCommentController);
+commentRoutes.post("/:commentId/replies", addReplyController);
 
 commentRoutes.get("/:commentId/replies", getPostCommentsController);
 

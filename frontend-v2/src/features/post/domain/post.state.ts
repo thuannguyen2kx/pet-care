@@ -26,7 +26,7 @@ export const CreatePostSchema = z.object({
 });
 
 export const CustomerPostsQuerySchema = z.object({
-  limit: z.coerce.number().optional().default(1),
+  limit: z.coerce.number().optional().default(10),
 });
 
 export type CreatePost = z.infer<typeof CreatePostSchema>;

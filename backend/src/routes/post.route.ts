@@ -17,7 +17,7 @@ import {
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
 import {
-  addCommentController,
+  addPostCommentController,
   getPostCommentsController,
 } from "../controllers/comment.controller";
 import {
@@ -77,7 +77,7 @@ postRoutes.put(
 );
 
 // -------- Comments by post --------
-postRoutes.post("/:postId/comments", addCommentController);
+postRoutes.post("/:postId/comments", addPostCommentController);
 
 postRoutes.get("/:postId/comments", getPostCommentsController);
 

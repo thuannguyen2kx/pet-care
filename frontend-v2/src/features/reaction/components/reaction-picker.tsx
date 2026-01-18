@@ -21,7 +21,6 @@ export function ReactionPicker({ onReactionSelect, currentReaction }: ReactionPi
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="text-muted-foreground hover:text-accent h-auto gap-2.5 px-0 py-1 transition-colors"
         aria-label="Add reaction"
       >
         <span className="text-xl">{getReactionMeta(currentReaction || defaultReaction).emoji}</span>
