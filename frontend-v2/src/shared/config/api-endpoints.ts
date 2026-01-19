@@ -154,5 +154,6 @@ export const POST_ENDPOINTS = {
   REACTION: (postId: string) => `${API_BASE.POST}/${postId}/reactions`,
   COMMENTS: (postId: string) => `${API_BASE.POST}/${postId}/comments`,
   FEATURED: `${API_BASE.POST}/featured`,
+  SET_FEATURE: (postId: string) => `${API_BASE.POST}/admin/${postId}/featured`,
   ME: `${API_BASE.POST}/me`,
 };

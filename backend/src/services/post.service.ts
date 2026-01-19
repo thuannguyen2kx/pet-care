@@ -1050,35 +1050,54 @@ export const getFeaturedPostsService = async ({
   };
 };
 
-// Admin: Set a post as featured
-export const setPostFeatureService = async ({
+export const setPostFeaturedService = async ({
   postId,
   featured,
   user,
 }: {
-  postId: string;
+  postId: Types.ObjectId;
   featured: boolean;
-  user?: any;
+  user: { _id: Types.ObjectId; role: RoleType };
 }) => {
-  // Check if user is admin
-  if (user?.role !== Roles.ADMIN && user?.role !== Roles.EMPLOYEE) {
-    throw new ForbiddenException("Admin access required");
+  /* ---------------- auth ---------------- */
+  if (user.role !== Roles.ADMIN && user.role !== Roles.EMPLOYEE) {
+    throw new ForbiddenException("Admin or employee access required");
   }
 
-  const post = await PostModel.findById(postId);
+  /* ---------------- find post ---------------- */
+  const post = await PostModel.findById(postId).select(
+    "isFeatured status visibility",
+  );
 
   if (!post) {
     throw new NotFoundException("Post not found");
   }
 
-  // Set featured status
-  post.isFeatured = featured;
+  /* ---------------- business rules ---------------- */
+  if (featured) {
+    if (post.status !== "active" || post.visibility !== "public") {
+      throw new BadRequestException(
+        "Only active and public posts can be featured",
+      );
+    }
+  }
 
+  if (post.isFeatured === featured) {
+    return {
+      postId,
+      isFeatured: post.isFeatured,
+      updated: false,
+    };
+  }
+
+  /* ---------------- update ---------------- */
+  post.isFeatured = featured;
   await post.save();
 
   return {
-    message: featured ? "Post set as featured" : "Post removed from featured",
-    post,
+    postId,
+    isFeatured: post.isFeatured,
+    updated: true,
   };
 };
 

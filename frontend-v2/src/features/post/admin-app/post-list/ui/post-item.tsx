@@ -3,6 +3,7 @@ import { vi } from 'date-fns/locale';
 import { useState } from 'react';
 
 import { useAdminPostReactionController } from '@/features/post/admin-app/post-list/application/use-post-reaction-controller';
+import { useSetPostFeaturedController } from '@/features/post/admin-app/post-list/application/use-set-post-featured.controller';
 import { AdminPostActions } from '@/features/post/admin-app/post-list/ui/post-actions';
 import { AdminPostComments } from '@/features/post/admin-app/post-list/ui/post-comments';
 import { AdminPostMedia } from '@/features/post/admin-app/post-list/ui/post-media';
@@ -19,6 +20,7 @@ type Props = {
 export function AdminPostItem({ post }: Props) {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const { onReact } = useAdminPostReactionController(post);
+  const { onSetFeatured } = useSetPostFeaturedController();
 
   const reactions = post.reactionSummary;
   const stats = post.stats;
@@ -38,13 +40,21 @@ export function AdminPostItem({ post }: Props) {
           </Avatar>
 
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">{post.author.fullName}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold">{post.author.fullName}</span>
+
+              {post.isFeatured && (
+                <Badge className="text-xs" variant={'secondary'}>
+                  Bài viết nổi bật
+                </Badge>
+              )}
+            </div>
             <time className="text-muted-foreground text-xs">
               {formatDistanceToNowStrict(new Date(post.updatedAt), { addSuffix: true, locale: vi })}
             </time>
           </div>
         </div>
-        <AdminPostActions />
+        <AdminPostActions post={post} onSetFeatured={onSetFeatured} />
       </div>
 
       {post.title && <h2 className="text-foreground text-lg font-semibold">{post.title}</h2>}

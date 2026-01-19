@@ -17,6 +17,9 @@ export const PostsQuerySchema = z.object({
 export const AddReactionDtoSchema = z.object({
   reactionType: ReactionTypeSchema,
 });
+export const SetPostFeaturedDtoSchema = z.object({
+  featured: z.boolean(),
+});
 // ====================
 // Response from API
 // ====================
@@ -89,3 +92,4 @@ export const PostsPaginationDtoSchema = z.object({
 export type PostsQuery = z.infer<typeof PostsQuerySchema>;
 export type PostDto = z.infer<typeof PostDtoSchema>;
 export type PostsPaginationDto = z.infer<typeof PostsPaginationDtoSchema>;
+export type SetPostFeaturedDto = z.infer<typeof SetPostFeaturedDtoSchema>;

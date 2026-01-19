@@ -35,3 +35,22 @@ export const useCreatePost = ({ mutationConfig }: UseCreatePostOptions = {}) => 
     },
   });
 };
+
+export const useAdminCreatePost = ({ mutationConfig }: UseCreatePostOptions = {}) => {
+  const queryClient = useQueryClient();
+  const { onSuccess, ...rest } = mutationConfig || {};
+
+  return useMutation({
+    onSuccess: async (...args) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: postQueryKeys.admin.lists() }),
+        onSuccess?.(...args),
+      ]);
+    },
+    ...rest,
+    mutationFn: (createPostData: CreatePost) => {
+      const formData = mapCreatePostToDto(createPostData);
+      return createPost(formData);
+    },
+  });
+};

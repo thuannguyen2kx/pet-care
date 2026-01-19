@@ -1,9 +1,10 @@
-import type { PostDto, PostsQuery } from '@/features/post/domain/post.dto';
+import type { PostDto, PostsQuery, SetPostFeaturedDto } from '@/features/post/domain/post.dto';
 import type { Post } from '@/features/post/domain/post.entity';
 import type {
   AdminPostsQuery,
   CreatePost,
   CustomerPostsQuery,
+  SetPostFeatured,
 } from '@/features/post/domain/post.state';
 
 // ======================
@@ -43,6 +44,11 @@ export const mapAdminPostQueryToDto = (state: AdminPostsQuery & { page: number }
   };
 };
 
+export const mapSetPostFeaturedToDto = (state: SetPostFeatured): SetPostFeaturedDto => {
+  return {
+    featured: state.featured,
+  };
+};
 // ======================
 // Dto => Entity
 // ======================

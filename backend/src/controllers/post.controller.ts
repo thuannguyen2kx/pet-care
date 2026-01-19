@@ -23,10 +23,10 @@ import {
   updatePostStatusService,
   reportPostService,
   getReportedPostsService,
-  setPostFeatureService,
   getUserPostsService,
   resolveReportService,
   getFeaturedPostsService,
+  setPostFeaturedService,
 } from "../services/post.service";
 import { userIdSchema } from "../validation/user.validation";
 import mongoose from "mongoose";
@@ -232,30 +232,33 @@ export const getFeaturedPostsController = asyncHandler(
   },
 );
 
-// @desc    Admin: Set a post as featured
+// @desc    Admin/Employee: Set post featured
 // @route   PUT /api/posts/:id/featured
-// @access  Private (Admin/Employee)
+// @access  Private (Admin, Employee)
 export const setPostFeatureController = asyncHandler(
   async (req: Request, res: Response) => {
-    const postId = postIdSchema.parse(req.params.id);
-    const featured =
-      req.body.featured !== undefined ? Boolean(req.body.featured) : undefined;
+    const postId = postIdSchema.parse(req.params.postId);
+    const { featured } = req.body;
 
-    if (featured === undefined) {
+    if (typeof featured !== "boolean") {
       return res.status(HTTPSTATUS.BAD_REQUEST).json({
-        message: "Featured status is required",
+        message: "featured must be a boolean",
       });
     }
 
-    const { message, post } = await setPostFeatureService({
-      postId,
+    const result = await setPostFeaturedService({
+      postId: new mongoose.Types.ObjectId(postId),
       featured,
-      user: req.user,
+      user: req.user!,
     });
 
     return res.status(HTTPSTATUS.OK).json({
-      message,
-      post,
+      message: result.updated
+        ? featured
+          ? "Post has been featured"
+          : "Post has been unfeatured"
+        : "Post featured status unchanged",
+      data: result,
     });
   },
 );

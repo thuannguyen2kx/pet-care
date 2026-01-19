@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { mongoObjectIdSchema } from '@/shared/lib/zod-primitives';
+
 export const existingMediaSchema = z.object({
   id: z.string(),
   url: z.url(),
@@ -33,7 +35,13 @@ export const AdminPostsQuerySchema = z.object({
   limit: z.coerce.number().optional().default(10),
 });
 
+export const SetPostFeaturedSchema = z.object({
+  postId: mongoObjectIdSchema,
+  featured: z.boolean(),
+});
+
 export type CreatePost = z.infer<typeof CreatePostSchema>;
 export type MediaField = z.infer<typeof mediaFieldSchema>;
 export type CustomerPostsQuery = z.infer<typeof CustomerPostsQuerySchema>;
 export type AdminPostsQuery = z.infer<typeof AdminPostsQuerySchema>;
+export type SetPostFeatured = z.infer<typeof SetPostFeaturedSchema>;

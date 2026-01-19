@@ -1,5 +1,6 @@
 import { Edit, MoreVertical, Pin, Trash2 } from 'lucide-react';
 
+import type { Post } from '@/features/post/domain/post.entity';
 import { Button } from '@/shared/ui/button';
 import {
   DropdownMenu,
@@ -9,7 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-export function AdminPostActions() {
+type Props = {
+  post: Post;
+  onSetFeatured: (postId: string, featured: boolean) => void;
+};
+export function AdminPostActions({ post, onSetFeatured }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -18,9 +23,9 @@ export function AdminPostActions() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onSetFeatured(post.id, !post.isFeatured)}>
           <Pin className="mr-2 h-4 w-4" />
-          Ghim bài viết
+          {post.isFeatured ? 'Bỏ ghim bài viết' : 'Ghim bài viết'}
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Edit className="mr-2 h-4 w-4" />

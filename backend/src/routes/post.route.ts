@@ -67,7 +67,7 @@ postRoutes.put(
 );
 
 postRoutes.put(
-  "/admin/posts/:postId/featured",
+  "/admin/:postId/featured",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
   setPostFeatureController,
 );
