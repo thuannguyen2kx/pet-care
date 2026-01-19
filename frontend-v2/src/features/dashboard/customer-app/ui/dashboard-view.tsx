@@ -1,5 +1,6 @@
 import { QuickActions } from '@/features/dashboard/customer-app/ui/quick-actions';
 import { MyPetsWidget } from '@/features/dashboard/customer-app/widgets/my-pets';
+import { SocialFeed } from '@/features/dashboard/customer-app/widgets/social-feed';
 import { TodayBookingsWidget } from '@/features/dashboard/customer-app/widgets/today-bookings';
 import { UpcommingBookingsWidget } from '@/features/dashboard/customer-app/widgets/upcomming-bookings';
 
@@ -19,6 +20,7 @@ export function CustomerAppDashboardView({ displayName }: Props) {
         <div className="space-y-6 lg:col-span-2">
           <TodayBookingsWidget />
           <UpcommingBookingsWidget />
+          <SocialFeed />
         </div>
         <div>
           <MyPetsWidget />

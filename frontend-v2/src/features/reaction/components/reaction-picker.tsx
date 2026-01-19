@@ -17,12 +17,7 @@ export function ReactionPicker({ onReactionSelect, currentReaction }: ReactionPi
   const defaultReaction = getDefaultReaction();
   return (
     <div className="group relative">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Add reaction"
-      >
+      <Button variant="ghost" onClick={() => setIsOpen(!isOpen)} aria-label="Add reaction">
         <span className="text-xl">{getReactionMeta(currentReaction || defaultReaction).emoji}</span>
         <span className="sr-only">Add reaction</span>
       </Button>

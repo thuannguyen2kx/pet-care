@@ -1,17 +1,15 @@
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { MessageCircle } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { useState } from 'react';
 
-import { usePostReactionController } from '@/features/post/customer-app/feeds/application/use-post-reaction-controller';
-import { usePostsController } from '@/features/post/customer-app/feeds/application/use-posts';
+import { usePostReactionController } from '@/features/dashboard/customer-app/application/use-post-reaction-controller';
 import { PostComments } from '@/features/post/customer-app/feeds/widget/post-comment';
 import type { Post } from '@/features/post/domain/post.entity';
 import { ReactionPicker } from '@/features/reaction/components/reaction-picker';
 import { getReactionMeta } from '@/features/reaction/config';
 import type { ReactionType } from '@/features/reaction/domain/reaction-entity';
 import { BlurImage } from '@/shared/components/blur-image';
-import { SectionSpinner } from '@/shared/components/template/loading';
 import { getInitials } from '@/shared/lib/utils';
 import { AspectRatio } from '@/shared/ui/aspect-ratio';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
@@ -33,60 +31,7 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog';
 
-export function PostList() {
-  const postsController = usePostsController();
-
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = postsController;
-
-  const loadMoreRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isFetchingNextPage) return;
-
-      observerRef.current?.disconnect();
-
-      if (!node || !hasNextPage) return;
-
-      observerRef.current = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) {
-          fetchNextPage();
-        }
-      });
-
-      observerRef.current.observe(node);
-    },
-    [fetchNextPage, hasNextPage, isFetchingNextPage],
-  );
-
-  if (postsController.isFetching && postsController.data.length === 0) {
-    return <SectionSpinner />;
-  }
-  if (!postsController.isFetching && postsController.data.length === 0)
-    return (
-      <div className="py-16 text-center">
-        <div className="mb-4">
-          <h3 className="text-foreground mb-2 text-lg font-semibold">Chưa có bài viết nào</h3>
-          <p className="text-muted-foreground">Hãy quay lại sớm để xem các cập nhật về cửa hàng!</p>
-        </div>
-      </div>
-    );
-  const posts = postsController.data;
-
-  return (
-    <div className="divide-border divide-y">
-      {posts.map((post) => (
-        <PostItem key={post.id} post={post} />
-      ))}
-
-      <div ref={loadMoreRef} className="py-6">
-        {postsController.isFetchingNextPage && <SectionSpinner />}
-      </div>
-    </div>
-  );
-}
-
-export function PostItem({ post }: { post: Post }) {
+export function FeaturedPostItem({ post }: { post: Post }) {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const { onReact } = usePostReactionController(post);
 
@@ -235,8 +180,8 @@ function MediaCarousel({ media }: { media: Post['media'] }) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-2 md:-left-10" />
-        <CarouselNext className="right-2 md:-right-10" />
+        <CarouselPrevious className="left-2 md:left-1" />
+        <CarouselNext className="right-2 md:right-1" />
       </Carousel>
       <div className="bg-muted text-muted-foreground absolute right-2 bottom-2 rounded-md px-2 py-1 text-xs">
         {media.length} đính kèm

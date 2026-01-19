@@ -4,6 +4,7 @@ import { CustomerProfileCard } from '@/features/customer/customer-app/profile/ui
 import { BookingsHistoryTab } from '@/features/customer/customer-app/profile/ui/tabs/bookings-history-tab';
 import { CustomerPetsTab } from '@/features/customer/customer-app/profile/ui/tabs/customer-pets-tab';
 import { CustomerInfoTab } from '@/features/customer/customer-app/profile/ui/tabs/info-tab';
+import { MyPostsTab } from '@/features/customer/customer-app/profile/ui/tabs/my-posts-tab';
 import type { Customer } from '@/features/customer/domain/customer-entity';
 import type { TPet } from '@/features/pets/types';
 import { BackLink } from '@/shared/components/template/back-link';
@@ -16,8 +17,16 @@ type Props = {
   totalPet: number;
   bookings: Booking[];
   onUpdateProfile: () => void;
+  onCreatePost: () => void;
 };
-export function CustomerProfileView({ data, onUpdateProfile, totalPet, pets, bookings }: Props) {
+export function CustomerProfileView({
+  data,
+  onUpdateProfile,
+  totalPet,
+  pets,
+  bookings,
+  onCreatePost,
+}: Props) {
   return (
     <main className="container mx-auto px-4 py-6">
       <BackLink to={paths.customer.root.path} label="Quay lại trang chủ" />
@@ -30,8 +39,9 @@ export function CustomerProfileView({ data, onUpdateProfile, totalPet, pets, boo
 
         <div className="lg:col-span-2">
           <Tabs defaultValue="info" className="space-y-6">
-            <TabsList className="bg-muted/50 grid w-full grid-cols-3">
+            <TabsList className="bg-muted/50 grid w-full grid-cols-4">
               <TabsTrigger value="info">Thông tin</TabsTrigger>
+              <TabsTrigger value="my-posts">Bài viết của tôi</TabsTrigger>
               <TabsTrigger value="pets">Thú cưng</TabsTrigger>
               <TabsTrigger value="history">Lịch sử</TabsTrigger>
             </TabsList>
@@ -39,7 +49,9 @@ export function CustomerProfileView({ data, onUpdateProfile, totalPet, pets, boo
             <TabsContent value="info" className="space-y-6">
               <CustomerInfoTab data={data} onUpdateProfile={onUpdateProfile} />
             </TabsContent>
-
+            <TabsContent value="my-posts" className="space-y-6">
+              <MyPostsTab onCreatePost={onCreatePost} />
+            </TabsContent>
             <TabsContent value="pets" className="space-y-6">
               <CustomerPetsTab pets={pets} />
             </TabsContent>
