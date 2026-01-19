@@ -1,6 +1,10 @@
 import type { PostDto, PostsQuery } from '@/features/post/domain/post.dto';
 import type { Post } from '@/features/post/domain/post.entity';
-import type { CreatePost, CustomerPostsQuery } from '@/features/post/domain/post.state';
+import type {
+  AdminPostsQuery,
+  CreatePost,
+  CustomerPostsQuery,
+} from '@/features/post/domain/post.state';
 
 // ======================
 // State => Dto
@@ -26,6 +30,13 @@ export const mapCreatePostToDto = (state: CreatePost): FormData => {
 export const mapCustomerPostQueryToDto = (
   state: CustomerPostsQuery & { page: number },
 ): PostsQuery => {
+  return {
+    page: state.page,
+    limit: state.limit,
+  };
+};
+
+export const mapAdminPostQueryToDto = (state: AdminPostsQuery & { page: number }): PostsQuery => {
   return {
     page: state.page,
     limit: state.limit,

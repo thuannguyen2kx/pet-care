@@ -158,6 +158,14 @@ export const paths = {
       path: '/admin/settings',
       getHref: () => '/admin/settings',
     },
+    socials: {
+      path: '/admin/socials',
+      getHref: () => '/admin/socials',
+    },
+    createPost: {
+      path: '/admin/socials/create',
+      getHref: () => '/admin/socials/create',
+    },
   },
 
   /* ===================== COMMON ===================== */

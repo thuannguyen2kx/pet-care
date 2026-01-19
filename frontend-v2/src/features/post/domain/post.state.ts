@@ -29,6 +29,11 @@ export const CustomerPostsQuerySchema = z.object({
   limit: z.coerce.number().optional().default(10),
 });
 
+export const AdminPostsQuerySchema = z.object({
+  limit: z.coerce.number().optional().default(10),
+});
+
 export type CreatePost = z.infer<typeof CreatePostSchema>;
 export type MediaField = z.infer<typeof mediaFieldSchema>;
 export type CustomerPostsQuery = z.infer<typeof CustomerPostsQuerySchema>;
+export type AdminPostsQuery = z.infer<typeof AdminPostsQuerySchema>;

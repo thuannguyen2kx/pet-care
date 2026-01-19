@@ -29,6 +29,7 @@ import {
   getFeaturedPostsService,
 } from "../services/post.service";
 import { userIdSchema } from "../validation/user.validation";
+import mongoose from "mongoose";
 
 // @desc    Get all posts (with filtering, pagination)
 // @route   GET /api/posts
@@ -218,10 +219,16 @@ export const resolveReportController = asyncHandler(
 // @access  Public
 export const getFeaturedPostsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 5;
-    const { posts } = await getFeaturedPostsService({ limit });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const userId = req.user?._id;
 
-    return res.status(HTTPSTATUS.OK).json({ posts });
+    const result = await getFeaturedPostsService({
+      page,
+      limit,
+    });
+
+    return res.status(HTTPSTATUS.OK).json(result);
   },
 );
 
@@ -259,6 +266,21 @@ export const setPostFeatureController = asyncHandler(
 export const getUserPostsController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = userIdSchema.parse(req.params.userId);
+    const query = postQuerySchema.parse(req.query);
+    const { posts, pagination } = await getUserPostsService({
+      query,
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+
+    return res.status(HTTPSTATUS.OK).json({
+      posts,
+      pagination,
+    });
+  },
+);
+export const getMyPostsController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user!._id;
     const query = postQuerySchema.parse(req.query);
     const { posts, pagination } = await getUserPostsService({
       query,

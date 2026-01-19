@@ -153,4 +153,6 @@ export const POST_ENDPOINTS = {
   DELETE: (postId: string) => `${API_BASE.POST}/${postId}`,
   REACTION: (postId: string) => `${API_BASE.POST}/${postId}/reactions`,
   COMMENTS: (postId: string) => `${API_BASE.POST}/${postId}/comments`,
+  FEATURED: `${API_BASE.POST}/featured`,
+  ME: `${API_BASE.POST}/me`,
 };

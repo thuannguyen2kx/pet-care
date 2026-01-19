@@ -5,6 +5,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   PawPrint,
   Scissors,
   Settings,
@@ -28,6 +29,7 @@ const adminNavItems = [
   { href: paths.admin.services.path, label: 'Quản lý dịch vụ', icon: Scissors },
   { href: paths.admin.bookings.path, label: 'Quản lý lịch hẹn', icon: PawPrint },
   { href: paths.admin.schedule.path, label: 'Lịch làm việc', icon: Calendar },
+  { href: paths.admin.socials.path, label: 'Cộng đồng', icon: MessageCircle },
   { href: paths.admin.reports.path, label: 'Báo cáo', icon: BarChart3 },
   { href: paths.admin.settings.path, label: 'Cài đặt', icon: Settings },
 ];

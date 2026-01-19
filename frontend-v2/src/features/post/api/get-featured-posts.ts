@@ -3,30 +3,21 @@ import type { AxiosRequestConfig } from 'axios';
 
 import { postQueryKeys } from '@/features/post/api/query-keys';
 import { GetPostsResponseDtoSchema } from '@/features/post/domain/post-http-schema';
-import type { AdminPostsQuery, CustomerPostsQuery } from '@/features/post/domain/post.state';
-import {
-  mapAdminPostQueryToDto,
-  mapCustomerPostQueryToDto,
-  mapPostsDtoToEntities,
-} from '@/features/post/domain/post.transform';
+import { mapPostsDtoToEntities } from '@/features/post/domain/post.transform';
 import { POST_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { QueryConfig } from '@/shared/lib/react-query';
 
-const getPosts = (config: AxiosRequestConfig) => {
-  return http.get(POST_ENDPOINTS.LIST, config);
+const getFeaturedPosts = (config: AxiosRequestConfig) => {
+  return http.get(POST_ENDPOINTS.FEATURED, config);
 };
 
-export const getPostsInfiniteQueryOptions = (query: CustomerPostsQuery) => {
+export const getFeaturedPostsInfiniteQueryOptions = () => {
   return infiniteQueryOptions({
-    queryKey: postQueryKeys.customer.list(query),
+    queryKey: postQueryKeys.customer.featured(),
     queryFn: async ({ pageParam = 1, signal }) => {
-      const queryDto = mapCustomerPostQueryToDto({
-        ...query,
-        page: pageParam as number,
-      });
-      const config = { signal, params: queryDto };
-      const raw = await getPosts(config);
+      const config = { signal, params: { page: pageParam as number } };
+      const raw = await getFeaturedPosts(config);
       const response = GetPostsResponseDtoSchema.parse(raw);
       return {
         posts: mapPostsDtoToEntities(response.posts),
@@ -41,28 +32,23 @@ export const getPostsInfiniteQueryOptions = (query: CustomerPostsQuery) => {
   });
 };
 
-type UsePostsOptions = {
-  query: CustomerPostsQuery;
-  queryConfig?: QueryConfig<typeof getPostsInfiniteQueryOptions>;
+type UseFeaturedPostsOptions = {
+  queryConfig?: QueryConfig<typeof getFeaturedPostsInfiniteQueryOptions>;
 };
 
-export const usePosts = ({ query, queryConfig }: UsePostsOptions) => {
+export const useFeaturedPosts = ({ queryConfig }: UseFeaturedPostsOptions = {}) => {
   return useInfiniteQuery({
-    ...getPostsInfiniteQueryOptions(query),
+    ...getFeaturedPostsInfiniteQueryOptions(),
     ...queryConfig,
   });
 };
 
-export const getAdminPostsInfiniteQueryOptions = (query: AdminPostsQuery) => {
+export const getAdminFeaturedPostsInfiniteQueryOptions = () => {
   return infiniteQueryOptions({
-    queryKey: postQueryKeys.admin.list(query),
+    queryKey: postQueryKeys.admin.featured(),
     queryFn: async ({ pageParam = 1, signal }) => {
-      const queryDto = mapAdminPostQueryToDto({
-        ...query,
-        page: pageParam as number,
-      });
-      const config = { signal, params: queryDto };
-      const raw = await getPosts(config);
+      const config = { signal, params: { page: pageParam as number } };
+      const raw = await getFeaturedPosts(config);
       const response = GetPostsResponseDtoSchema.parse(raw);
       return {
         posts: mapPostsDtoToEntities(response.posts),
@@ -77,14 +63,13 @@ export const getAdminPostsInfiniteQueryOptions = (query: AdminPostsQuery) => {
   });
 };
 
-type UseAdminPostsOptions = {
-  query: AdminPostsQuery;
-  queryConfig?: QueryConfig<typeof getAdminPostsInfiniteQueryOptions>;
+type UseAdminFeaturedPostsOptions = {
+  queryConfig?: QueryConfig<typeof getAdminFeaturedPostsInfiniteQueryOptions>;
 };
 
-export const useAdminPosts = ({ query, queryConfig }: UseAdminPostsOptions) => {
+export const useAdminFeaturedPosts = ({ queryConfig }: UseAdminFeaturedPostsOptions = {}) => {
   return useInfiniteQuery({
-    ...getAdminPostsInfiniteQueryOptions(query),
+    ...getAdminFeaturedPostsInfiniteQueryOptions(),
     ...queryConfig,
   });
 };

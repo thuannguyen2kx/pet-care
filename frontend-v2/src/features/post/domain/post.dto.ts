@@ -27,7 +27,7 @@ export const PostDtoSchema = z.object({
     _id: mongoObjectIdSchema,
     fullName: z.string(),
     profilePicture: z.object({
-      url: z.url(),
+      url: z.url().nullable(),
       publicId: z.string().nullable(),
     }),
   }),

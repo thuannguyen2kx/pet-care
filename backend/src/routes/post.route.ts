@@ -13,6 +13,7 @@ import {
   getFeaturedPostsController,
   setPostFeatureController,
   getUserPostsController,
+  getMyPostsController,
 } from "../controllers/post.controller";
 import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
@@ -34,16 +35,17 @@ const postRoutes = express.Router();
 // -------- Public --------
 postRoutes.get("/", getPostsController);
 postRoutes.get("/featured", getFeaturedPostsController);
-postRoutes.get("/:postId", getPostByIdController);
 
 // -------- Authenticated --------
 postRoutes.post("/", createPostController);
+postRoutes.get("/me", getMyPostsController);
+postRoutes.get("/:postId", getPostByIdController);
 postRoutes.put("/:postId", updatePostController);
 postRoutes.delete("/:postId", deletePostController);
 postRoutes.post("/:postId/reports", reportPostController);
 
 // -------- User context --------
-postRoutes.get("/user/:userId/posts", getUserPostsController);
+postRoutes.get("/user/:userId", getUserPostsController);
 
 // -------- Admin / Moderator --------
 postRoutes.get(

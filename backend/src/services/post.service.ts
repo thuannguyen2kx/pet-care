@@ -10,7 +10,7 @@ import { Roles, RoleType } from "../enums/role.enum";
 import { CommentModel } from "../models/comment.model";
 import { IMedia, IReport, PostModel } from "../models/post.model";
 import { ReactionModel } from "../models/reaction.model";
-import { Types } from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 
 interface PostQuery {
   page?: number;
@@ -479,7 +479,7 @@ export const deletePostService = async ({
   await CommentModel.deleteMany({ postId: post._id });
 
   // Delete all reactions related to this post
-  await ReactionModel.deleteMany({ contentType: "post", contentId: post._id });
+  await ReactionModel.deleteMany({ contentType: "Post", contentId: post._id });
 
   // Delete media files from cloud storage
   if (post.media && post.media.length > 0) {
@@ -810,44 +810,244 @@ export const resolveReportService = async ({
   };
 };
 
-// Get featured posts (for homepage)
+// /**
+//  * Get featured posts
+//  */
+// export const getFeaturedPostsService = async ({
+//   page = 1,
+//   limit = 10,
+//   userId,
+// }: {
+//   page?: number;
+//   limit?: number;
+//   userId?: Types.ObjectId;
+// }) => {
+//   const skip = (page - 1) * limit;
+
+//   const pipeline: PipelineStage[] = [
+//     {
+//       $match: {
+//         status: "active",
+//         visibility: "public",
+//       },
+//     },
+
+//     /**
+//      * Priority:
+//      * - isFeatured first
+//      * - then popular posts
+//      */
+//     {
+//       $addFields: {
+//         featuredPriority: {
+//           $cond: [{ $eq: ["$isFeatured", true] }, 1, 0],
+//         },
+//       },
+//     },
+
+//     /**
+//      * Sort rule
+//      */
+//     {
+//       $sort: {
+//         featuredPriority: -1,
+//         "stats.viewCount": -1,
+//         "stats.likeCount": -1,
+//         createdAt: -1,
+//       },
+//     },
+
+//     /**
+//      * Pagination
+//      */
+//     { $skip: skip },
+//     { $limit: limit },
+
+//     /**
+//      * Populate author
+//      */
+//     {
+//       $lookup: {
+//         from: "users",
+//         localField: "authorId",
+//         foreignField: "_id",
+//         as: "author",
+//       },
+//     },
+//     { $unwind: "$author" },
+
+//     /**
+//      * Populate pets
+//      */
+//     {
+//       $lookup: {
+//         from: "pets",
+//         localField: "petIds",
+//         foreignField: "_id",
+//         as: "pets",
+//       },
+//     },
+//   ];
+
+//   /**
+//    * Optional: attach user reaction
+//    */
+//   if (userId) {
+//     pipeline.push(
+//       {
+//         $lookup: {
+//           from: "reactions",
+//           let: { postId: "$_id" },
+//           pipeline: [
+//             {
+//               $match: {
+//                 $expr: {
+//                   $and: [
+//                     { $eq: ["$contentId", "$$postId"] },
+//                     { $eq: ["$userId", userId] },
+//                   ],
+//                 },
+//               },
+//             },
+//             { $limit: 1 },
+//           ],
+//           as: "userReaction",
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "reactionSummary.userReaction": {
+//             $ifNull: [{ $arrayElemAt: ["$userReaction.type", 0] }, null],
+//           },
+//         },
+//       },
+//       { $project: { userReaction: 0 } },
+//     );
+//   }
+
+//   /**
+//    * Count total (for pagination)
+//    */
+//   const [posts, total] = await Promise.all([
+//     PostModel.aggregate(pipeline),
+//     PostModel.countDocuments({
+//       status: "active",
+//       visibility: "public",
+//     }),
+//   ]);
+
+//   return {
+//     posts,
+//     pagination: {
+//       page,
+//       limit,
+//       totalItems: total,
+//       totalPages: Math.ceil(total / limit),
+//       hasNextPage: page * limit < total,
+//     },
+//   };
+// };
+
+/**
+ * Get featured posts (priority: featured -> popular)
+ */
 export const getFeaturedPostsService = async ({
-  limit = 5,
+  page = 1,
+  limit = 10,
+  user,
 }: {
+  page?: number;
   limit?: number;
+  user?: { _id: Types.ObjectId; role: RoleType };
 }) => {
-  // Get most popular posts (by view count, likes, comments)
-  const featuredPosts = await PostModel.find({
-    status: "active",
-    visibility: "public",
-    isFeatured: true, // You'd need to add this field to your schema
-  })
-    .populate("authorId", "fullName profilePicture")
-    .populate("petIds", "name species breed profilePicture")
-    .sort({ "stats.viewCount": -1, "stats.likeCount": -1 })
-    .limit(limit);
+  const skip = (page - 1) * limit;
 
-  // If not enough featured posts, add popular ones
-  if (featuredPosts.length < limit) {
-    const remainingLimit = limit - featuredPosts.length;
+  /* ---------------- visibility rule ---------------- */
+  const filter: any = {};
 
-    // Get popular posts that aren't already featured
-    const featuredIds = featuredPosts.map((post) => post._id);
-
-    const popularPosts = await PostModel.find({
-      _id: { $nin: featuredIds },
-      status: "active",
-      visibility: "public",
-    })
-      .populate("authorId", "fullName profilePicture")
-      .populate("petIds", "name species breed profilePicture")
-      .sort({ "stats.viewCount": -1, "stats.likeCount": -1 })
-      .limit(remainingLimit);
-
-    featuredPosts.push(...popularPosts);
+  if (user?.role === Roles.ADMIN || user?.role === Roles.EMPLOYEE) {
+    // admin / employee see all
+  } else {
+    filter.status = "active";
+    filter.visibility = "public";
   }
 
-  return { posts: featuredPosts };
+  /* ---------------- fetch posts ---------------- */
+  const posts = await PostModel.find(filter)
+    .populate("authorId", "fullName profilePicture")
+    .populate("petIds", "name species breed profilePicture")
+    .sort({
+      isFeatured: -1,
+      "stats.viewCount": -1,
+      "stats.likeCount": -1,
+      createdAt: -1,
+    })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+
+  const totalPosts = await PostModel.countDocuments(filter);
+
+  if (!posts.length) {
+    return {
+      posts: [],
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        totalPosts,
+        hasNextPage: false,
+        hasPrevPage: page > 1,
+      },
+    };
+  }
+
+  const postIds = posts.map((p) => p._id);
+
+  /* ---------------- reactions ---------------- */
+  const reactions = await ReactionModel.find({
+    contentType: "Post",
+    contentId: { $in: postIds },
+  }).select("contentId reactionType userId");
+
+  /* ---------------- aggregate reaction summary ---------------- */
+  const reactionMap = new Map<
+    string,
+    ReturnType<typeof createEmptyReactionSummary>
+  >();
+
+  posts.forEach((post) => {
+    reactionMap.set(post._id.toString(), createEmptyReactionSummary());
+  });
+
+  reactions.forEach((reaction) => {
+    const postId = reaction.contentId.toString();
+    const summary = reactionMap.get(postId);
+    if (!summary) return;
+
+    summary.total += 1;
+    summary.byType[reaction.reactionType as ReactionType] += 1;
+
+    if (user && reaction.userId.toString() === user._id.toString()) {
+      summary.userReaction = reaction.reactionType as ReactionType;
+    }
+  });
+
+  /* ---------------- attach entity ---------------- */
+  const enrichedPosts = posts.map((post) => ({
+    ...post,
+    reactionSummary: reactionMap.get(post._id.toString()),
+  }));
+
+  return {
+    posts: enrichedPosts,
+    pagination: {
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+      totalPosts,
+      hasNextPage: page < Math.ceil(totalPosts / limit),
+      hasPrevPage: page > 1,
+    },
+  };
 };
 
 // Admin: Set a post as featured
@@ -887,75 +1087,91 @@ export const getUserPostsService = async ({
   userId,
 }: {
   query: PostQuery;
-  userId?: string;
+  userId: Types.ObjectId;
 }) => {
-  // Check if user exists
-  if (!userId) {
-    throw new ForbiddenException("Authentication required");
-  }
-
   const {
     page = 1,
     limit = 10,
-    status = "all",
+    status,
     sortBy = "createdAt",
     sortDirection = "desc",
   } = query;
 
   const skip = (page - 1) * limit;
 
-  // Build filter
-  const filter: any = {
-    authorId: userId,
-  };
+  const filter: any = { authorId: userId };
 
   if (status && status !== "all") {
     filter.status = status;
   }
 
-  // Create sort object
   const sort: any = {};
   sort[sortBy] = sortDirection === "asc" ? 1 : -1;
 
-  // Get posts with pagination
   const posts = await PostModel.find(filter)
+    .populate("authorId", "fullName profilePicture")
     .populate("petIds", "name species breed profilePicture")
     .sort(sort)
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
-  // Get total count for pagination
   const totalPosts = await PostModel.countDocuments(filter);
 
-  // Get engagement stats for each post
-  const postsWithStats = await Promise.all(
-    posts.map(async (post) => {
-      const postId = post._id;
+  if (!posts.length) {
+    return {
+      posts: [],
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        totalPosts,
+        hasNextPage: page < Math.ceil(totalPosts / limit),
+        hasPrevPage: page > 1,
+      },
+    };
+  }
 
-      const [commentCount, reactionCount] = await Promise.all([
-        CommentModel.countDocuments({ postId }),
-        ReactionModel.countDocuments({
-          contentType: "post",
-          contentId: postId,
-        }),
-      ]);
+  const postIds = posts.map((p) => p._id);
 
-      return {
-        ...post.toObject(),
-        engagementStats: {
-          commentCount,
-          reactionCount,
-        },
-      };
-    }),
-  );
+  const reactions = await ReactionModel.find({
+    contentType: "Post",
+    contentId: { $in: postIds },
+  }).select("contentId reactionType userId");
+
+  const reactionMap = new Map<
+    string,
+    ReturnType<typeof createEmptyReactionSummary>
+  >();
+
+  posts.forEach((post) => {
+    reactionMap.set(post._id.toString(), createEmptyReactionSummary());
+  });
+
+  reactions.forEach((reaction) => {
+    const postId = reaction.contentId.toString();
+    const summary = reactionMap.get(postId);
+    if (!summary) return;
+
+    summary.total += 1;
+    summary.byType[reaction.reactionType as ReactionType] += 1;
+
+    if (reaction.userId.toString() === userId.toString()) {
+      summary.userReaction = reaction.reactionType as ReactionType;
+    }
+  });
+
+  const enrichedPosts = posts.map((post) => ({
+    ...post,
+    reactionSummary:
+      reactionMap.get(post._id.toString()) ?? createEmptyReactionSummary(),
+  }));
 
   return {
-    posts: postsWithStats,
+    posts: enrichedPosts,
     pagination: {
-      totalPosts,
-      totalPages: Math.ceil(totalPosts / limit),
       currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+      totalPosts,
       hasNextPage: page < Math.ceil(totalPosts / limit),
       hasPrevPage: page > 1,
     },

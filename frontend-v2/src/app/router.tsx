@@ -201,6 +201,16 @@ const createAppRouter = (queryClient: QueryClient) => {
                       path: paths.admin.reports.path,
                       lazy: () => import('@/routes/admin/reports').then(convert(queryClient)),
                     },
+                    {
+                      path: paths.admin.socials.path,
+                      lazy: () =>
+                        import('@/routes/admin/social/post-list').then(convert(queryClient)),
+                    },
+                    {
+                      path: paths.admin.createPost.path,
+                      lazy: () =>
+                        import('@/routes/admin/social/create-post').then(convert(queryClient)),
+                    },
                   ],
                 },
               ],
