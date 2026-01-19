@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, type Resolver } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { useCreatePost } from '@/features/post/api/create-post';
+import { useAdminCreatePost } from '@/features/post/api/create-post';
 import { CreatePostSchema, type CreatePost } from '@/features/post/domain/post.state';
 
 export const useAdminCreatePostController = () => {
@@ -17,7 +17,7 @@ export const useAdminCreatePostController = () => {
       },
     },
   });
-  const createPost = useCreatePost({
+  const createPost = useAdminCreatePost({
     mutationConfig: {
       onSuccess: () => {
         form.reset();

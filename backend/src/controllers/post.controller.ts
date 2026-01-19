@@ -81,7 +81,7 @@ export const createPostController = [
       files: req.files as Express.Multer.File[],
     });
 
-    return res.status(HTTPSTATUS.CREATED).json(post);
+    return res.status(HTTPSTATUS.CREATED).json({ post });
   }),
 ];
 

@@ -369,9 +369,15 @@ export const createPostService = async ({
   // Return populated post
   const populatedPost = await PostModel.findById(post._id)
     .populate("authorId", "fullName profilePicture")
-    .populate("petIds", "name species breed profilePicture");
+    .populate("petIds", "name species breed profilePicture")
+    .lean();
 
-  return { post: populatedPost };
+  return {
+    post: {
+      ...populatedPost,
+      reactionSummary: createEmptyReactionSummary(),
+    },
+  };
 };
 
 // Update a post

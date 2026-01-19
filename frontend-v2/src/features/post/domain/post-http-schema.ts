@@ -7,4 +7,7 @@ export const GetPostsResponseDtoSchema = z.object({
   pagination: PostsPaginationDtoSchema,
 });
 
+export const CreatePostResponseSchema = z.object({
+  post: PostDtoSchema,
+});
 export type GetPostsResponseDto = z.infer<typeof GetPostsResponseDtoSchema>;
