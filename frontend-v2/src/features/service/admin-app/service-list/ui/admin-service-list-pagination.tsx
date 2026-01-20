@@ -1,8 +1,3 @@
-import { useNavigate } from 'react-router';
-
-import { employeeFilterToSearchParams } from '@/features/employee/mapping';
-import type { ServicesQuery } from '@/features/service/domain/serivice.state';
-import { paths } from '@/shared/config/paths';
 import { getPaginationItems } from '@/shared/lib/helper';
 import {
   Pagination,
@@ -14,32 +9,20 @@ import {
   PaginationPrevious,
 } from '@/shared/ui/pagination';
 type Props = {
-  filter: ServicesQuery;
+  page: number;
   totalPages: number;
+  onChange: (page: number) => void;
 };
-export function CustomerServiceListPagination({ filter, totalPages }: Props) {
-  const navigate = useNavigate();
-  const page = filter.page;
-
+export function AdminServiceListPagination({ page, totalPages, onChange }: Props) {
   if (totalPages <= 1) return null;
 
-  const goToPage = (nextPage: number) => {
-    if (nextPage < 1 || nextPage > totalPages) return;
-    navigate({
-      pathname: paths.admin.employees.path,
-      search: employeeFilterToSearchParams({
-        ...filter,
-        page: nextPage,
-      }).toString(),
-    });
-  };
   const items = getPaginationItems(page, totalPages);
   return (
     <Pagination className="mt-6 justify-end">
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => goToPage(page - 1)}
+            onClick={() => onChange(page - 1)}
             className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
           />
         </PaginationItem>
@@ -55,7 +38,7 @@ export function CustomerServiceListPagination({ filter, totalPages }: Props) {
 
           return (
             <PaginationItem key={item.page}>
-              <PaginationLink isActive={item.page === page} onClick={() => goToPage(item.page)}>
+              <PaginationLink isActive={item.page === page} onClick={() => onChange(item.page)}>
                 {item.page}
               </PaginationLink>
             </PaginationItem>
@@ -64,7 +47,7 @@ export function CustomerServiceListPagination({ filter, totalPages }: Props) {
 
         <PaginationItem>
           <PaginationNext
-            onClick={() => goToPage(page + 1)}
+            onClick={() => onChange(page + 1)}
             className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
           />
         </PaginationItem>

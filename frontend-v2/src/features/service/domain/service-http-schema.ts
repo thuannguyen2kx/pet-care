@@ -11,3 +11,9 @@ export const GetServicesResponseSchema = z.object({
     pagination: ServicesPaginationDtoSchema,
   }),
 });
+
+export const GetServiceDetailResponseSchema = z.object({
+  data: z.object({
+    service: ServiceDtoSchema,
+  }),
+});

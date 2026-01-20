@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { serviceQueryKey } from '@/features/service/api/query-keys';
+import { serviceQueryKeys } from '@/features/service/api/query-keys';
 import { SERVICE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { MutationConfig } from '@/shared/lib/react-query';
@@ -23,7 +23,7 @@ export const useCreateService = ({ mutationConfig }: UseCreateServiceOptions = {
 
   return useMutation({
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: serviceQueryKey.adminLists() });
+      queryClient.invalidateQueries({ queryKey: serviceQueryKeys.admin.lists() });
       onSuccess?.(...args);
     },
     ...restConfig,

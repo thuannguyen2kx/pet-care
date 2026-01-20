@@ -67,7 +67,7 @@ type UseAdminGetServicesOptions = {
   queryConfig?: QueryConfig<typeof getAdminServicesQueryOptions>;
 };
 
-export const useAdminGetServices = ({ filter, queryConfig }: UseAdminGetServicesOptions) => {
+export const useGetAdminServices = ({ filter, queryConfig }: UseAdminGetServicesOptions) => {
   return useQuery({
     ...getAdminServicesQueryOptions(filter),
     ...queryConfig,

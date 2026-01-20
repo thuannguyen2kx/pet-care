@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react';
 
 import { SERVICE_CATEGORY_CONFIG } from '@/features/service/config/service-category.config';
 import type { ServicesQuery } from '@/features/service/domain/serivice.state';
-import type { TCustomerServiceFilter } from '@/features/service/schemas';
 import { useDebounce } from '@/shared/hooks/use-debounce';
 import { Input } from '@/shared/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 type Props = {
-  filter: TCustomerServiceFilter;
+  filter: ServicesQuery;
   setFilters: (next: Partial<ServicesQuery>) => void;
 };
 const CATEGORY_ALL = 'ALL' as const;

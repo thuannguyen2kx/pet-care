@@ -1,4 +1,8 @@
-import type { ServicesQuery } from '@/features/service/domain/serivice.state';
+import type {
+  CreateService,
+  ServicesQuery,
+  UpdateService,
+} from '@/features/service/domain/serivice.state';
 import type { ServiceDto, ServicesQueryDto } from '@/features/service/domain/service.dto';
 import type { Service } from '@/features/service/domain/service.entity';
 
@@ -39,7 +43,78 @@ export const mapServicesQueryToDto = (query: ServicesQuery): ServicesQueryDto =>
 
   return dto;
 };
+export const buildCreateServiceFormData = (data: CreateService): FormData => {
+  const formData = new FormData();
 
+  // Basic fields
+  formData.append('name', data.name);
+  if (data.description) formData.append('description', data.description);
+  formData.append('price', data.price.toString());
+  formData.append('duration', data.duration.toString());
+  formData.append('category', data.category);
+  formData.append('isActive', String(data.isActive));
+
+  data.requiredSpecialties.forEach((s) => {
+    formData.append('requiredSpecialties[]', s);
+  });
+
+  // Images
+  data.images.added.forEach((img) => {
+    formData.append('images', img.file);
+  });
+
+  data.images.existing.forEach((img) => {
+    formData.append('keepImageIds[]', img.id);
+  });
+
+  return formData;
+};
+
+export const buildUpdateServiceFormData = (data: UpdateService): FormData => {
+  const formData = new FormData();
+
+  if (data.name !== undefined) {
+    formData.append('name', data.name);
+  }
+
+  if (data.description !== undefined) {
+    formData.append('description', data.description);
+  }
+
+  if (data.price !== undefined) {
+    formData.append('price', data.price.toString());
+  }
+
+  if (data.duration !== undefined) {
+    formData.append('duration', data.duration.toString());
+  }
+
+  if (data.category !== undefined) {
+    formData.append('category', data.category);
+  }
+
+  if (data.isActive !== undefined) {
+    formData.append('isActive', String(data.isActive));
+  }
+
+  if (data.requiredSpecialties !== undefined) {
+    data.requiredSpecialties.forEach((s) => {
+      formData.append('requiredSpecialties[]', s);
+    });
+  }
+
+  if (data.images) {
+    data.images.added.forEach((img) => {
+      formData.append('images', img.file);
+    });
+
+    data.images.existing.forEach((img) => {
+      formData.append('keepImageIds[]', img.id);
+    });
+  }
+
+  return formData;
+};
 // ===================
 // Dto => Entity
 // ====================
