@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { serviceQueryKey } from '@/features/service/api/query-key';
+import { serviceQueryKey } from '@/features/service/api/query-keys';
 import { SERVICE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { MutationConfig } from '@/shared/lib/react-query';

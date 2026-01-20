@@ -2,6 +2,14 @@ import z from 'zod';
 
 import { isoDateSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
+export const EmployeeSpecialtyDtoSchema = z.enum([
+  'GROOMING',
+  'SPA',
+  'HEALTHCARE',
+  'TRAINING',
+  'BOARDING',
+]);
+
 export const EmployeeDashboardStartDtoSchema = z.object({
   rating: z.object({
     average: z.number(),

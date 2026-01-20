@@ -1,15 +1,16 @@
 import { ArrowRight, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { CATEGORY_CONFIG } from '@/features/service/constants';
-import type { TService } from '@/features/service/domain/service.entity';
+import { getServiceCategoryConfig } from '@/features/service/config/service-category.config';
+import type { Service } from '@/features/service/domain/service.entity';
 import { paths } from '@/shared/config/paths';
+import { formatCurrency } from '@/shared/lib/utils';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 
 interface Props {
-  service: TService;
+  service: Service;
 }
 
 export function ServiceCard({ service }: Props) {
@@ -20,14 +21,12 @@ export function ServiceCard({ service }: Props) {
     return `${minutes} phút`;
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-  };
-
-  const { label: categoryLabel, color: categoryColors } = CATEGORY_CONFIG[service.category];
+  const { label: categoryLabel, color: categoryColors } = getServiceCategoryConfig(
+    service.category,
+  );
 
   return (
-    <Card className="group border-border/50 hover:border-primary/30 overflow-hidden transition-all">
+    <Card className="group border-border/50 hover:border-primary/30 overflow-hidden rounded-none shadow-none transition-all">
       <div className="relative aspect-4/3 overflow-hidden">
         <img
           src={service.images[0].url || '/placeholder.svg'}
@@ -46,11 +45,11 @@ export function ServiceCard({ service }: Props) {
         <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">{service.description}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-primary text-lg font-bold">{formatPrice(service.price)}</span>
+            <span className="text-primary text-lg font-bold">{formatCurrency(service.price)}</span>
           </div>
 
           <Button size="sm" asChild>
-            <Link to={paths.customer.createBooking.getHref(service._id)}>
+            <Link to={paths.customer.createBooking.getHref(service.id)}>
               Đặt ngay
               <ArrowRight className="ml-1 h-4 w-4" />
             </Link>

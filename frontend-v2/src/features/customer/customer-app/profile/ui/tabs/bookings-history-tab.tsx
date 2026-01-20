@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import type { Booking } from '@/features/booking/domain/booking.entity';
-import { getCategoryConfig } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
 import { paths } from '@/shared/config/paths';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -26,7 +26,7 @@ export function BookingsHistoryTab({ bookings }: Props) {
       <div className="space-y-3">
         {bookings.map((booking) => {
           const bookingStatus = getStatusConfig(booking.status);
-          const categoryConfig = getCategoryConfig(booking.service.category);
+          const categoryConfig = getServiceCategoryConfig(booking.service.category);
           return (
             <Link
               key={booking.id}

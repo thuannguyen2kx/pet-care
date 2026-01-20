@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { serviceQueryKey } from '@/features/service/api/query-key';
+import { serviceQueryKey } from '@/features/service/api/query-keys';
 import type { TGetServiceDetailApiResponse } from '@/features/service/api/types';
 import { SERVICE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';

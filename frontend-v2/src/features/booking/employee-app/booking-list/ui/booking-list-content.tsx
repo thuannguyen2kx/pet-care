@@ -4,7 +4,7 @@ import { Calendar, Clock, MoreVertical } from 'lucide-react';
 
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import type { Booking } from '@/features/booking/domain/booking.entity';
-import { getCategoryConfig } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
 import { SectionSpinner } from '@/shared/components/template/loading';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
@@ -50,7 +50,7 @@ export function EmployeeBookingListContent({ bookings, isLoading, onViewDetail }
 
       {bookings.map((booking) => {
         const bookingStatus = getStatusConfig(booking.status);
-        const categoryConfig = getCategoryConfig(booking.service.category);
+        const categoryConfig = getServiceCategoryConfig(booking.service.category);
 
         return (
           <Card

@@ -1,11 +1,11 @@
-import { ArrowRight, Badge, Calendar, Clock } from 'lucide-react';
+import { ArrowRight, Badge, Calendar } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAdminBookings } from '@/features/booking/api/get-bookings';
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import type { Booking } from '@/features/booking/domain/booking.entity';
 import { BOOKING_VIEW } from '@/features/booking/domain/booking.state';
-import { getCategoryConfig } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
 import { paths } from '@/shared/config/paths';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -62,7 +62,7 @@ function RecentBookingList({ bookings, isLoading }: { bookings: Booking[]; isLoa
 
 function RecentBookingItem({ booking }: { booking: Booking }) {
   const bookingStatus = getStatusConfig(booking.status);
-  const categoryConfig = getCategoryConfig(booking.service.category);
+  const categoryConfig = getServiceCategoryConfig(booking.service.category);
   return (
     <div
       key={booking.id}

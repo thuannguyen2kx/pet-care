@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import type { Booking } from '@/features/booking/domain/booking.entity';
-import { getCategoryConfig } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
 import { SectionSpinner } from '@/shared/components/template/loading';
 import { paths } from '@/shared/config/paths';
 import { getInitials } from '@/shared/lib/utils';
@@ -58,7 +58,7 @@ export function BookingListContent({ bookings, isLoading }: Props) {
 
       {bookings.map((booking) => {
         const bookingStatus = getStatusConfig(booking.status);
-        const categoryConfig = getCategoryConfig(booking.service.category);
+        const categoryConfig = getServiceCategoryConfig(booking.service.category);
 
         return (
           <Link

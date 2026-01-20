@@ -2,7 +2,8 @@ import { Scissors } from 'lucide-react';
 
 import { useReportServicesByBookingCount } from '@/features/report/admin-app/report-overview/application/use-report-services-by-booking-count';
 import type { ReportServiceStat } from '@/features/report/domain/report-entity';
-import { getCategoryConfig, type TCategory } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
+import type { ServiceCategory } from '@/features/service/domain/service.entity';
 import { EmptyState } from '@/shared/components/template/empty-state';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -54,7 +55,7 @@ function ServiceList({
   return (
     <div className="space-y-3">
       {services.map((service, idx) => {
-        const categoryConfig = getCategoryConfig(service.category as TCategory);
+        const categoryConfig = getServiceCategoryConfig(service.category as ServiceCategory);
         return (
           <div key={service.id} className="bg-muted/30 flex items-center gap-4 p-4">
             <span className="text-muted-foreground w-6 text-lg font-bold">{idx + 1}</span>

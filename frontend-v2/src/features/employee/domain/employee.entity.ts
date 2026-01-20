@@ -2,6 +2,14 @@ import z from 'zod';
 
 import { isoDateSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
+export const EmployeeSpecialtySchema = z.enum([
+  'GROOMING',
+  'SPA',
+  'HEALTHCARE',
+  'TRAINING',
+  'BOARDING',
+]);
+
 export const EmployeeDashboardStartSchema = z.object({
   rating: z.object({
     average: z.number(),
@@ -41,5 +49,19 @@ export const EmployeeScheduleSchema = z.object({
   reason: z.string().optional(),
 });
 
+// =======================
+// Types
+// =======================
 export type EmployeeDashboardStart = z.infer<typeof EmployeeDashboardStartSchema>;
 export type EmployeeSchedule = z.infer<typeof EmployeeScheduleSchema>;
+export type EmployeeSpecialty = z.infer<typeof EmployeeSpecialtySchema>;
+// =======================
+// Constants
+// =======================
+export const EMPLOYEE_SPECIALTIES = {
+  GROOMING: 'GROOMING',
+  SPA: 'SPA',
+  HEALTHCARE: 'HEALTHCARE',
+  TRAINING: 'TRAINING',
+  BOARDING: 'BOARDING',
+} as const;

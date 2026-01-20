@@ -2,7 +2,8 @@ import { Scissors } from 'lucide-react';
 
 import { useReportServicesByRevenue } from '@/features/report/admin-app/report-overview/application/use-report-services-by-revenue';
 import type { ReportServiceStat } from '@/features/report/domain/report-entity';
-import { getCategoryConfig, type TCategory } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
+import type { ServiceCategory } from '@/features/service/domain/service.entity';
 import { EmptyState } from '@/shared/components/template/empty-state';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
@@ -51,7 +52,7 @@ function ServiceList({
   return (
     <div className="space-y-3">
       {services.map((service) => {
-        const categoryConfig = getCategoryConfig(service.category as TCategory);
+        const categoryConfig = getServiceCategoryConfig(service.category as ServiceCategory);
         return (
           <div key={service.id} className="flex items-center justify-between">
             <div className="flex items-center gap-3">

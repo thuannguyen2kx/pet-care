@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import { useBookings } from '@/features/booking/api/get-bookings';
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import { BOOKING_VIEW } from '@/features/booking/domain/booking.state';
-import { getCategoryConfig } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
 import { paths } from '@/shared/config/paths';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -52,7 +52,7 @@ export function TodayBookingsWidget() {
       <CardContent className="space-y-4">
         {bookings.map((booking) => {
           const status = getStatusConfig(booking.status);
-          const category = getCategoryConfig(booking.service.category);
+          const category = getServiceCategoryConfig(booking.service.category);
 
           return (
             <div key={booking.id} className="bg-background flex gap-4 rounded-xl border p-4">

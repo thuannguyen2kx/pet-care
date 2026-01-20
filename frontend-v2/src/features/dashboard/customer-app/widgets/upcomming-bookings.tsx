@@ -7,7 +7,7 @@ import { useBookings } from '@/features/booking/api/get-bookings';
 import { getStatusConfig } from '@/features/booking/config/booking-status.config';
 import type { Booking } from '@/features/booking/domain/booking.entity';
 import { BOOKING_VIEW } from '@/features/booking/domain/booking.state';
-import { getCategoryConfig } from '@/features/service/constants';
+import { getServiceCategoryConfig } from '@/features/service/config';
 import { paths } from '@/shared/config/paths';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -50,7 +50,7 @@ export function UpcommingBookingsWidget({ bookings }: Props) {
       <CardContent className="space-y-4">
         {bookingsData.map((booking) => {
           const bookingStatus = getStatusConfig(booking.status);
-          const categoryConfig = getCategoryConfig(booking.service.category);
+          const categoryConfig = getServiceCategoryConfig(booking.service.category);
           return (
             <div key={booking.id} className="border-border flex gap-4 rounded-xl border p-4">
               <div className="bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">

@@ -1,19 +1,26 @@
 import {
   CustomerServiceListContent,
   type ServiceListState,
-} from '@/features/service/components/customer-service-list/customer-service-list-content';
-import { CustomerServiceListPagination } from '@/features/service/components/customer-service-list/customer-service-list-pagination';
-import { CustomerServiceListToolbar } from '@/features/service/components/customer-service-list/customer-service-toolbar';
-import type { TService } from '@/features/service/domain/service.entity';
-import type { TCustomerServiceFilter } from '@/features/service/schemas';
+} from '@/features/service/customer-app/service-list/ui/customer-service-list-content';
+import { CustomerServiceListPagination } from '@/features/service/customer-app/service-list/ui/customer-service-list-pagination';
+import { CustomerServiceListToolbar } from '@/features/service/customer-app/service-list/ui/customer-service-toolbar';
+import type { ServicesQuery } from '@/features/service/domain/serivice.state';
+import type { Service } from '@/features/service/domain/service.entity';
 
 type Props = {
-  filter: TCustomerServiceFilter;
+  filter: ServicesQuery;
   isLoading: boolean;
-  services: TService[];
+  services: Service[];
   totalPages: number;
+  setFilters: (next: Partial<ServicesQuery>) => void;
 };
-export function CustomerServiceView({ isLoading, services, filter, totalPages }: Props) {
+export function CustomerServiceView({
+  isLoading,
+  services,
+  filter,
+  totalPages,
+  setFilters,
+}: Props) {
   const listState: ServiceListState = (() => {
     if (isLoading) {
       return { type: 'loading' };
@@ -37,7 +44,7 @@ export function CustomerServiceView({ isLoading, services, filter, totalPages }:
           </p>
         </div>
 
-        <CustomerServiceListToolbar filter={filter} />
+        <CustomerServiceListToolbar filter={filter} setFilters={setFilters} />
         <CustomerServiceListContent state={listState} />
         <CustomerServiceListPagination filter={filter} totalPages={totalPages} />
       </div>
