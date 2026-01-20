@@ -20,8 +20,8 @@ export default function CustomerProfilePage() {
   const petsQuery = useGetUserPets();
   const bookingsQuery = useBookings({ query: { page: 1, limit: 10 } });
 
-  const totalPet = useMemo(() => petsQuery.data?.data.length || 0, [petsQuery.data]);
-  const pets = petsQuery.data?.data || [];
+  const totalPet = useMemo(() => petsQuery.data?.length || 0, [petsQuery.data]);
+  const pets = petsQuery.data || [];
   const bookings = bookingsQuery.data?.bookings || [];
 
   if (profileQuery.isLoading) {

@@ -1,13 +1,14 @@
 import { Link } from 'react-router';
 
-import { formatPetType, getPetAge } from '@/features/pets/helpers';
-import type { TPet } from '@/features/pets/types';
+import { formatPetType } from '@/features/pets/config';
+import type { Pet } from '@/features/pets/domain/pet.entity';
+import { getPetAge } from '@/features/pets/domain/pet.helper';
 import { paths } from '@/shared/config/paths';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card } from '@/shared/ui/card';
 
-type Props = { pets: TPet[] };
+type Props = { pets: Pet[] };
 export function CustomerPetsTab({ pets }: Props) {
   return (
     <>
@@ -23,11 +24,11 @@ export function CustomerPetsTab({ pets }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         {pets.map((pet) => {
           return (
-            <Link to={paths.customer.petDetail.getHref(pet._id)} key={pet._id}>
+            <Link to={paths.customer.petDetail.getHref(pet.id)} key={pet.id}>
               <Card className="hover:border-primary/50 overflow-hidden rounded-none border border-transparent shadow-none transition-all">
                 <div className="flex items-center gap-4 p-4">
                   <img
-                    src={pet.image?.url || '/placeholder.svg'}
+                    src={pet.image || '/placeholder.svg'}
                     alt={pet.name}
                     className="h-20 w-20 rounded-xl object-cover"
                   />

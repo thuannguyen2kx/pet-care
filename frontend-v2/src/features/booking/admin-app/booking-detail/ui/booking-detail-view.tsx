@@ -9,8 +9,8 @@ import {
   type BookingStatus,
 } from '@/features/booking/domain/booking.entity';
 import { getSpecialtyLabel } from '@/features/employee/constants';
-import { formatPetType } from '@/features/pets/helpers';
-import { getCategoryName } from '@/features/service/constants';
+import { formatPetType } from '@/features/pets/config';
+import { getServiceCategoryLabel } from '@/features/service/config';
 import { BackLink } from '@/shared/components/template/back-link';
 import { paths } from '@/shared/config/paths';
 import { cn, getInitials } from '@/shared/lib/utils';
@@ -191,7 +191,7 @@ function ServiceInfo({ booking }: { booking: BookingDetail }) {
     <Section title="Dịch vụ">
       <p className="font-semibold">{booking.service.name}</p>
       <p className="text-muted-foreground text-sm">
-        {getCategoryName(booking.service.category)} • {booking.service.duration} phút
+        {getServiceCategoryLabel(booking.service.category)} • {booking.service.duration} phút
       </p>
     </Section>
   );

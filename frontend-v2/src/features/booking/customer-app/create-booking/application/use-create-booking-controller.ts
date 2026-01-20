@@ -81,8 +81,8 @@ export const useCreateBookingController = (serviceId: string) => {
 
   const summary = useBookingSummary({
     draft: state.bookingDraft,
-    service: serviceQuery.data?.data.service,
-    pets: petsQuery.data?.data,
+    service: serviceQuery.data,
+    pets: petsQuery.data,
     employees: employeesQuery.data,
   });
 
@@ -128,8 +128,8 @@ export const useCreateBookingController = (serviceId: string) => {
     },
 
     data: {
-      service: serviceQuery.data?.data.service,
-      pets: petsQuery.data?.data,
+      service: serviceQuery.data,
+      pets: petsQuery.data,
       employees: employeesQuery.data,
       slots: slotsQuery.data,
       summary,

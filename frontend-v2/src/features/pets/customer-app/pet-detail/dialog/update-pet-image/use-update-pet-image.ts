@@ -19,7 +19,7 @@ export function useUpdatePetImageForm({
   const form = useForm<UpdatePetImage>({
     mode: 'onChange',
     resolver: zodResolver(UpdatePetImageSchema),
-    defaultValues: { petImage: undefined },
+    defaultValues: { petId, petImage: undefined },
   });
 
   const submit = form.handleSubmit((data) => {

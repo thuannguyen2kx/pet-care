@@ -2,8 +2,9 @@ import { Avatar } from '@radix-ui/react-avatar';
 import { Check, PawPrint } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { formatGender, formatPetType, formatWeight, getPetAge } from '@/features/pets/helpers';
-import type { TPet } from '@/features/pets/types';
+import { formatGender, formatPetType } from '@/features/pets/config';
+import type { Pet } from '@/features/pets/domain/pet.entity';
+import { formatWeight, getPetAge } from '@/features/pets/domain/pet.helper';
 import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/utils';
 import { AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
@@ -11,7 +12,7 @@ import { Badge } from '@/shared/ui/badge';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 type Props = {
-  pets: TPet[];
+  pets: Pet[];
   isLoading: boolean;
   selectedPetId: string | null;
   onSelectPet: (petId: string) => void;
@@ -41,12 +42,12 @@ export function SelectedPetStep({ pets, isLoading, selectedPetId, onSelectPet }:
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {pets.map((pet) => {
-          const isSelected = selectedPetId === pet._id;
+          const isSelected = selectedPetId === pet.id;
 
           return (
             <button
-              key={pet._id}
-              onClick={() => onSelectPet(pet._id)}
+              key={pet.id}
+              onClick={() => onSelectPet(pet.id)}
               className={cn(
                 'group relative flex items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all duration-300',
                 isSelected
@@ -55,7 +56,7 @@ export function SelectedPetStep({ pets, isLoading, selectedPetId, onSelectPet }:
               )}
             >
               <Avatar className="h-16 w-16">
-                <AvatarImage src={pet.image?.url ?? undefined} />
+                <AvatarImage src={pet.image ?? undefined} />
                 <AvatarFallback>{pet.name[0]}</AvatarFallback>
               </Avatar>
 
@@ -69,7 +70,7 @@ export function SelectedPetStep({ pets, isLoading, selectedPetId, onSelectPet }:
                     {getPetAge(pet.dateOfBirth)}
                   </Badge>
                   <Badge variant="outline" className="border-border text-xs">
-                    {formatWeight(pet.weight.toString())}
+                    {formatWeight(pet.weight)}
                   </Badge>
                   <Badge variant="outline" className="border-border text-xs">
                     {formatGender(pet.gender)}

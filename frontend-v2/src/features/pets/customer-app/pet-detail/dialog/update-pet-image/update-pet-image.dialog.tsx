@@ -7,8 +7,10 @@ import { useUpdatePetImageForm } from './use-update-pet-image';
 import { Button } from '@/shared/ui/button';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -44,12 +46,17 @@ export const UpdatePetImageDialog = ({ petId, petImage }: UpdatePetImageDialogPr
             Tải lên ảnh mới để hồ sơ trông dễ thương hơn 🐾
           </DialogDescription>
         </DialogHeader>
-        <UpdatePetImageForm
-          form={form}
-          petImage={petImage}
-          onSubmit={submit}
-          isSubmitting={isSubmitting}
-        />
+        <UpdatePetImageForm form={form} petImage={petImage} />
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline" disabled={isSubmitting}>
+              Huỷ
+            </Button>
+          </DialogClose>
+          <Button type="submit" onClick={submit} disabled={!form.formState.isValid || isSubmitting}>
+            Lưu ảnh
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

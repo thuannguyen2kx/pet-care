@@ -2,11 +2,11 @@
 import { useFormContext, Controller } from 'react-hook-form';
 
 import { PetImageUpload } from '@/features/pets/components/pet-image-upload/pet-image-upload';
-import type { TUpdatePetImageInput } from '@/features/pets/schemas';
+import type { UpdatePetImage } from '@/features/pets/domain/pet.state';
 import { Field, FieldError } from '@/shared/ui/field';
 
 export function PetImageUploadField({ initialUrl }: { initialUrl?: string }) {
-  const { control } = useFormContext<TUpdatePetImageInput>();
+  const { control } = useFormContext<UpdatePetImage>();
 
   return (
     <Controller

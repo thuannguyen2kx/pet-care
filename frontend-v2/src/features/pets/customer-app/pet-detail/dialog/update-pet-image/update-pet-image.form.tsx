@@ -2,28 +2,16 @@ import { FormProvider, type UseFormReturn } from 'react-hook-form';
 
 import { PetImageUploadField } from '@/features/pets/components/form-fields';
 import type { UpdatePetImage } from '@/features/pets/domain/pet.state';
-import { Button } from '@/shared/ui/button';
 
 type Props = {
   form: UseFormReturn<UpdatePetImage>;
-  isSubmitting: boolean;
   petImage?: string;
-  onSubmit: () => void;
 };
-export function UpdatePetImageForm({ form, petImage, isSubmitting, onSubmit }: Props) {
+export function UpdatePetImageForm({ form, petImage }: Props) {
   return (
     <FormProvider {...form}>
-      <form className="mt-6 flex flex-col justify-center space-y-4" onSubmit={onSubmit}>
+      <form className="mt-6 flex flex-col justify-center space-y-4">
         <PetImageUploadField initialUrl={petImage} />
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" disabled={isSubmitting}>
-            Huỷ
-          </Button>
-
-          <Button type="submit" disabled={!form.formState.isValid || isSubmitting}>
-            Lưu ảnh
-          </Button>
-        </div>
       </form>
     </FormProvider>
   );

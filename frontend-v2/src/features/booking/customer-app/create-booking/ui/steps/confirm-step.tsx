@@ -2,7 +2,7 @@ import { Calendar, Check, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import type { useBookingSummary } from '@/features/booking/customer-app/create-booking/application/use-create-booking-summary';
-import { formatPetType } from '@/features/pets/helpers';
+import { formatPetType } from '@/features/pets/config';
 import { useDebounce } from '@/shared/hooks/use-debounce';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
@@ -108,7 +108,7 @@ function ConfirmSummary({ summary }: { summary: ReturnType<typeof useBookingSumm
 
       <div className="flex items-center gap-4">
         <Avatar className="h-14 w-14">
-          <AvatarImage src={pet.image?.url ?? undefined} />
+          <AvatarImage src={pet.image ?? undefined} />
           <AvatarFallback>{getInitials(pet.name)}</AvatarFallback>
         </Avatar>
         <div className="flex-1">

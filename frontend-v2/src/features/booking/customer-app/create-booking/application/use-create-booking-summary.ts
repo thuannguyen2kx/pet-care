@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 
 import type { BookableEmployee } from '@/features/availability/domain';
 import type { CreateBookingDraft } from '@/features/booking/domain/booking.state';
-import type { TPet } from '@/features/pets/types';
-import type { TService } from '@/features/service/domain/service.entity';
+import type { Pet } from '@/features/pets/domain/pet.entity';
+import type { Service } from '@/features/service/domain/service.entity';
 
 interface UseBookingSummaryParams {
   draft: CreateBookingDraft;
-  service?: TService;
-  pets?: TPet[];
+  service?: Service;
+  pets?: Pet[];
   employees?: BookableEmployee[];
 }
 
@@ -34,7 +34,7 @@ interface UseBookingSummaryParams {
  */
 export function useBookingSummary({ draft, service, pets, employees }: UseBookingSummaryParams) {
   return useMemo(() => {
-    const selectedPet = pets?.find((p) => p._id === draft.petId);
+    const selectedPet = pets?.find((p) => p.id === draft.petId);
     const selectedEmployee = employees?.find((e) => e.employeeId === draft.employeeId);
 
     return {
