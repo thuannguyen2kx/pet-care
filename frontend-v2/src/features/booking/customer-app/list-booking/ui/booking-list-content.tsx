@@ -71,7 +71,7 @@ function BookingCard({
 }) {
   const status = getStatusConfig(booking.status);
   return (
-    <Card className="border-border/50 overflow-hidden">
+    <Card className="border-border/50 overflow-hidden rounded-none shadow-none">
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
           <div className="flex flex-1 gap-4 p-4">

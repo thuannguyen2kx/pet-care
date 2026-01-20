@@ -10,6 +10,11 @@ export const BOOKING_VIEW_CONFIG: Record<
     icon: React.ElementType;
   }
 > = {
+  [BOOKING_VIEW.ALL]: {
+    label: 'Tất cả',
+    description: 'Toàn bộ lịch hẹn',
+    icon: List,
+  },
   [BOOKING_VIEW.TODAY]: {
     label: 'Hôm nay',
     description: 'Lịch hẹn trong ngày',
@@ -29,10 +34,5 @@ export const BOOKING_VIEW_CONFIG: Record<
     label: 'Đã qua',
     description: 'Lịch hẹn trước đây',
     icon: History,
-  },
-  [BOOKING_VIEW.ALL]: {
-    label: 'Tất cả',
-    description: 'Toàn bộ lịch hẹn',
-    icon: List,
   },
 };

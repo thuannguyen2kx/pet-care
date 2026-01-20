@@ -6,8 +6,9 @@ import { usePetsFilter } from '@/features/pets/customer-app/my-pets/application/
 import { PetCard, PetCardSkeleton } from '@/features/pets/customer-app/my-pets/ui/pet-card';
 import { PetListToolbar } from '@/features/pets/customer-app/my-pets/ui/pet-list-toolbar';
 import type { Pet } from '@/features/pets/domain/pet.entity';
+import { EmptyState } from '@/shared/components/template/empty-state';
 import { paths } from '@/shared/config/paths';
-import { Card, CardContent } from '@/shared/ui/card';
+import { Card } from '@/shared/ui/card';
 
 export function MyPetsList() {
   const petsQuery = useGetUserPets();
@@ -42,15 +43,11 @@ export function MyPetsList() {
 
 export function PetsListEmpty() {
   return (
-    <Card className="rounded-none border-none p-4 shadow-none">
-      <CardContent>
-        <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-          <Search className="text-muted-foreground h-8 w-8" />
-        </div>
-        <h3 className="text-foreground text-lg font-medium">Không tìm thấy thú cưng</h3>
-        <p className="text-muted-foreground mt-1">Thử tìm kiếm với từ khóa khác</p>
-      </CardContent>
-    </Card>
+    <EmptyState
+      icon={Search}
+      title="Không tìm thấy thú cưng"
+      description="Thử tìm kiếm với từ khóa khác"
+    />
   );
 }
 

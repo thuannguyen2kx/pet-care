@@ -65,7 +65,7 @@ export const customerBookingQuerySchema = z.object({
   status: bookingStatusSchema.optional(),
   page: z.coerce.number().default(1),
   limit: z.coerce.number().default(20),
-  view: bookingViewSchema.optional(),
+  view: bookingViewSchema.optional().default('all'),
 });
 
 export const employeeBookingQuerySchema = z.object({
