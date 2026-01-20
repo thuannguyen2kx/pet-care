@@ -2,9 +2,9 @@ import { ArrowRight, Plus } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useGetUserPets } from '@/features/pets/api/get-user-pet';
-import { PET_TYPE_CONFIG } from '@/features/pets/constants';
-import { getPetAge } from '@/features/pets/helpers';
-import type { TPet } from '@/features/pets/types';
+import { getPetTypeConfig } from '@/features/pets/config';
+import type { Pet } from '@/features/pets/domain/pet.entity';
+import { getPetAge } from '@/features/pets/domain/pet.helper';
 import { paths } from '@/shared/config/paths';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 type Props = {
-  pets?: TPet[];
+  pets?: Pet[];
 };
 export function MyPetsWidget({ pets }: Props) {
   const petsQuery = useGetUserPets({
@@ -24,7 +24,7 @@ export function MyPetsWidget({ pets }: Props) {
   if (petsQuery.isLoading) {
     return <MyPetsSkeleton />;
   }
-  const petsData = pets || petsQuery.data?.data || [];
+  const petsData = pets || petsQuery.data || [];
 
   return (
     <Card className="rounded-none border-none p-6 shadow-none">
@@ -39,15 +39,15 @@ export function MyPetsWidget({ pets }: Props) {
       </CardHeader>
       <CardContent className="space-y-4">
         {petsData.map((pet) => {
-          const petTypeConfig = PET_TYPE_CONFIG[pet.type];
+          const petTypeConfig = getPetTypeConfig(pet.type);
           return (
             <Link
-              key={pet._id}
-              to={paths.customer.petDetail.getHref(pet._id)}
+              key={pet.id}
+              to={paths.customer.petDetail.getHref(pet.id)}
               className="border-border hover:border-primary/50 hover:bg-muted/50 flex items-center gap-3 rounded-xl border p-3 transition-all"
             >
               <img
-                src={pet?.image?.url || '/placeholder.svg'}
+                src={pet?.image || '/placeholder.svg'}
                 alt={pet.name}
                 className="h-14 w-14 rounded-full object-cover"
               />

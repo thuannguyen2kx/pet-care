@@ -1,12 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 
-import { PET_GENDER_CONFIG, PET_GENDERS } from '@/features/pets/constants';
-import type { TUpdatePetInfoInput } from '@/features/pets/schemas';
+import { PET_GENDER_CONFIG } from '@/features/pets/config';
 import { Field, FieldError, FieldLabel, FieldLegend, FieldSet } from '@/shared/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group';
 
 export function PetGenderField() {
-  const { control } = useFormContext<TUpdatePetInfoInput>();
+  const { control } = useFormContext();
   return (
     <Controller
       name="gender"
@@ -15,12 +14,11 @@ export function PetGenderField() {
         <FieldSet>
           <FieldLegend variant="label">Giới tính</FieldLegend>
           <RadioGroup value={field.value} onValueChange={field.onChange} className="grid-cols-2">
-            {PET_GENDERS.map((gender) => {
-              const { label } = PET_GENDER_CONFIG[gender];
+            {Object.entries(PET_GENDER_CONFIG).map(([gender, config]) => {
               return (
                 <Field key={gender} data-invalid={fieldState.invalid} orientation="horizontal">
                   <RadioGroupItem id={gender} value={gender} aria-invalid={fieldState.invalid} />
-                  <FieldLabel htmlFor={gender}>{label}</FieldLabel>
+                  <FieldLabel htmlFor={gender}>{config.label}</FieldLabel>
                 </Field>
               );
             })}

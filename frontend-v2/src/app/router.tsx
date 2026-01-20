@@ -25,7 +25,7 @@ const createAppRouter = (queryClient: QueryClient) => {
     {
       id: 'root',
       hydrateFallbackElement: <SplashScreen />,
-      ErrorBoundary: MainErrorFallback,
+      // ErrorBoundary: MainErrorFallback,
       children: [
         {
           path: paths.root.path,

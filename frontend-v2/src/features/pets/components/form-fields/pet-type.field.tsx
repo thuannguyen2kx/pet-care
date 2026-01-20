@@ -1,13 +1,12 @@
 import { Controller, useFormContext } from 'react-hook-form';
 
-import { PET_TYPE_CONFIG, PET_TYPES } from '@/features/pets/constants';
-import type { TUpdatePetInfoInput } from '@/features/pets/schemas';
+import { PET_TYPE_CONFIG } from '@/features/pets/config';
 import { cn } from '@/shared/lib/utils';
 import { Field, FieldError, FieldLabel, FieldLegend, FieldSet } from '@/shared/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group';
 
 export function PetTypeField() {
-  const { control } = useFormContext<TUpdatePetInfoInput>();
+  const { control } = useFormContext();
 
   return (
     <Controller
@@ -18,8 +17,7 @@ export function PetTypeField() {
           <FieldLegend variant="label">Loại thú cưng</FieldLegend>
 
           <RadioGroup value={field.value} onValueChange={field.onChange} className="grid-cols-2">
-            {PET_TYPES.map((petType) => {
-              const { label, icon: Icon } = PET_TYPE_CONFIG[petType];
+            {Object.entries(PET_TYPE_CONFIG).map(([petType, config]) => {
               const isSelected = field.value === petType;
 
               return (
@@ -35,10 +33,10 @@ export function PetTypeField() {
                           : 'bg-muted text-muted-foreground',
                       )}
                     >
-                      <Icon className="h-6 w-6" />
+                      <config.icon className="h-6 w-6" />
                     </div>
 
-                    <span className="font-medium">{label}</span>
+                    <span className="font-medium">{config.label}</span>
                   </Field>
                 </FieldLabel>
               );

@@ -1,8 +1,9 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 
+import type { CreatePet } from '@/features/pets/domain/pet.state';
+import { buildCreatePetFormData, mapCreatePetToDto } from '@/features/pets/domain/pet.transform';
 import { PET_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
-import type { MutationConfig } from '@/shared/lib/react-query';
 
 export const createPet = ({ data }: { data: FormData }) => {
   return http.post(PET_ENDPOINTS.CREATE, data, {
@@ -13,7 +14,7 @@ export const createPet = ({ data }: { data: FormData }) => {
 };
 
 type UseCreatePetOptions = {
-  mutationConfig?: MutationConfig<typeof createPet>;
+  mutationConfig?: UseMutationOptions<unknown, unknown, CreatePet, unknown>;
 };
 
 export const useCreatePet = ({ mutationConfig }: UseCreatePetOptions) => {
@@ -24,6 +25,11 @@ export const useCreatePet = ({ mutationConfig }: UseCreatePetOptions) => {
       onSuccess?.(...args);
     },
     ...restConfig,
-    mutationFn: createPet,
+    mutationFn: (createPetData: CreatePet) => {
+      const dto = mapCreatePetToDto(createPetData);
+      const formData = buildCreatePetFormData(dto);
+
+      return createPet({ data: formData });
+    },
   });
 };

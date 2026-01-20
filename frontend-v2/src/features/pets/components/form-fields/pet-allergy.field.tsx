@@ -1,7 +1,7 @@
 import { XIcon } from 'lucide-react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
-import type { TUpdatePetAllergiesInput } from '@/features/pets/schemas';
+import type { UpdatePetAllergies } from '@/features/pets/domain/pet.state';
 import { Button } from '@/shared/ui/button';
 import { Field, FieldContent, FieldError, FieldGroup, FieldSet } from '@/shared/ui/field';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/shared/ui/input-group';
 
 export function PetAllergyField() {
-  const { control, formState } = useFormContext<TUpdatePetAllergiesInput>();
+  const { control, formState } = useFormContext<UpdatePetAllergies>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'allergies',

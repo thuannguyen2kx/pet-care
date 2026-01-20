@@ -1,17 +1,16 @@
 import { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
-import { CAT_BREEDS, DOG_BREEDS } from '@/features/pets/constants';
-import type { TUpdatePetInfoInput } from '@/features/pets/schemas';
+import { CAT_BREEDS, DOG_BREEDS, PET_TYPES } from '@/features/pets/domain/pet.entity';
 import { Field, FieldError, FieldLabel } from '@/shared/ui/field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 
 export function PetBreedField() {
-  const { control, watch } = useFormContext<TUpdatePetInfoInput>();
+  const { control, watch } = useFormContext();
 
   const watchType = watch('type');
   const breeds = useMemo(() => {
-    return watchType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
+    return watchType === PET_TYPES.DOG ? DOG_BREEDS : CAT_BREEDS;
   }, [watchType]);
 
   return (
