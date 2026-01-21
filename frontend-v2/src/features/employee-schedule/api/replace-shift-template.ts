@@ -1,23 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
 import { employeeScheduleKeys } from '@/features/employee-schedule/api/query-key';
-import type { TReplaceShiftTemplatePayload } from '@/features/employee-schedule/schemas';
+import type { ReplaceShiftTemplateDto } from '@/features/employee-schedule/domain/schedule.dto';
+import type { ReplaceShiftTemplate } from '@/features/employee-schedule/domain/schedule.state';
+import { mapReplaceShiftTemplateToDto } from '@/features/employee-schedule/domain/schedule.transform';
 import { EMPLOYEE_SCHEDULE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
-import type { MutationConfig } from '@/shared/lib/react-query';
 
 const replaceShiftTemplate = ({
   shiftId,
-  payload,
+  replaceShiftTemplateDto,
 }: {
   shiftId: string;
-  payload: TReplaceShiftTemplatePayload;
+  replaceShiftTemplateDto: ReplaceShiftTemplateDto;
 }) => {
-  return http.put(EMPLOYEE_SCHEDULE_ENDPOINTS.REPLACE_SHIFT(shiftId), payload);
+  return http.put(EMPLOYEE_SCHEDULE_ENDPOINTS.REPLACE_SHIFT(shiftId), replaceShiftTemplateDto);
 };
 
 type UseReplaceShiftTemplateOptions = {
-  mutationConfig?: MutationConfig<typeof replaceShiftTemplate>;
+  mutationConfig?: UseMutationOptions<unknown, unknown, ReplaceShiftTemplate, unknown>;
 };
 
 export const useReplaceShiftTemplate = ({
@@ -31,6 +32,12 @@ export const useReplaceShiftTemplate = ({
       onSuccess?.(...args);
     },
     ...restConfig,
-    mutationFn: replaceShiftTemplate,
+    mutationFn: (replaceShiftTemplateData: ReplaceShiftTemplate) => {
+      const replaceShiftTemplateDto = mapReplaceShiftTemplateToDto(replaceShiftTemplateData);
+      return replaceShiftTemplate({
+        shiftId: replaceShiftTemplateData.shiftId,
+        replaceShiftTemplateDto,
+      });
+    },
   });
 };

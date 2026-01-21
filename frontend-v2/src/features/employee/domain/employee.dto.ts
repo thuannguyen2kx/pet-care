@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { isoDateSchema, time24hSchema } from '@/shared/lib/zod-primitives';
+import { mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
 export const EmployeeSpecialtyDtoSchema = z.enum([
   'GROOMING',
@@ -9,6 +9,66 @@ export const EmployeeSpecialtyDtoSchema = z.enum([
   'TRAINING',
   'BOARDING',
 ]);
+
+export const EmployeeInfoDtoSchema = z.object({
+  specialties: z.array(EmployeeSpecialtyDtoSchema),
+  certifications: z.array(z.string()).optional(),
+  experience: z.string().optional(),
+
+  hourlyRate: z.number().positive().optional(),
+  commissionRate: z.number().optional(),
+
+  defaultSchedule: z.object({
+    workdays: z.array(z.number()),
+    workHours: z.object({
+      start: time24hSchema,
+      end: time24hSchema,
+    }),
+  }),
+
+  stats: z.object({
+    rating: z.number(),
+    totalBookings: z.number(),
+    completedBookings: z.number(),
+    cancelledBookings: z.number(),
+    noShowRate: z.number(),
+    totalRevenue: z.number(),
+    averageServiceTime: z.number(),
+  }),
+
+  hireDate: z.string(),
+  employeeId: mongoObjectIdSchema.optional(),
+  department: z.string().optional(),
+  isAcceptingBookings: z.boolean(),
+  maxDailyBookings: z.number(),
+  vacationMode: z.boolean(),
+});
+
+export const EmployeeDtoSchema = z.object({
+  _id: mongoObjectIdSchema,
+
+  fullName: z.string(),
+  email: z.string(),
+  phoneNumber: z.string().optional(),
+  gender: z.enum(['male', 'female']),
+  dateOfBirth: z.string().optional(),
+  profilePicture: z.object({
+    url: z.string().nullable(),
+    publicId: z.string().nullable(),
+  }),
+  address: z
+    .object({
+      province: z.string(),
+      ward: z.string(),
+    })
+    .optional(),
+  role: z.string(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  employeeInfo: EmployeeInfoDtoSchema,
+
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
 
 export const EmployeeDashboardStartDtoSchema = z.object({
   rating: z.object({
@@ -29,25 +89,6 @@ export const EmployeeDashboardStartDtoSchema = z.object({
   }),
 });
 
-export const EmployeeScheduleDtoSchema = z.object({
-  date: isoDateSchema,
-  dayOfWeek: z.number().min(0).max(6),
-  isWorking: z.boolean(),
-
-  startTime: time24hSchema.optional(),
-  endTime: time24hSchema.optional(),
-
-  breaks: z.array(
-    z.object({
-      name: z.string(),
-      startTime: time24hSchema,
-      endTime: time24hSchema,
-    }),
-  ),
-
-  overwrite: z.boolean().optional(),
-  reason: z.string().optional(),
-});
-
 export type EmployeeDashboardStatDto = z.infer<typeof EmployeeDashboardStartDtoSchema>;
-export type EmployeeScheduleDto = z.infer<typeof EmployeeScheduleDtoSchema>;
+export type EmployeeInfoDto = z.infer<typeof EmployeeInfoDtoSchema>;
+export type EmployeeDto = z.infer<typeof EmployeeDtoSchema>;

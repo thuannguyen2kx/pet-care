@@ -1,23 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
 import { employeeScheduleKeys } from '@/features/employee-schedule/api/query-key';
-import type { TCreateBreakTemplatePayload } from '@/features/employee-schedule/schemas';
+import type { CreateBreakTemplateDto } from '@/features/employee-schedule/domain/schedule.dto';
+import type { CreateBreakTemplate } from '@/features/employee-schedule/domain/schedule.state';
+import { mapCreateBreakTemplateToDto } from '@/features/employee-schedule/domain/schedule.transform';
 import { EMPLOYEE_SCHEDULE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
-import type { MutationConfig } from '@/shared/lib/react-query';
 
 const createBreakTemplate = ({
   employeeId,
-  payload,
+  createBreakTemplateDto,
 }: {
   employeeId: string;
-  payload: TCreateBreakTemplatePayload;
+  createBreakTemplateDto: CreateBreakTemplateDto;
 }) => {
-  return http.post(EMPLOYEE_SCHEDULE_ENDPOINTS.CREATE_BREAK(employeeId), payload);
+  return http.post(EMPLOYEE_SCHEDULE_ENDPOINTS.CREATE_BREAK(employeeId), createBreakTemplateDto);
 };
 
 type UseCreateBreakTemplateOptions = {
-  mutationConfig?: MutationConfig<typeof createBreakTemplate>;
+  mutationConfig?: UseMutationOptions<unknown, unknown, CreateBreakTemplate, unknown>;
 };
 
 export const useCreateBreakTemplate = ({ mutationConfig }: UseCreateBreakTemplateOptions = {}) => {
@@ -29,6 +30,12 @@ export const useCreateBreakTemplate = ({ mutationConfig }: UseCreateBreakTemplat
       onSuccess?.(...args);
     },
     ...restConfig,
-    mutationFn: createBreakTemplate,
+    mutationFn: (createBreakTemplateData: CreateBreakTemplate) => {
+      const createBreakTemplateDto = mapCreateBreakTemplateToDto(createBreakTemplateData);
+      return createBreakTemplate({
+        employeeId: createBreakTemplateData.employeeId,
+        createBreakTemplateDto,
+      });
+    },
   });
 };

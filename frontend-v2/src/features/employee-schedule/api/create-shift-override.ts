@@ -1,23 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
 import { employeeScheduleKeys } from '@/features/employee-schedule/api/query-key';
-import type { CreateShiftOverridePayload } from '@/features/employee-schedule/schemas';
+import type { CreateShiftOverrideDto } from '@/features/employee-schedule/domain/schedule.dto';
+import type { CreateShiftOverride } from '@/features/employee-schedule/domain/schedule.state';
+import { mapCreateShiftOverrideToDto } from '@/features/employee-schedule/domain/schedule.transform';
 import { EMPLOYEE_SCHEDULE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
-import type { MutationConfig } from '@/shared/lib/react-query';
 
 const createShiftOverride = ({
   employeeId,
-  payload,
+  createShiftOverrideDto,
 }: {
   employeeId: string;
-  payload: CreateShiftOverridePayload;
+  createShiftOverrideDto: CreateShiftOverrideDto;
 }) => {
-  return http.post(EMPLOYEE_SCHEDULE_ENDPOINTS.CREATE_OVERRIDE(employeeId), payload);
+  return http.post(EMPLOYEE_SCHEDULE_ENDPOINTS.CREATE_OVERRIDE(employeeId), createShiftOverrideDto);
 };
 
 type UseCreateShiftOverrideOptions = {
-  mutationConfig?: MutationConfig<typeof createShiftOverride>;
+  mutationConfig?: UseMutationOptions<unknown, unknown, CreateShiftOverride, unknown>;
 };
 
 export const useCreateShiftOverride = ({ mutationConfig }: UseCreateShiftOverrideOptions = {}) => {
@@ -30,6 +31,12 @@ export const useCreateShiftOverride = ({ mutationConfig }: UseCreateShiftOverrid
       onSuccess?.(...args);
     },
     ...restConfig,
-    mutationFn: createShiftOverride,
+    mutationFn: (createShiftOverrideData: CreateShiftOverride) => {
+      const createShiftOverrideDto = mapCreateShiftOverrideToDto(createShiftOverrideData);
+      return createShiftOverride({
+        employeeId: createShiftOverrideData.employeeId,
+        createShiftOverrideDto,
+      });
+    },
   });
 };

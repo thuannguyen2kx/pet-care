@@ -1,23 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
 import { employeeScheduleKeys } from '@/features/employee-schedule/api/query-key';
-import type { CreateShiftTemplatePayload } from '@/features/employee-schedule/schemas';
+import type { CreateShiftTemplateDto } from '@/features/employee-schedule/domain/schedule.dto';
+import type { CreateShiftTemplate } from '@/features/employee-schedule/domain/schedule.state';
+import { mapCreateShiftTemplateToDto } from '@/features/employee-schedule/domain/schedule.transform';
 import { EMPLOYEE_SCHEDULE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
-import type { MutationConfig } from '@/shared/lib/react-query';
 
 const createShiftTemplate = ({
   employeeId,
-  payload,
+  createShiftTemplateDto,
 }: {
   employeeId: string;
-  payload: CreateShiftTemplatePayload;
+  createShiftTemplateDto: CreateShiftTemplateDto;
 }) => {
-  return http.post(EMPLOYEE_SCHEDULE_ENDPOINTS.CREATE_SHIFT(employeeId), payload);
+  return http.post(EMPLOYEE_SCHEDULE_ENDPOINTS.CREATE_SHIFT(employeeId), createShiftTemplateDto);
 };
 
 type UseCreateShiftTemplateOptions = {
-  mutationConfig?: MutationConfig<typeof createShiftTemplate>;
+  mutationConfig?: UseMutationOptions<unknown, unknown, CreateShiftTemplate, unknown>;
 };
 
 export const useCreateShiftTemplate = ({ mutationConfig }: UseCreateShiftTemplateOptions = {}) => {
@@ -31,6 +32,12 @@ export const useCreateShiftTemplate = ({ mutationConfig }: UseCreateShiftTemplat
       onSuccess?.(...args);
     },
     ...restConfig,
-    mutationFn: createShiftTemplate,
+    mutationFn: (createShiftTemplateData: CreateShiftTemplate) => {
+      const createShiftTemplateDto = mapCreateShiftTemplateToDto(createShiftTemplateData);
+      return createShiftTemplate({
+        employeeId: createShiftTemplateData.employeeId,
+        createShiftTemplateDto,
+      });
+    },
   });
 };

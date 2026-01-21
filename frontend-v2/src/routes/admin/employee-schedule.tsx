@@ -1,10 +1,12 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { ClientLoaderFunctionArgs } from 'react-router';
 
+import EmployeeSchedulePage from '@/features/employee-schedule/admin-app/employee-schedule/page';
 import { getEmployeeScheduleQueryOptions } from '@/features/employee-schedule/api/get-employee-schedule';
-import EmployeeScheduleContainer from '@/features/employee-schedule/containers/employee-schedule.container';
-import { getApiDateRange } from '@/features/employee-schedule/utils/get-api-date-range';
-import { parseScheduleSearch } from '@/features/employee-schedule/utils/parse-schedule-search';
+import {
+  getApiDateRange,
+  parseScheduleSearch,
+} from '@/features/employee-schedule/domain/schedule.lib';
 import DashboardLayout from '@/routes/admin/layout';
 import { privateClientLoader } from '@/shared/lib/auth.loader';
 
@@ -30,7 +32,7 @@ export default function AdminEmployeeScheduleRoute() {
       title="Lịch làm việc của nhân viên"
       description="Xem và quản lý thông tin lịch làm việc của nhân viên"
     >
-      <EmployeeScheduleContainer />
+      <EmployeeSchedulePage />
     </DashboardLayout>
   );
 }

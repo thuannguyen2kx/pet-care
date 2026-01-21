@@ -1,9 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { ClientLoaderFunctionArgs } from 'react-router';
 
+import EmployeeScheduleListPage from '@/features/employee-schedule/admin-app/schedule-list/page';
 import { getTeamScheduleQueryOptions } from '@/features/employee-schedule/api/get-team-schedule';
-import AdminScheduleContainer from '@/features/employee-schedule/containers/admin-schedule.container';
-import { getWeekRangeFromParam } from '@/features/employee-schedule/utils/get-week-range-from-param';
+import { getWeekRangeFromParam } from '@/features/employee-schedule/domain/schedule.lib';
 import DashboardLayout from '@/routes/admin/layout';
 import { privateClientLoader } from '@/shared/lib/auth.loader';
 
@@ -24,7 +24,7 @@ export default function AdminScheduleRoute() {
       title="Lịch làm việc của nhân viên"
       description="Xem và quản lý lịch làm việc của nhân viên"
     >
-      <AdminScheduleContainer />
+      <EmployeeScheduleListPage />
     </DashboardLayout>
   );
 }

@@ -1,22 +1,44 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
+import type { AxiosRequestConfig } from 'axios';
 
+import { mapEmployeeDtoToEntity } from '@/features/employee/domain/employee.transform';
 import { employeeScheduleKeys } from '@/features/employee-schedule/api/query-key';
-import type { TGetEmployeeDetail } from '@/features/employee-schedule/types';
+import { EmployeeScheduleDetailResponseSchema } from '@/features/employee-schedule/domain/schedule-http-schema';
+import {
+  mapBreakTemplatesToEntity,
+  mapShiftOverridesToEntity,
+  mapShiftTemplatesToEntity,
+} from '@/features/employee-schedule/domain/schedule.transform';
 import { EMPLOYEE_SCHEDULE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { QueryConfig } from '@/shared/lib/react-query';
-import type { TApiResponseSuccess } from '@/shared/types';
 
-const getEmployeeDetail = (
-  employeeId: string,
-): Promise<TApiResponseSuccess<TGetEmployeeDetail>> => {
-  return http.get(EMPLOYEE_SCHEDULE_ENDPOINTS.GET_EMPLOYEE(employeeId));
+const getEmployeeDetail = ({
+  employeeId,
+  config,
+}: {
+  employeeId: string;
+  config: AxiosRequestConfig;
+}) => {
+  return http.get(EMPLOYEE_SCHEDULE_ENDPOINTS.GET_EMPLOYEE(employeeId), config);
 };
 
 export const getEmployeeDetailQueryOptions = (employeeId: string) => {
   return queryOptions({
     queryKey: employeeScheduleKeys.employeeDetail(employeeId),
-    queryFn: () => getEmployeeDetail(employeeId),
+    queryFn: async ({ signal }) => {
+      const config = { signal };
+      const raw = await getEmployeeDetail({ employeeId, config });
+      const response = EmployeeScheduleDetailResponseSchema.parse(raw);
+      return {
+        employee: mapEmployeeDtoToEntity(response.data.employee),
+        schedule: {
+          shifts: mapShiftTemplatesToEntity(response.data.schedule.shifts),
+          overrides: mapShiftOverridesToEntity(response.data.schedule.overrides),
+          breaks: mapBreakTemplatesToEntity(response.data.schedule.breaks),
+        },
+      };
+    },
   });
 };
 

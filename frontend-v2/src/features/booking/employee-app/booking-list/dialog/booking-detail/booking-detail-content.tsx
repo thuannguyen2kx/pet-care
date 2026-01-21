@@ -6,8 +6,8 @@ import type { BookingDetail, BookingStatus } from '@/features/booking/domain/boo
 import { getAvailableStatusActions } from '@/features/booking/domain/booking.policy';
 import type { UpdateBookingStatus } from '@/features/booking/domain/booking.state';
 import { getSpecialtyLabel } from '@/features/employee/constants';
-import { formatPetType } from '@/features/pets/helpers';
-import { getCategoryName } from '@/features/service/constants';
+import { formatPetType } from '@/features/pets/config';
+import { getServiceCategoryLabel } from '@/features/service/config';
 import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
@@ -210,7 +210,7 @@ function ServiceInfo({ booking }: { booking: BookingDetail }) {
     <Section title="Dịch vụ">
       <p className="font-semibold">{booking.service.name}</p>
       <p className="text-muted-foreground text-sm">
-        {getCategoryName(booking.service.category)} • {booking.service.duration} phút
+        {getServiceCategoryLabel(booking.service.category)} • {booking.service.duration} phút
       </p>
     </Section>
   );

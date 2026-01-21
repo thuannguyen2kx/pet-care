@@ -1,39 +1,29 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
+import type { AxiosRequestConfig } from 'axios';
 
-import { employeWorkScheduleResponseSchema } from '@/features/employee/domain/employee-http-schema';
-import { mapEmployeeSchedulesDtoToEntities } from '@/features/employee/domain/employee.transform';
 import { employeeScheduleKeys } from '@/features/employee-schedule/api/query-key';
-import type { TEmployeeScheduleDay } from '@/features/employee-schedule/domain/schedule.type';
+import { EmployeWorkScheduleResponseSchema } from '@/features/employee-schedule/domain/schedule-http-schema';
+import type { EmployeeScheduleQuery } from '@/features/employee-schedule/domain/schedule.state';
+import { mapEmployeeSchedulesDtoToEntities } from '@/features/employee-schedule/domain/schedule.transform';
 import { EMPLOYEE_SCHEDULE_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { QueryConfig } from '@/shared/lib/react-query';
-import type { TApiResponseSuccess } from '@/shared/types';
 
-type GetEmployeeScheduleParams = {
-  employeeId?: string;
-  startDate?: string; // ISO
-  endDate?: string; // ISO
-};
-const getEmployeeSchedule = (
-  params: GetEmployeeScheduleParams,
-): Promise<TApiResponseSuccess<TEmployeeScheduleDay[]>> => {
-  const { employeeId, startDate, endDate } = params;
-  console.log({ startDate, endDate });
-  return http.get(EMPLOYEE_SCHEDULE_ENDPOINTS.SCHEDULE, {
-    params: { employeeId, startDate, endDate },
-  });
+const getEmployeeSchedule = (config: AxiosRequestConfig) => {
+  return http.get(EMPLOYEE_SCHEDULE_ENDPOINTS.SCHEDULE, config);
 };
 
 export const getEmployeeScheduleQueryOptions = ({
   employeeId,
   startDate,
   endDate,
-}: GetEmployeeScheduleParams) => {
+}: EmployeeScheduleQuery) => {
   return queryOptions({
     queryKey: employeeScheduleKeys.detail(employeeId, startDate, endDate),
-    queryFn: async () => {
-      const raw = await getEmployeeSchedule({ employeeId, startDate, endDate });
-      const response = employeWorkScheduleResponseSchema.parse(raw);
+    queryFn: async ({ signal }) => {
+      const config = { signal, params: { employeeId, startDate, endDate } };
+      const raw = await getEmployeeSchedule(config);
+      const response = EmployeWorkScheduleResponseSchema.parse(raw);
       return mapEmployeeSchedulesDtoToEntities(response.data);
     },
   });

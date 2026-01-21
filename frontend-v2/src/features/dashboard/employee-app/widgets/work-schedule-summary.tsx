@@ -2,9 +2,9 @@ import { format, isToday, parseISO } from 'date-fns';
 import { CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 
-import type { EmployeeSchedule } from '@/features/employee/domain/employee.entity';
 import { useEmployeeSchedule } from '@/features/employee-schedule/api/get-employee-schedule';
-import { getWeekRange } from '@/features/employee-schedule/domain/date-range';
+import type { EmployeeSchedule } from '@/features/employee-schedule/domain/schedule.entity';
+import { getWeekRange } from '@/features/employee-schedule/domain/schedule.lib';
 import { paths } from '@/shared/config/paths';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';

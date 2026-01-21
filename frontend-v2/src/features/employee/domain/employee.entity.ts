@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { isoDateSchema, time24hSchema } from '@/shared/lib/zod-primitives';
+import { isoDateSchema, mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
 export const EmployeeSpecialtySchema = z.enum([
   'GROOMING',
@@ -29,32 +29,71 @@ export const EmployeeDashboardStartSchema = z.object({
   }),
 });
 
-export const EmployeeScheduleSchema = z.object({
-  date: isoDateSchema,
-  dayOfWeek: z.number().min(0).max(6),
-  isWorking: z.boolean(),
+export const EmployeeInfoSchema = z.object({
+  specialties: z.array(EmployeeSpecialtySchema),
+  certifications: z.array(z.string()).optional(),
+  experience: z.string().optional(),
 
-  startTime: time24hSchema.optional(),
-  endTime: time24hSchema.optional(),
+  hourlyRate: z.number().positive().optional(),
+  commissionRate: z.number().optional(),
 
-  breaks: z.array(
-    z.object({
-      name: z.string(),
-      startTime: time24hSchema,
-      endTime: time24hSchema,
+  defaultSchedule: z.object({
+    workdays: z.array(z.number()),
+    workHours: z.object({
+      start: time24hSchema,
+      end: time24hSchema,
     }),
-  ),
+  }),
 
-  overwrite: z.boolean().optional(),
-  reason: z.string().optional(),
+  stats: z.object({
+    rating: z.number(),
+    totalBookings: z.number(),
+    completedBookings: z.number(),
+    cancelledBookings: z.number(),
+    noShowRate: z.number(),
+    totalRevenue: z.number(),
+    averageServiceTime: z.number(),
+  }),
+
+  hireDate: z.string(),
+  employeeId: mongoObjectIdSchema.optional(),
+  department: z.string().optional(),
+  isAcceptingBookings: z.boolean(),
+  maxDailyBookings: z.number(),
+  vacationMode: z.boolean(),
+});
+
+export const EmployeeSchema = z.object({
+  id: mongoObjectIdSchema,
+
+  fullName: z.string(),
+  email: z.string(),
+  phoneNumber: z.string().optional(),
+  gender: z.enum(['male', 'female']),
+  dateOfBirth: z.string().optional(),
+
+  profilePicture: z.url().nullable(),
+  address: z
+    .object({
+      province: z.string(),
+      ward: z.string(),
+    })
+    .optional(),
+  role: z.string(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  employeeInfo: EmployeeInfoSchema,
+
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });
 
 // =======================
 // Types
 // =======================
 export type EmployeeDashboardStart = z.infer<typeof EmployeeDashboardStartSchema>;
-export type EmployeeSchedule = z.infer<typeof EmployeeScheduleSchema>;
 export type EmployeeSpecialty = z.infer<typeof EmployeeSpecialtySchema>;
+export type EmployeeInfo = z.infer<typeof EmployeeInfoSchema>;
+export type Employee = z.infer<typeof EmployeeSchema>;
 // =======================
 // Constants
 // =======================
