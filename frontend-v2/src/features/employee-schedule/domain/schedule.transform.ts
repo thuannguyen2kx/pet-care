@@ -42,7 +42,6 @@ export const mapEmployeeScheduleDtoToEntity = (dto: EmployeeScheduleDto): Employ
     endTime: dto.endTime,
     breaks: dto.breaks,
     override: dto.override,
-    reason: dto.reason,
   };
 };
 
@@ -108,10 +107,12 @@ export const mapShiftOverrideToEntity = (dto: ShiftOverrideDto): ShiftOverride =
     date: dto.date,
     isWorking: dto.isWorking,
     reason: dto.reason,
-    createdBy: {
-      id: dto.createdBy.id,
-      fullName: dto.createdBy.fullName,
-    },
+    createdBy: dto.createdBy
+      ? {
+          id: dto.createdBy._id,
+          fullName: dto.createdBy.fullName,
+        }
+      : undefined,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };
@@ -147,7 +148,7 @@ export const mapCreateShiftTemplateToDto = (state: CreateShiftTemplate): CreateS
     startTime: state.startTime,
     endTime: state.endTime,
     effectiveFrom: format(state.effectiveFrom, 'yyyy-MM-dd'),
-    effectiveTo: format(state.effectiveTo!, 'yyyy-MM-dd'),
+    effectiveTo: state.effectiveTo ? format(state.effectiveTo, 'yyyy-MM-dd') : undefined,
   };
 };
 export const mapBulkShiftTemplatesToDto = (
@@ -183,13 +184,17 @@ export const mapDisableShiftTemplateToDto = (
   };
 };
 export const mapCreateShiftOverrideToDto = (state: CreateShiftOverride): CreateShiftOverrideDto => {
-  return {
+  const dto: CreateShiftOverrideDto = {
     date: format(state.date, 'yyyy-MM-dd'),
-    isWorking: state.isWorking,
-    startTime: state.startTime,
-    endTime: state.endTime,
     reason: state.reason,
+    isWorking: state.isWorking,
   };
+  if (state.isWorking) {
+    dto.startTime = state.startTime;
+    dto.endTime = state.endTime;
+  }
+
+  return dto;
 };
 
 export const mapCreateBreakTemplateToDto = (state: CreateBreakTemplate): CreateBreakTemplateDto => {

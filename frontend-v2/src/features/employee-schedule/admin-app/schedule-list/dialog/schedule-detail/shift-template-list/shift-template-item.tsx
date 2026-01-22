@@ -4,15 +4,15 @@ import { useState } from 'react';
 import { ReplaceShiftTemplateForm } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/shift-template-list/replace-shift-template-form';
 import { ShiftRow } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/shift-template-list/shift-row';
 import { useReplaceShiftTemplateForm } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/shift-template-list/use-replace-shift-template-form';
+import type { ShiftTemplate } from '@/features/employee-schedule/domain/schedule.entity';
 import type {
   DisableShiftTemplate,
   ReplaceShiftTemplate,
 } from '@/features/employee-schedule/domain/schedule.state';
-import type { TShiftTemplate } from '@/features/employee-schedule/types';
 import { Button } from '@/shared/ui/button';
 
 type ItemProps = {
-  shift: TShiftTemplate;
+  shift: ShiftTemplate;
   onDisable: (payload: DisableShiftTemplate) => void;
   onReplace: (payload: ReplaceShiftTemplate) => void;
 };
@@ -22,7 +22,7 @@ export function ShiftTemplateItem({ shift, onDisable, onReplace }: ItemProps) {
 
   const { form } = useReplaceShiftTemplateForm({
     initialValues: {
-      shiftId: shift._id,
+      shiftId: shift.id,
       startTime: shift.startTime,
       endTime: shift.endTime,
     },
@@ -32,7 +32,7 @@ export function ShiftTemplateItem({ shift, onDisable, onReplace }: ItemProps) {
     onReplace(values);
     setExpanded(false);
   });
-  const handleDisabeShift = () => onDisable({ shiftId: shift._id, effectiveTo: new Date() });
+  const handleDisabeShift = () => onDisable({ shiftId: shift.id, effectiveTo: new Date() });
 
   return (
     <div className="rounded-lg border border-gray-200">

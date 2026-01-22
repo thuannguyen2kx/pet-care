@@ -2,7 +2,7 @@ import { Mail, Phone } from 'lucide-react';
 
 import type { Employee } from '@/features/employee/domain/employee.entity';
 import { EmployeeStatsGrid } from '@/features/employee/employee-app/profile/ui/employee-stats-grid';
-import { ProfileAvatarDialog } from '@/features/user/components/profile-action/profile-avatar';
+import { ProfileAvatarDialog } from '@/features/user/components/profile-avatar';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Separator } from '@/shared/ui/separator';

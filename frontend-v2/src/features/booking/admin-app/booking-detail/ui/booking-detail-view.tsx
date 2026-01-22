@@ -8,7 +8,7 @@ import {
   type BookingDetail,
   type BookingStatus,
 } from '@/features/booking/domain/booking.entity';
-import { getSpecialtyLabel } from '@/features/employee/constants';
+import { formatEmployeeSpecialty } from '@/features/employee/config';
 import { formatPetType } from '@/features/pets/config';
 import { getServiceCategoryLabel } from '@/features/service/config';
 import { BackLink } from '@/shared/components/template/back-link';
@@ -256,7 +256,7 @@ function EmployeeInfo({ booking }: { booking: BookingDetail }) {
       <InfoBlock
         avatar={e.profilePicture.url}
         title={e.fullName}
-        subtitle={e.specialties.map(getSpecialtyLabel).join(' • ')}
+        subtitle={e.specialties.map(formatEmployeeSpecialty).join(' • ')}
       />
     </Section>
   );

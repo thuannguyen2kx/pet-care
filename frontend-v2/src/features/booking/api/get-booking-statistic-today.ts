@@ -2,13 +2,9 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosRequestConfig } from 'axios';
 
 import { bookingQueryKeys } from '@/features/booking/api/query-keys';
-import {
-  bookingStatisticResponseSchema,
-  bookingTodayStatisticResponseSchema,
-} from '@/features/booking/domain/booking-http-schema';
+import { bookingTodayStatisticResponseSchema } from '@/features/booking/domain/booking-http-schema';
 import type { BookingTodayStatisticQuery } from '@/features/booking/domain/booking.state';
 import {
-  mapBookingStatisticDtoToEntity,
   mapBookingTodayStatisticDtoToEntity,
   mapBookingTodayStatisticQueryToDto,
 } from '@/features/booking/domain/booking.transform';

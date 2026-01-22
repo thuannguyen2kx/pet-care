@@ -1,11 +1,11 @@
 import { FormProvider, type UseFormReturn } from 'react-hook-form';
 
 import { PetMedicalNotesField } from '@/features/pets/components/form-fields/pet-medical-notes.field';
-import type { TUpdatePetMedicalNotesInput } from '@/features/pets/schemas';
+import type { UpdatePetMedicalNotes } from '@/features/pets/domain/pet.state';
 import { Button } from '@/shared/ui/button';
 
 type Props = {
-  form: UseFormReturn<TUpdatePetMedicalNotesInput>;
+  form: UseFormReturn<UpdatePetMedicalNotes>;
   onSubmit: () => void;
   onClose: () => void;
   isSubmitting: boolean;

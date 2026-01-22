@@ -5,7 +5,7 @@ import {
   type EmployeeActionKey,
 } from '@/features/employee/admin-app/employee-list/application/employee-actions.key';
 import type { EmployeeListItem } from '@/features/employee/domain/employee.entity';
-import { USER_STATUS } from '@/features/user/domain/user-status';
+import { USER_STATUS } from '@/features/user/domain/user.entity';
 import type { AdminAction } from '@/shared/action-system/types';
 
 export const employeeActions: AdminAction<EmployeeListItem, EmployeeActionKey>[] = [

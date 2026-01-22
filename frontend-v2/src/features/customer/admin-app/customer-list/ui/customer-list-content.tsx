@@ -1,11 +1,11 @@
 import { ArrowRight, Ban, Crown, Gift, Mail, MoreVertical, Phone, Users } from 'lucide-react';
 
-import type { CustomerListItem } from '@/features/customer/domain/customer-entity';
+import { getMembershipTierConfig } from '@/features/customer/config';
 import {
-  getMembershipTierConfig,
   MEMBER_SHIP_TIER,
-  USER_STATUS,
-} from '@/features/user/domain/user-status';
+  type CustomerListItem,
+} from '@/features/customer/domain/customer-entity';
+import { USER_STATUS } from '@/features/user/domain/user.entity';
 import { cn, getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';

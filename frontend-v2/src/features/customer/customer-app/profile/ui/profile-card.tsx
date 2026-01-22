@@ -3,7 +3,7 @@ import { vi } from 'date-fns/locale';
 import { Award, Gift } from 'lucide-react';
 
 import type { Customer } from '@/features/customer/domain/customer-entity';
-import { ProfileAvatarDialog } from '@/features/user/components/profile-action/profile-avatar';
+import { ProfileAvatarDialog } from '@/features/user/components/profile-avatar';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Separator } from '@/shared/ui/separator';
 

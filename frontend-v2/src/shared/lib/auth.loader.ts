@@ -15,7 +15,7 @@ export const protectedLoader =
     return loader(args);
   };
 
-export const privateClientLoader = (queryClient: QueryClient, loader: ClientLoaderFunction) =>
+export const privateClientLoader = (_queryClient: QueryClient, loader: ClientLoaderFunction) =>
   protectedLoader(loader);
 
 export const requireAuthLoader: ClientLoaderFunction = async ({ request }) => {

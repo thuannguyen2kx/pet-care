@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { employeeKeys } from '@/features/employee/api/query-key';
+import { employeeQueryKeys } from '@/features/employee/api/query-keys';
 import { employeeDashboardStatsResponseSchema } from '@/features/employee/domain/employee-http-schema';
 import { mapEmployeeDashboardStatDtoToEntity } from '@/features/employee/domain/employee.transform';
 import { EMPLOYEE_ENDPOINTS } from '@/shared/config/api-endpoints';
@@ -13,7 +13,7 @@ const getEmployeeDashboardStats = () => {
 
 export const getEmployeeDashboardStatsQueryOptions = () => {
   return queryOptions({
-    queryKey: employeeKeys.employee.dashboard_stats(),
+    queryKey: employeeQueryKeys.employee.dashboard_stats(),
     queryFn: async () => {
       const raw = await getEmployeeDashboardStats();
       const response = employeeDashboardStatsResponseSchema.parse(raw);

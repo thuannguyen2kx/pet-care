@@ -20,8 +20,11 @@ export const EmployeeScheduleSchema = z.object({
     }),
   ),
 
-  override: z.boolean().optional(),
-  reason: z.string().optional(),
+  override: z
+    .object({
+      reason: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const EmployeeScheduleCalendarSchema = z.object({
@@ -40,8 +43,11 @@ export const EmployeeScheduleCalendarSchema = z.object({
     }),
   ),
 
-  override: z.boolean().optional(),
-  reason: z.string().optional(),
+  override: z
+    .object({
+      reason: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const EmployeeWeekScheduleSchema = z.object({
@@ -77,10 +83,12 @@ export const ShiftOverrideSchmema = z.object({
   date: isoDateSchema,
   isWorking: z.boolean(),
   reason: z.string(),
-  createdBy: z.object({
-    id: mongoObjectIdSchema,
-    fullName: z.string(),
-  }),
+  createdBy: z
+    .object({
+      id: mongoObjectIdSchema,
+      fullName: z.string(),
+    })
+    .optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

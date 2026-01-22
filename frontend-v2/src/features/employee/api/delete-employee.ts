@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { employeeKeys } from '@/features/employee/api/query-key';
+import { employeeQueryKeys } from '@/features/employee/api/query-keys';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { MutationConfig } from '@/shared/lib/react-query';
@@ -19,7 +19,7 @@ export const useDeleteEmployee = ({ mutationConfig }: UseDeleteEmployeeOptions =
 
   return useMutation({
     onSuccess: (data, variables, ...args) => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeQueryKeys.admin.lists() });
       onSuccess?.(data, variables, ...args);
     },
     ...restConfig,

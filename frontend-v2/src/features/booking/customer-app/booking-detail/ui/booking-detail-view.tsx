@@ -11,7 +11,7 @@ import {
   type BookingDetail,
   type BookingStatus,
 } from '@/features/booking/domain/booking.entity';
-import { formatPetType } from '@/features/pets/helpers';
+import { formatPetType } from '@/features/pets/config';
 import { BackLink } from '@/shared/components/template/back-link';
 import { paths } from '@/shared/config/paths';
 import { cn, getInitials } from '@/shared/lib/utils';

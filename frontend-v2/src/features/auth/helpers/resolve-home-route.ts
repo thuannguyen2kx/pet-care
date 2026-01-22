@@ -1,4 +1,4 @@
-import { USER_STATUS } from '@/features/user/domain/user-status';
+import { USER_STATUS } from '@/features/user/domain/user.entity';
 import { paths } from '@/shared/config/paths';
 import { ROLES } from '@/shared/constant';
 import type { TUserIdentity } from '@/shared/types';

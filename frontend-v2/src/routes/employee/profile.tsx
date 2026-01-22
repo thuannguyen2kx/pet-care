@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 
+import { getProfleQueryOptions } from '@/features/employee/api/get-employee-profile';
 import EmployeeProfilePage from '@/features/employee/employee-app/profile/page';
-import { getProfleQueryOptions } from '@/features/user/api/get-profile';
 import EmployeeLayout from '@/routes/employee/layout';
 import { privateClientLoader } from '@/shared/lib/auth.loader';
 

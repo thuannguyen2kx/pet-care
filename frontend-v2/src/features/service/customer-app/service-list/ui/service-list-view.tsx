@@ -46,7 +46,11 @@ export function CustomerServiceView({
 
         <CustomerServiceListToolbar filter={filter} setFilters={setFilters} />
         <CustomerServiceListContent state={listState} />
-        <CustomerServiceListPagination filter={filter} totalPages={totalPages} />
+        <CustomerServiceListPagination
+          page={filter.page}
+          onPageChange={(page) => setFilters({ page })}
+          totalPages={totalPages}
+        />
       </div>
     </div>
   );

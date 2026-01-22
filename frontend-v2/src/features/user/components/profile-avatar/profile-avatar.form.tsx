@@ -1,13 +1,13 @@
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
-import { ProfileAvatarUpload } from '@/features/user/components/profile-action/profile-avatar/profile-avatar-upload';
-import type { TUpdateProfileAvatar } from '@/features/user/schemas';
+import { ProfileAvatarUpload } from '@/features/user/components/profile-avatar/profile-avatar-upload';
+import type { UpdateProfileAvatar } from '@/features/user/domain/user.state';
 import { Field, FieldError } from '@/shared/ui/field';
 
 type Props = {
   initialUrl?: string;
   fullName: string;
-  form: UseFormReturn<TUpdateProfileAvatar>;
+  form: UseFormReturn<UpdateProfileAvatar>;
 };
 export function ProfileAvatarForm({ initialUrl, fullName, form }: Props) {
   return (

@@ -88,6 +88,7 @@ export function configureAuth<User, Error, LoginCredentials, RegisterCredentials
       mutationFn: logoutFn,
       ...options,
       onSuccess: (...args) => {
+        queryClient.clear();
         setUser(null);
         options?.onSuccess?.(...args);
       },

@@ -9,7 +9,7 @@ import { EmployeeCardView } from '@/features/employee/admin-app/employee-list/ui
 import { useChangeEmployeeStatus } from '@/features/employee/api/change-employee-status';
 import { useDeleteEmployee } from '@/features/employee/api/delete-employee';
 import type { EmployeeListItem } from '@/features/employee/domain/employee.entity';
-import { USER_STATUS_UI } from '@/features/user/domain/user-status';
+import { getUserStatusConfig } from '@/features/user/config';
 import { ActionMenu } from '@/shared/action-system/components/action-menu';
 import type { ActionHandlers } from '@/shared/action-system/types';
 
@@ -20,7 +20,7 @@ export function EmployeeCardContainer({
   employee: EmployeeListItem;
   onEdit: (id: string) => void;
 }) {
-  const statusUI = USER_STATUS_UI[employee.status];
+  const statusUI = getUserStatusConfig(employee.status);
   const deleteEmployee = useDeleteEmployee();
   const changeEmployeeStatus = useChangeEmployeeStatus({
     mutationConfig: {

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 
 import { Guards } from '@/features/user/domain/user.guards';
-import { default as AppRoot, ErrorBoundary as AppErrorBoundary } from '@/routes/root';
+import { default as AppRoot } from '@/routes/root';
 import { MainErrorFallback } from '@/shared/components/errors/main';
 import { ForbiddenFallback } from '@/shared/components/forbidden/main';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
@@ -25,7 +25,7 @@ const createAppRouter = (queryClient: QueryClient) => {
     {
       id: 'root',
       hydrateFallbackElement: <SplashScreen />,
-      // ErrorBoundary: MainErrorFallback,
+      ErrorBoundary: MainErrorFallback,
       children: [
         {
           path: paths.root.path,
@@ -205,11 +205,6 @@ const createAppRouter = (queryClient: QueryClient) => {
                       path: paths.admin.socials.path,
                       lazy: () =>
                         import('@/routes/admin/social/post-list').then(convert(queryClient)),
-                    },
-                    {
-                      path: paths.admin.createPost.path,
-                      lazy: () =>
-                        import('@/routes/admin/social/create-post').then(convert(queryClient)),
                     },
                   ],
                 },

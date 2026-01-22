@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function CreateBookingSummary({ summary }: Props) {
-  const { service, pet, employee, date, startTime, notes, totalAmount } = summary;
+  const { service, pet, employee, date, startTime, totalAmount } = summary;
 
   const summaryData = {
     items: [

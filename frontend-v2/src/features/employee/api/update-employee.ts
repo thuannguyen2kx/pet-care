@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
-import { employeeKeys } from '@/features/employee/api/query-key';
+import { employeeQueryKeys } from '@/features/employee/api/query-keys';
 import type { UpdateEmployee } from '@/features/employee/domain/employee-state';
 import type { UpdateEmployeeDto } from '@/features/employee/domain/employee.dto';
 import { mapUpdateEmployeeToDto } from '@/features/employee/domain/employee.transform';
-import { userKeys } from '@/features/user/api/query-key';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 
@@ -27,9 +26,10 @@ export const useUpdateEmployee = ({ mutationConfig }: UseUpdateEmployeeOptions =
   const { onSuccess, ...restConfig } = mutationConfig || {};
   return useMutation({
     onSuccess: (_data, variables, ...args) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.lists() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.detail(variables.employeeId) });
+      queryClient.invalidateQueries({ queryKey: employeeQueryKeys.admin.lists() });
+      queryClient.invalidateQueries({
+        queryKey: employeeQueryKeys.admin.detail(variables.employeeId),
+      });
       onSuccess?.(_data, variables, ...args);
     },
     ...restConfig,

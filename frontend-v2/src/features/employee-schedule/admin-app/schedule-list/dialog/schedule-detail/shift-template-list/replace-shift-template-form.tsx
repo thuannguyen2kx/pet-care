@@ -1,12 +1,12 @@
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
-import type { TReplaceShiftTemplateInput } from '@/features/employee-schedule/schemas';
+import type { ReplaceShiftTemplate } from '@/features/employee-schedule/domain/schedule.state';
 import { PickerWithInput } from '@/shared/components/picker-with-input';
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
 type Props = {
-  form: UseFormReturn<TReplaceShiftTemplateInput>;
+  form: UseFormReturn<ReplaceShiftTemplate>;
 };
 export function ReplaceShiftTemplateForm({ form }: Props) {
   return (

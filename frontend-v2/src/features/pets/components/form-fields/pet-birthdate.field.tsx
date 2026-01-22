@@ -1,11 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 
-import type { TUpdatePetInfoInput } from '@/features/pets/schemas';
+import type { UpdatePetInfo } from '@/features/pets/domain/pet.state';
 import { PickerWithInput } from '@/shared/components/picker-with-input';
 import { Field, FieldError, FieldLabel } from '@/shared/ui/field';
 
 export function PetBirthDateField() {
-  const { control } = useFormContext<TUpdatePetInfoInput>();
+  const { control } = useFormContext<UpdatePetInfo>();
   return (
     <Controller
       name="dateOfBirth"

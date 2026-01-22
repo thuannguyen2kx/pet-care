@@ -17,8 +17,7 @@ export const clientLoader = (queryClient: QueryClient) => {
 
     const query = getSerivceQueryOptions(serviceId);
 
-    const serviceQuery =
-      queryClient.getQueryData(query.queryKey) ?? (await queryClient.fetchQuery(query));
+    await Promise.all([queryClient.ensureQueryData(query)]);
 
     return { serviceId };
   });

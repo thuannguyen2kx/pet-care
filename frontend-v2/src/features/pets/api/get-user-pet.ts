@@ -18,11 +18,6 @@ export const getUserPetsQueryOptions = () => {
     queryFn: async ({ signal }) => {
       const config = { signal };
       const raw = await getUserPets(config);
-      try {
-        const response = GetPetsResponseSchema.parse(raw);
-      } catch (error) {
-        console.log(error);
-      }
       const response = GetPetsResponseSchema.parse(raw);
       return mapPetsDtoToEntities(response.data);
     },

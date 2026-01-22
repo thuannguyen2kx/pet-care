@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { EmployeeHeader } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/emplyee-header';
+import { EmployeeHeader } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/employee-header';
 import { BreakTemplateTab } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/schedule-tabs/break-template-tab';
 import { ShiftOverrideTab } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/schedule-tabs/shift-override-tab';
 import { WeeklyShiftTab } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/schedule-tabs/weekly-shift-tabs';
@@ -61,8 +61,8 @@ export function ScheduleDetailDrawer({ open, onOpenChange, emloyeeId }: Props) {
       </Drawer>
     );
   }
-  if (!employeeDetailQuery.data?.data) return null;
-  const { employee, schedule } = employeeDetailQuery.data.data;
+  if (!employeeDetailQuery.data) return null;
+  const { employee, schedule } = employeeDetailQuery.data;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>

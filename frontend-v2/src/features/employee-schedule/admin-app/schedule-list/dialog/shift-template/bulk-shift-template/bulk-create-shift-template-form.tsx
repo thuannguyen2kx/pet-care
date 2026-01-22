@@ -1,7 +1,9 @@
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
-import type { BulkCreateShiftsTemplate } from '@/features/employee-schedule/domain/schedule.state';
-import type { TDayOfWeek } from '@/features/employee-schedule/domain/schedule.type';
+import {
+  DayOfWeekEnum,
+  type BulkCreateShiftsTemplate,
+} from '@/features/employee-schedule/domain/schedule.state';
 import { PickerWithInput } from '@/shared/components/picker-with-input';
 import { Field, FieldError, FieldLabel, FieldLegend, FieldSet } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
@@ -11,13 +13,13 @@ type Props = {
   form: UseFormReturn<BulkCreateShiftsTemplate>;
 };
 const dayLabels = {
-  0: 'Thứ hai',
-  1: 'Thứ ba',
-  2: 'Thứ tư',
-  3: 'Thứ năm',
-  4: 'Thứ sáu',
-  5: 'Thứ bảy',
-  6: 'Chủ nhật',
+  '0': 'Thứ hai',
+  '1': 'Thứ ba',
+  '2': 'Thứ tư',
+  '3': 'Thứ năm',
+  '4': 'Thứ sáu',
+  '5': 'Thứ bảy',
+  '6': 'Chủ nhật',
 };
 export function BulkCreateShiftTemplateForm({ form }: Props) {
   const watchShifts = form.watch('days');
@@ -27,7 +29,7 @@ export function BulkCreateShiftTemplateForm({ form }: Props) {
         <FieldLegend>Lịch làm việc hàng tuần</FieldLegend>
         <div className="space-y-2">
           {Object.keys(watchShifts).map((dayString) => {
-            const day = Number(dayString) as TDayOfWeek;
+            const day = DayOfWeekEnum.parse(dayString);
             return (
               <div key={day} className="bg-muted/30 flex items-center gap-4 rounded-xl p-4">
                 <div className="w-24 font-medium">{dayLabels[day]}</div>

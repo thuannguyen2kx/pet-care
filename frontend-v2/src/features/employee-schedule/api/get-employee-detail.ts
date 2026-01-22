@@ -29,6 +29,11 @@ export const getEmployeeDetailQueryOptions = (employeeId: string) => {
     queryFn: async ({ signal }) => {
       const config = { signal };
       const raw = await getEmployeeDetail({ employeeId, config });
+      try {
+        const response = EmployeeScheduleDetailResponseSchema.parse(raw);
+      } catch (error) {
+        console.log(error);
+      }
       const response = EmployeeScheduleDetailResponseSchema.parse(raw);
       return {
         employee: mapEmployeeDtoToEntity(response.data.employee),

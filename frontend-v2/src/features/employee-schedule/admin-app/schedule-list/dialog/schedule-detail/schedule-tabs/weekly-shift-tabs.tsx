@@ -1,13 +1,13 @@
 import { ShiftTemplateList } from '../shift-template-list/shift-template-list';
 
+import type { ShiftTemplate } from '@/features/employee-schedule/domain/schedule.entity';
 import type {
   DisableShiftTemplate,
   ReplaceShiftTemplate,
 } from '@/features/employee-schedule/domain/schedule.state';
-import type { TShiftTemplate } from '@/features/employee-schedule/types';
 
 type Props = {
-  shifts: TShiftTemplate[];
+  shifts: ShiftTemplate[];
   onDiable: (payload: DisableShiftTemplate) => void;
   onReplace: (payload: ReplaceShiftTemplate) => void;
 };

@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosRequestConfig } from 'axios';
 
-import { employeeKeys } from '@/features/employee/api/query-key';
+import { employeeQueryKeys } from '@/features/employee/api/query-keys';
 import { EmployeeListResponseSchema } from '@/features/employee/domain/employee-http-schema';
 import type { EmployeesQuery } from '@/features/employee/domain/employee-state';
 import {
@@ -18,7 +18,7 @@ const getEmployees = (config: AxiosRequestConfig) => {
 
 export const getEmployeesOptions = (query: EmployeesQuery) => {
   return queryOptions({
-    queryKey: employeeKeys.admin.list(query),
+    queryKey: employeeQueryKeys.admin.list(query),
     queryFn: async ({ signal }) => {
       const queryDto = mapEmployeesQueryToDto(query);
       const config = { signal, params: queryDto };

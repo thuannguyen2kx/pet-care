@@ -1,18 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { customerQueryKey } from '@/features/customer/api/query-keys';
-import { userKeys } from '@/features/user/api/query-key';
-import type { TProfile } from '@/features/user/types';
+import { employeeQueryKeys } from '@/features/employee/api/query-keys';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { MutationConfig } from '@/shared/lib/react-query';
 
-const updateProfileAvatar = async (data: FormData): Promise<TProfile> => {
-  const res = await http.put(USER_ENDPOINTS.UPDATE_PROFILE_IMAGE, data, {
+const updateProfileAvatar = (data: FormData) => {
+  return http.put(USER_ENDPOINTS.UPDATE_PROFILE_IMAGE, data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-
-  return res.data.user;
 };
 type UseUpdateAvatarOptions = {
   mutaionConfig?: MutationConfig<typeof updateProfileAvatar>;
@@ -23,7 +20,7 @@ export const useUpdateAvatar = ({ mutaionConfig }: UseUpdateAvatarOptions = {}) 
   const { onSuccess, ...restConfig } = mutaionConfig || {};
   return useMutation({
     onSuccess: (data, ...args) => {
-      queryClient.setQueriesData({ queryKey: userKeys.profile() }, data);
+      queryClient.invalidateQueries({ queryKey: employeeQueryKeys.employee.profile() });
       queryClient.invalidateQueries({ queryKey: customerQueryKey.profile() });
 
       onSuccess?.(data, ...args);

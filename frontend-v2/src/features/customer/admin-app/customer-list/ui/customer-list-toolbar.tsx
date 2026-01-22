@@ -1,8 +1,9 @@
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { MEMBER_SHIP_TIER } from '@/features/customer/domain/customer-entity';
 import type { CustomersQuery } from '@/features/customer/domain/customer-state';
-import { MEMBER_SHIP_TIER, USER_STATUS } from '@/features/user/domain/user-status';
+import { USER_STATUS } from '@/features/user/domain/user.entity';
 import { useDebounce } from '@/shared/hooks/use-debounce';
 import { Input } from '@/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';

@@ -52,7 +52,7 @@ export const CustomerUserDtoSchema = z.object({
     .optional(),
   dateOfBirth: z.string().nullable().optional(),
   role: z.literal('CUSTOMER'),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'DELETED']),
   emailVerified: z.boolean(),
   emailVerifiedAt: z.string().nullable(),
   phoneVerified: z.boolean(),

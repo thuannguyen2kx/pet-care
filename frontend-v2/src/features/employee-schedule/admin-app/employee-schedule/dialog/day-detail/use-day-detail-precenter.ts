@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
-import type { TCalendarDayWithSchedule } from '@/features/employee-schedule/domain/calendar-day-with-schedule.type';
+import type { CalendarDayWithSchedule } from '@/features/employee-schedule/domain/schedule.entity';
 
 export function useDayDetailPresenter() {
-  const [selectedDay, setSelectedDay] = useState<TCalendarDayWithSchedule | null>(null);
+  const [selectedDay, setSelectedDay] = useState<CalendarDayWithSchedule | null>(null);
 
   return {
     selectedDay,
-    openDayDetail: (day: TCalendarDayWithSchedule) => setSelectedDay(day),
+    openDayDetail: (day: CalendarDayWithSchedule) => setSelectedDay(day),
     closeDayDetail: () => setSelectedDay(null),
   };
 }

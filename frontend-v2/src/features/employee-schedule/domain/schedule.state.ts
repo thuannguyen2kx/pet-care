@@ -4,7 +4,7 @@ import { isoDateSchema, mongoObjectIdSchema } from '@/shared/lib/zod-primitives'
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-const DayOfWeekEnum = z.enum(['0', '1', '2', '3', '4', '5', '6']);
+export const DayOfWeekEnum = z.enum(['0', '1', '2', '3', '4', '5', '6']);
 
 export const CreateShiftTemplateSchema = z.object({
   employeeId: mongoObjectIdSchema,
@@ -161,6 +161,7 @@ export const EmployeeScheduleQuerySchema = z.object({
 // Types
 // =============
 
+export type DayOfWeek = z.infer<typeof DayOfWeekEnum>;
 export type CreateShiftTemplate = z.infer<typeof CreateShiftTemplateSchema>;
 export type BulkCreateShiftsTemplate = z.infer<typeof BulkCreateShiftsTemplateSchema>;
 export type ReplaceShiftTemplate = z.infer<typeof ReplaceShiftTemplateSchema>;

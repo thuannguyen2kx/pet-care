@@ -69,8 +69,11 @@ export const EmployeeScheduleDtoSchema = z.object({
     }),
   ),
 
-  override: z.boolean().optional(),
-  reason: z.string().optional(),
+  override: z
+    .object({
+      reason: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const EmployeeWeekScheduleDtoSchema = z.object({
@@ -93,8 +96,8 @@ export const ShiftTemplateDtoSchema = z.object({
   dayOfWeek: z.number().min(0).max(6),
   startTime: time24hSchema,
   endTime: time24hSchema,
-  effectiveFrom: z.date(),
-  effectiveTo: z.date().optional(),
+  effectiveFrom: z.string(),
+  effectiveTo: z.string().nullable(),
   isActive: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -106,10 +109,12 @@ export const ShiftOverrideDtoSchmema = z.object({
   date: z.string(),
   isWorking: z.boolean(),
   reason: z.string(),
-  createdBy: z.object({
-    id: mongoObjectIdSchema,
-    fullName: z.string(),
-  }),
+  createdBy: z
+    .object({
+      _id: mongoObjectIdSchema,
+      fullName: z.string(),
+    })
+    .optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

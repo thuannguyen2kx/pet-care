@@ -1,19 +1,19 @@
 import { ShiftTemplateItem } from '@/features/employee-schedule/admin-app/schedule-list/dialog/schedule-detail/shift-template-list/shift-template-item';
+import type { ShiftTemplate } from '@/features/employee-schedule/domain/schedule.entity';
 import type {
   DisableShiftTemplate,
   ReplaceShiftTemplate,
 } from '@/features/employee-schedule/domain/schedule.state';
-import type { TShiftTemplate } from '@/features/employee-schedule/types';
 
 type Props = {
-  shifts: TShiftTemplate[];
+  shifts: ShiftTemplate[];
   onDisable: (payload: DisableShiftTemplate) => void;
   onReplace: (payload: ReplaceShiftTemplate) => void;
 };
 const DAY_LABELS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 
 export function ShiftTemplateList({ shifts, onDisable, onReplace }: Props) {
-  const shiftsByDay = shifts.reduce<Record<number, TShiftTemplate[]>>((acc, shift) => {
+  const shiftsByDay = shifts.reduce<Record<number, ShiftTemplate[]>>((acc, shift) => {
     if (!acc[shift.dayOfWeek]) acc[shift.dayOfWeek] = [];
     acc[shift.dayOfWeek].push(shift);
     return acc;
@@ -38,7 +38,7 @@ export function ShiftTemplateList({ shifts, onDisable, onReplace }: Props) {
             <div className="space-y-2">
               {dayShifts.map((shift) => (
                 <ShiftTemplateItem
-                  key={shift._id}
+                  key={shift.id}
                   shift={shift}
                   onDisable={onDisable}
                   onReplace={onReplace}

@@ -1,6 +1,7 @@
 import type { TRole } from '../constant/roles';
 
-import type { TMemberShipTier, TUserStatus } from '@/features/user/domain/user-status';
+import type { MembershipTier } from '@/features/customer/domain/customer-entity';
+import type { UserStatus } from '@/features/user/domain/user.entity';
 
 type TApiResponseSuccess<T> = {
   status: number;
@@ -20,7 +21,7 @@ export type { TApiResponseSuccess, TApiResponseError };
 export type TUserIdentity = {
   id: string;
   role: TRole;
-  status: TUserStatus;
+  status: UserStatus;
 };
 export type TUserProfile = {
   email: string;
@@ -38,7 +39,7 @@ export type TEmployeeDomain = {
 
 export type TCustomerDomain = {
   type: 'customer';
-  membershipTier: TMemberShipTier;
+  membershipTier: MembershipTier;
   loyaltyPoints: number;
   isVip: boolean;
 };

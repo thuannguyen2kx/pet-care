@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
-import { employeeKeys } from '@/features/employee/api/query-key';
+import { employeeQueryKeys } from '@/features/employee/api/query-keys';
 import type { CreateEmployee } from '@/features/employee/domain/employee-state';
 import type { CreateEmployeeDto } from '@/features/employee/domain/employee.dto';
 import { mapCreatEmployeeToDto } from '@/features/employee/domain/employee.transform';
@@ -20,7 +20,7 @@ export const useCreateEmployee = ({ mutationConfig }: UseCreateEmployeeOptions =
   const { onSuccess, ...restConfig } = mutationConfig || {};
   return useMutation({
     onSuccess: (data, ...args) => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeQueryKeys.admin.lists() });
       onSuccess?.(data, ...args);
     },
     ...restConfig,

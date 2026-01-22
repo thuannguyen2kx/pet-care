@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
+import { UserStatusSchema } from '@/features/user/domain/user.entity';
 import { mongoObjectIdSchema } from '@/shared/lib/zod-primitives';
+
+export const MembershipTierSchema = z.enum(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']);
 
 export const ProfilePictureSchema = z.object({
   url: z.url().nullable(),
@@ -26,7 +29,7 @@ export const CustomerInfoSchema = z.object({
   communicationPreferences: CommunicationPreferencesSchema,
   stats: CustomerStatsSchema,
   loyaltyPoints: z.number(),
-  membershipTier: z.enum(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']),
+  membershipTier: MembershipTierSchema,
   memberSince: z.date(),
   isVip: z.boolean(),
   hasOutstandingBalance: z.boolean(),
@@ -46,7 +49,7 @@ export const CustomerSchema = z.object({
   profilePicture: ProfilePictureSchema,
   dateOfBirth: z.string().nullable(),
 
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  status: UserStatusSchema,
   emailVerified: z.boolean(),
   phoneVerified: z.boolean(),
   twoFactorEnabled: z.boolean(),
@@ -61,7 +64,7 @@ export const CustomerListItemSchema = z.object({
   id: mongoObjectIdSchema,
   fullName: z.string(),
   email: z.email(),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  status: UserStatusSchema,
   phoneNumber: z.string().nullable(),
   profilePicture: z.url().nullable(),
   customerInfo: CustomerInfoSchema,
@@ -72,3 +75,13 @@ export const CustomerListItemSchema = z.object({
  * ===================== */
 export type Customer = z.infer<typeof CustomerSchema>;
 export type CustomerListItem = z.infer<typeof CustomerListItemSchema>;
+export type MembershipTier = z.infer<typeof MembershipTierSchema>;
+// =====================
+// Constant
+// =====================
+export const MEMBER_SHIP_TIER = {
+  BRONZE: 'BRONZE',
+  SILVER: 'SILVER',
+  GOLD: 'GOLD',
+  PLATINUM: 'PLATINUM',
+} as const;

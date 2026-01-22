@@ -1,7 +1,7 @@
-import { ImageIcon, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
-import { useAvatarUpload } from '@/features/user/components/profile-action/profile-avatar/use-avatar-upload';
+import { useAvatarUpload } from '@/features/user/components/profile-avatar/use-avatar-upload';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 

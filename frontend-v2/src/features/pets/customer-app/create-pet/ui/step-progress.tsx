@@ -1,9 +1,9 @@
-import type { TCreatePetFormStep } from '@/features/pets/schemas';
+import type { CreatePetStepSchemas } from '@/features/pets/domain/pet.state';
 import { Progress } from '@/shared/ui/progress';
 
 type Props = {
   title: string;
-  step: TCreatePetFormStep;
+  step: keyof typeof CreatePetStepSchemas;
   progress: number;
 };
 export function StepProgress({ title, step, progress }: Props) {

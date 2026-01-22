@@ -1,9 +1,9 @@
 import { ShiftOverrideList } from '../shift-override-list';
 
-import type { TShiftOverride } from '@/features/employee-schedule/types';
+import type { ShiftOverride } from '@/features/employee-schedule/domain/schedule.entity';
 
 type Props = {
-  overrides: TShiftOverride[];
+  overrides: ShiftOverride[];
 };
 
 export function ShiftOverrideTab({ overrides }: Props) {

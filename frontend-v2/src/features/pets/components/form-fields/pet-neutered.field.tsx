@@ -1,11 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 
-import type { TUpdatePetInfoInput } from '@/features/pets/schemas';
+import type { UpdatePetInfo } from '@/features/pets/domain/pet.state';
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/shared/ui/field';
 import { Switch } from '@/shared/ui/switch';
 
 export function PetNeuteredField() {
-  const { control } = useFormContext<TUpdatePetInfoInput>();
+  const { control } = useFormContext<UpdatePetInfo>();
   return (
     <Controller
       name="isNeutered"

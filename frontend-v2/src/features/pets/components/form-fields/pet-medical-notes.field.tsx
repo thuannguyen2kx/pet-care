@@ -1,11 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 
-import type { TUpdatePetMedicalNotesInput } from '@/features/pets/schemas';
+import type { UpdatePetMedicalNotes } from '@/features/pets/domain/pet.state';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Textarea } from '@/shared/ui/textarea';
 
 export function PetMedicalNotesField() {
-  const { control } = useFormContext<TUpdatePetMedicalNotesInput>();
+  const { control } = useFormContext<UpdatePetMedicalNotes>();
   return (
     <FieldGroup>
       <Controller

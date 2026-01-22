@@ -2,6 +2,7 @@ import { User } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { useBookings } from '@/features/booking/api/get-bookings';
+import { BOOKING_VIEW } from '@/features/booking/domain/booking.state';
 import { useCustomerProfile } from '@/features/customer/api/get-profile';
 import { useCreatePostController } from '@/features/customer/customer-app/profile/application/use-create-post-controller';
 import { CreatePostDialog } from '@/features/customer/customer-app/profile/dialog/create-post/create-post-dialog';
@@ -18,7 +19,7 @@ export default function CustomerProfilePage() {
 
   const profileQuery = useCustomerProfile();
   const petsQuery = useGetUserPets();
-  const bookingsQuery = useBookings({ query: { page: 1, limit: 10 } });
+  const bookingsQuery = useBookings({ query: { page: 1, limit: 10, view: BOOKING_VIEW.ALL } });
 
   const totalPet = useMemo(() => petsQuery.data?.length || 0, [petsQuery.data]);
   const pets = petsQuery.data || [];

@@ -1,12 +1,12 @@
-import type { TEmployeeDetail } from '@/features/employee/types';
+import type { Employee } from '@/features/employee/domain/employee.entity';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 
-export function EmployeeHeader({ employee }: { employee: TEmployeeDetail }) {
+export function EmployeeHeader({ employee }: { employee: Employee }) {
   return (
     <div className="flex items-center gap-4">
       <Avatar className="size-16">
-        <AvatarImage src={employee.profilePicture?.url ?? undefined} />
+        <AvatarImage src={employee.profilePicture ?? undefined} />
         <AvatarFallback className="bg-primary/10 text-primary text-sm">
           {getInitials(employee.fullName)}
         </AvatarFallback>

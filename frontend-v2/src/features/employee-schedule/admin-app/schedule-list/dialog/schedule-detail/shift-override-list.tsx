@@ -1,18 +1,18 @@
 import { format } from 'date-fns';
 import { AlertCircle } from 'lucide-react';
 
-import type { TShiftOverride } from '@/features/employee-schedule/types';
+import type { ShiftOverride } from '@/features/employee-schedule/domain/schedule.entity';
 import { Badge } from '@/shared/ui/badge';
 
 type Props = {
-  shiftOverrides: TShiftOverride[];
+  shiftOverrides: ShiftOverride[];
 };
 export function ShiftOverrideList({ shiftOverrides }: Props) {
   return (
     <div className="space-y-2">
       {shiftOverrides.map((override) => (
         <div
-          key={override._id}
+          key={override.id}
           className="group rounded-lg border border-gray-200 p-4 transition-all hover:border-gray-300 hover:shadow-sm"
         >
           <div className="flex items-center justify-between">

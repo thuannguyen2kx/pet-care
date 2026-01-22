@@ -1,10 +1,10 @@
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 
-import type { TCreatePetFormStep } from '@/features/pets/schemas';
+import type { CreatePetStepSchemas } from '@/features/pets/domain/pet.state';
 import { Button } from '@/shared/ui/button';
 
 type Props = {
-  step: TCreatePetFormStep;
+  step: keyof typeof CreatePetStepSchemas;
   onNext: () => void;
   onBack: () => void;
   onSubmit: () => void;

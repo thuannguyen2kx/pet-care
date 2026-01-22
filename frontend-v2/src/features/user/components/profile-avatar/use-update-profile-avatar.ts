@@ -3,14 +3,17 @@ import { useForm } from 'react-hook-form';
 
 import { useRemoveAvatar } from '@/features/user/api/remove-avatar';
 import { useUpdateAvatar } from '@/features/user/api/update-avatar';
-import { updateProfileAvatar, type TUpdateProfileAvatar } from '@/features/user/schemas';
+import {
+  UpdateProfileAvatarSchema,
+  type UpdateProfileAvatar,
+} from '@/features/user/domain/user.state';
 
 type Props = {
   onSuccess: () => void;
 };
 export const useUpdateProfileAvatar = ({ onSuccess }: Props) => {
-  const form = useForm<TUpdateProfileAvatar>({
-    resolver: zodResolver(updateProfileAvatar),
+  const form = useForm<UpdateProfileAvatar>({
+    resolver: zodResolver(UpdateProfileAvatarSchema),
     defaultValues: {
       profilePicture: undefined,
     },

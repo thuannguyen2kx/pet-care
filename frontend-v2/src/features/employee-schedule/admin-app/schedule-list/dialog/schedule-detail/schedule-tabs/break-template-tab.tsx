@@ -1,9 +1,9 @@
 import { BreakTemplateList } from '../break-template-list';
 
-import type { TBreakTemplate } from '@/features/employee-schedule/types';
+import type { BreakTemplate } from '@/features/employee-schedule/domain/schedule.entity';
 
 type Props = {
-  breaks: TBreakTemplate[];
+  breaks: BreakTemplate[];
 };
 
 export function BreakTemplateTab({ breaks }: Props) {

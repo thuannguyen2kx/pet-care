@@ -2,8 +2,8 @@ import { Camera } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { ProfileAvatarForm } from '@/features/user/components/profile-action/profile-avatar/profile-avatar.form';
-import { useUpdateProfileAvatar } from '@/features/user/components/profile-action/profile-avatar/use-update-profile-avatar';
+import { ProfileAvatarForm } from '@/features/user/components/profile-avatar/profile-avatar.form';
+import { useUpdateProfileAvatar } from '@/features/user/components/profile-avatar/use-update-profile-avatar';
 import { getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';

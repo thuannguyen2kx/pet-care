@@ -17,6 +17,7 @@ export const useReplaceShiftTemplateForm = ({ initialValues }: Props) => {
   const form = useForm<ReplaceShiftTemplate>({
     resolver: zodResolver(ReplaceShiftTemplateSchema) as Resolver<ReplaceShiftTemplate>,
     defaultValues: {
+      shiftId: initialValues.shiftId,
       startTime: initialValues.startTime,
       endTime: initialValues.endTime,
       effectiveFrom: new Date(),

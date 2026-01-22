@@ -1,11 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 
-import type { TUpdatePetInfoInput } from '@/features/pets/schemas';
+import type { UpdatePetInfo } from '@/features/pets/domain/pet.state';
 import { Field, FieldDescription, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 
 export function PetMicrochipField() {
-  const { control } = useFormContext<TUpdatePetInfoInput>();
+  const { control } = useFormContext<UpdatePetInfo>();
 
   return (
     <Controller

@@ -1,12 +1,12 @@
 import { format } from 'date-fns';
 import { Calendar, Clock } from 'lucide-react';
 
-import type { TShiftTemplate } from '@/features/employee-schedule/types';
+import type { ShiftTemplate } from '@/features/employee-schedule/domain/schedule.entity';
 import { Badge } from '@/shared/ui/badge';
 
 const dayOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 
-export function ShiftRow({ shift }: { shift: TShiftTemplate }) {
+export function ShiftRow({ shift }: { shift: ShiftTemplate }) {
   return (
     <div className="flex flex-1 items-center gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">

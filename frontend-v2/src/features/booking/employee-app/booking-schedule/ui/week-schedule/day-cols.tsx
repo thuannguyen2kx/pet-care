@@ -1,6 +1,6 @@
 import { isToday } from 'date-fns';
 
-import type { Booking, BookingScheduleDay } from '@/features/booking/domain/booking.entity';
+import type { Booking } from '@/features/booking/domain/booking.entity';
 import { BookingItem } from '@/features/booking/employee-app/booking-schedule/ui/week-schedule/booking-item';
 import { cn } from '@/shared/lib/utils';
 

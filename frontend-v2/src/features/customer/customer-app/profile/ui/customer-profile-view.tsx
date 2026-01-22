@@ -6,14 +6,14 @@ import { CustomerPetsTab } from '@/features/customer/customer-app/profile/ui/tab
 import { CustomerInfoTab } from '@/features/customer/customer-app/profile/ui/tabs/info-tab';
 import { MyPostsTab } from '@/features/customer/customer-app/profile/ui/tabs/my-posts-tab';
 import type { Customer } from '@/features/customer/domain/customer-entity';
-import type { TPet } from '@/features/pets/types';
+import type { Pet } from '@/features/pets/domain/pet.entity';
 import { BackLink } from '@/shared/components/template/back-link';
 import { paths } from '@/shared/config/paths';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 
 type Props = {
   data: Customer;
-  pets: TPet[];
+  pets: Pet[];
   totalPet: number;
   bookings: Booking[];
   onUpdateProfile: () => void;

@@ -1,6 +1,6 @@
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
-import type { TCreateBreakTemplateInput } from '@/features/employee-schedule/schemas';
+import type { CreateBreakTemplate } from '@/features/employee-schedule/domain/schedule.state';
 import { PickerWithInput } from '@/shared/components/picker-with-input';
 import {
   Field,
@@ -17,7 +17,7 @@ import { Input } from '@/shared/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group';
 
 type Props = {
-  form: UseFormReturn<TCreateBreakTemplateInput>;
+  form: UseFormReturn<CreateBreakTemplate>;
 };
 
 const daysOfWeek = [
