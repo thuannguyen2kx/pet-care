@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { isoDateSchema, mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
+import { mongoObjectIdSchema, time24hSchema } from '@/shared/lib/zod-primitives';
 
 export const EmployeeSpecialtySchema = z.enum([
   'GROOMING',
@@ -38,7 +38,7 @@ export const EmployeeInfoSchema = z.object({
   commissionRate: z.number().optional(),
 
   defaultSchedule: z.object({
-    workdays: z.array(z.number()),
+    workDays: z.array(z.number()),
     workHours: z.object({
       start: time24hSchema,
       end: time24hSchema,
@@ -69,7 +69,6 @@ export const EmployeeSchema = z.object({
   fullName: z.string(),
   email: z.string(),
   phoneNumber: z.string().optional(),
-  gender: z.enum(['male', 'female']),
   dateOfBirth: z.string().optional(),
 
   profilePicture: z.url().nullable(),
@@ -87,6 +86,38 @@ export const EmployeeSchema = z.object({
   updatedAt: z.date(),
 });
 
+export const EmployeeListItemSchema = z.object({
+  id: mongoObjectIdSchema,
+  fullName: z.string(),
+  email: z.string(),
+  phoneNumber: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+  profilePicture: z.url().nullable(),
+  address: z
+    .object({
+      province: z.string(),
+      ward: z.string(),
+    })
+    .optional(),
+  role: z.string(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+
+  employeeInfo: z.object({
+    specialties: z.array(EmployeeSpecialtySchema),
+    hourlyRate: z.number().positive().optional(),
+    commissionRate: z.number().optional(),
+    stats: z.object({
+      rating: z.number(),
+      totalBookings: z.number(),
+      completedBookings: z.number(),
+    }),
+    isAcceptingBookings: z.boolean(),
+    vacationMode: z.boolean(),
+    maxDailyBookings: z.number(),
+  }),
+  createdAt: z.date(),
+});
+
 // =======================
 // Types
 // =======================
@@ -94,6 +125,7 @@ export type EmployeeDashboardStart = z.infer<typeof EmployeeDashboardStartSchema
 export type EmployeeSpecialty = z.infer<typeof EmployeeSpecialtySchema>;
 export type EmployeeInfo = z.infer<typeof EmployeeInfoSchema>;
 export type Employee = z.infer<typeof EmployeeSchema>;
+export type EmployeeListItem = z.infer<typeof EmployeeListItemSchema>;
 // =======================
 // Constants
 // =======================

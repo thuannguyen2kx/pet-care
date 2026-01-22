@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 
-import EmployeeProfileContainer from '@/features/employee/containers/employee-profile.container';
+import EmployeeProfilePage from '@/features/employee/employee-app/profile/page';
 import { getProfleQueryOptions } from '@/features/user/api/get-profile';
 import EmployeeLayout from '@/routes/employee/layout';
 import { privateClientLoader } from '@/shared/lib/auth.loader';
@@ -19,7 +19,7 @@ export default function EmployeeProfileRoute() {
       title="Thông tin cá nhân"
       description="Cập nhật thông tin và chuyên môn của bạn"
     >
-      <EmployeeProfileContainer />
+      <EmployeeProfilePage />
     </EmployeeLayout>
   );
 }

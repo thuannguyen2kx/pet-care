@@ -19,7 +19,7 @@ export const useDeleteEmployee = ({ mutationConfig }: UseDeleteEmployeeOptions =
 
   return useMutation({
     onSuccess: (data, variables, ...args) => {
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.lists() });
       onSuccess?.(data, variables, ...args);
     },
     ...restConfig,

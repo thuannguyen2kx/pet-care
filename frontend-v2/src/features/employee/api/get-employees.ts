@@ -1,36 +1,46 @@
-import { queryOptions, useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
+import type { AxiosRequestConfig } from 'axios';
 
 import { employeeKeys } from '@/features/employee/api/query-key';
-import type { TEmployeeFilter } from '@/features/employee/shemas';
-import type { TGetEmployeeListResponse } from '@/features/employee/types';
+import { EmployeeListResponseSchema } from '@/features/employee/domain/employee-http-schema';
+import type { EmployeesQuery } from '@/features/employee/domain/employee-state';
+import {
+  mapEmployeeListItemsToEntities,
+  mapEmployeesQueryToDto,
+} from '@/features/employee/domain/employee.transform';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { QueryConfig } from '@/shared/lib/react-query';
-import type { TApiResponseSuccess } from '@/shared/types/api-response';
 
-const getEmployees = (
-  filter: TEmployeeFilter,
-): Promise<TApiResponseSuccess<TGetEmployeeListResponse>> => {
-  return http.get(USER_ENDPOINTS.EMPLOYEE_LIST, {
-    params: filter,
-  });
+const getEmployees = (config: AxiosRequestConfig) => {
+  return http.get(USER_ENDPOINTS.EMPLOYEE_LIST, config);
 };
 
-export const getEmployeesOptions = (filter: TEmployeeFilter) => {
+export const getEmployeesOptions = (query: EmployeesQuery) => {
   return queryOptions({
-    queryKey: employeeKeys.list(filter),
-    queryFn: () => getEmployees(filter),
+    queryKey: employeeKeys.admin.list(query),
+    queryFn: async ({ signal }) => {
+      const queryDto = mapEmployeesQueryToDto(query);
+      const config = { signal, params: queryDto };
+      const raw = await getEmployees(config);
+      const response = EmployeeListResponseSchema.parse(raw);
+      return {
+        employees: mapEmployeeListItemsToEntities(response.data.employees),
+        pages: response.data.pages,
+        total: response.data.total,
+      };
+    },
   });
 };
 
 type UseGetEmployeesOptions = {
-  filter: TEmployeeFilter;
+  query: EmployeesQuery;
   queryConfig?: QueryConfig<typeof getEmployeesOptions>;
 };
 
-export const useEmployees = ({ filter, queryConfig }: UseGetEmployeesOptions) => {
+export const useEmployees = ({ query, queryConfig }: UseGetEmployeesOptions) => {
   return useQuery({
-    ...getEmployeesOptions(filter),
+    ...getEmployeesOptions(query),
     ...queryConfig,
   });
 };

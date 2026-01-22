@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { employeeKeys } from '@/features/employee/api/query-key';
-import type { TEmployeeListItem } from '@/features/employee/types';
+import type { EmployeeListItem } from '@/features/employee/domain/employee.entity';
 import type { TUserStatus } from '@/features/user/domain/user-status';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
 import type { MutationConfig } from '@/shared/lib/react-query';
-import type { TApiResponseSuccess } from '@/shared/types/api-response';
 
 const changeEmployeeStatus = ({
   employeeId,
@@ -14,7 +13,7 @@ const changeEmployeeStatus = ({
 }: {
   employeeId: string;
   status: TUserStatus;
-}): Promise<TApiResponseSuccess<TEmployeeListItem>> => {
+}) => {
   return http.patch(USER_ENDPOINTS.CHANGE_STATUS(employeeId), { status });
 };
 
@@ -22,19 +21,19 @@ type UseChangeEmplyeeStatusOptions = {
   mutationConfig?: MutationConfig<typeof changeEmployeeStatus, ChangeEmployeeStatusContext>;
 };
 type ChangeEmployeeStatusContext = {
-  previousQueries: [readonly unknown[], { employees: TEmployeeListItem[] } | undefined][];
+  previousQueries: [readonly unknown[], { employees: EmployeeListItem[] } | undefined][];
 };
 export const useChangeEmployeeStatus = ({ mutationConfig }: UseChangeEmplyeeStatusOptions = {}) => {
   const queryClient = useQueryClient();
   const { onSuccess, onError, ...restConfig } = mutationConfig || {};
   return useMutation({
     async onMutate(variables) {
-      await queryClient.cancelQueries({ queryKey: employeeKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: employeeKeys.admin.lists() });
 
       const previousQueries = queryClient.getQueriesData<{
-        employees: TEmployeeListItem[];
+        employees: EmployeeListItem[];
       }>({
-        queryKey: employeeKeys.lists(),
+        queryKey: employeeKeys.admin.lists(),
       });
 
       previousQueries.forEach(([queryKey, data]) => {
@@ -43,7 +42,7 @@ export const useChangeEmployeeStatus = ({ mutationConfig }: UseChangeEmplyeeStat
         queryClient.setQueryData(queryKey, {
           ...data,
           employees: data.employees.map((emp) =>
-            emp._id === variables.employeeId ? { ...emp, status: variables.status } : emp,
+            emp.id === variables.employeeId ? { ...emp, status: variables.status } : emp,
           ),
         });
       });

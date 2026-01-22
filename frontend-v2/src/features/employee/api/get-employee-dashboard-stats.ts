@@ -13,7 +13,7 @@ const getEmployeeDashboardStats = () => {
 
 export const getEmployeeDashboardStatsQueryOptions = () => {
   return queryOptions({
-    queryKey: employeeKeys.dashboard_stats(),
+    queryKey: employeeKeys.employee.dashboard_stats(),
     queryFn: async () => {
       const raw = await getEmployeeDashboardStats();
       const response = employeeDashboardStatsResponseSchema.parse(raw);

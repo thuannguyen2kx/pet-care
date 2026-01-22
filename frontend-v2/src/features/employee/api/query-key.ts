@@ -1,13 +1,17 @@
-// @/features/employee/api/query-keys.ts
-
-import type { TEmployeeFilter } from '@/features/employee/shemas';
+import type { EmployeesQuery } from '@/features/employee/domain/employee-state';
 
 export const employeeKeys = {
   all: ['employees'] as const,
-  lists: () => [...employeeKeys.all, 'list'] as const,
-  list: (filter: TEmployeeFilter) => [...employeeKeys.lists(), filter] as const,
-  details: () => [...employeeKeys.all, 'detail'] as const,
-  detail: (id: string) => [...employeeKeys.details(), id] as const,
-
-  dashboard_stats: () => [...employeeKeys.all, 'dashboard_stats'] as const,
+  admin: {
+    root: () => [...employeeKeys.all, 'admin'] as const,
+    lists: () => [...employeeKeys.admin.root(), 'list'] as const,
+    list: (params: EmployeesQuery) => [...employeeKeys.admin.lists(), params] as const,
+    details: () => [...employeeKeys.admin.root(), 'detail'] as const,
+    detail: (id: string) => [...employeeKeys.admin.details(), id] as const,
+  },
+  employee: {
+    root: () => [...employeeKeys.all, 'employee'] as const,
+    profile: () => [...employeeKeys.employee.root(), 'profile'] as const,
+    dashboard_stats: () => [...employeeKeys.employee.root(), 'dashboard_stats'] as const,
+  },
 };

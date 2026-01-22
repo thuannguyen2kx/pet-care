@@ -1,37 +1,41 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 
 import { employeeKeys } from '@/features/employee/api/query-key';
-import type { TUpdateEmployeeInput } from '@/features/employee/shemas';
+import type { UpdateEmployee } from '@/features/employee/domain/employee-state';
+import type { UpdateEmployeeDto } from '@/features/employee/domain/employee.dto';
+import { mapUpdateEmployeeToDto } from '@/features/employee/domain/employee.transform';
 import { userKeys } from '@/features/user/api/query-key';
 import { USER_ENDPOINTS } from '@/shared/config/api-endpoints';
 import { http } from '@/shared/lib/http';
-import type { MutationConfig } from '@/shared/lib/react-query';
 
 const updateEmployee = ({
   employeeId,
-  data,
+  updateEmployeeDto,
 }: {
   employeeId: string;
-  data: TUpdateEmployeeInput;
+  updateEmployeeDto: UpdateEmployeeDto;
 }) => {
-  return http.put(USER_ENDPOINTS.UPDATE_EMPLOYEE(employeeId), data);
+  return http.put(USER_ENDPOINTS.UPDATE_EMPLOYEE(employeeId), updateEmployeeDto);
 };
 
 type UseUpdateEmployeeOptions = {
-  mutationConfig?: MutationConfig<typeof updateEmployee>;
+  mutationConfig?: UseMutationOptions<unknown, unknown, UpdateEmployee, unknown>;
 };
 
 export const useUpdateEmployee = ({ mutationConfig }: UseUpdateEmployeeOptions = {}) => {
   const queryClient = useQueryClient();
   const { onSuccess, ...restConfig } = mutationConfig || {};
   return useMutation({
-    onSuccess: (...args) => {
+    onSuccess: (_data, variables, ...args) => {
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: employeeKeys.detail(args[1].employeeId) });
-      onSuccess?.(...args);
+      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.lists() });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.admin.detail(variables.employeeId) });
+      onSuccess?.(_data, variables, ...args);
     },
     ...restConfig,
-    mutationFn: updateEmployee,
+    mutationFn: (updateEmployeeData: UpdateEmployee) => {
+      const updateEmployeeDto = mapUpdateEmployeeToDto(updateEmployeeData);
+      return updateEmployee({ employeeId: updateEmployeeData.employeeId, updateEmployeeDto });
+    },
   });
 };

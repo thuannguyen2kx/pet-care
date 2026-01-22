@@ -5,7 +5,7 @@ import { getStatusConfig } from '@/features/booking/config/booking-status.config
 import type { BookingDetail, BookingStatus } from '@/features/booking/domain/booking.entity';
 import { getAvailableStatusActions } from '@/features/booking/domain/booking.policy';
 import type { UpdateBookingStatus } from '@/features/booking/domain/booking.state';
-import { getSpecialtyLabel } from '@/features/employee/constants';
+import { formatEmployeeSpecialty } from '@/features/employee/config';
 import { formatPetType } from '@/features/pets/config';
 import { getServiceCategoryLabel } from '@/features/service/config';
 import { cn, getInitials } from '@/shared/lib/utils';
@@ -276,7 +276,7 @@ function EmployeeInfo({ booking }: { booking: BookingDetail }) {
       <InfoBlock
         avatar={e.profilePicture.url}
         title={e.fullName}
-        subtitle={e.specialties.map(getSpecialtyLabel).join(' • ')}
+        subtitle={e.specialties.map(formatEmployeeSpecialty).join(' • ')}
       />
     </Section>
   );
