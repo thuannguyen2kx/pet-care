@@ -14,6 +14,8 @@ import {
   PetResponse,
   PetStatsResponse,
 } from "../@types/pet";
+import { BookingModel } from "../models/booking.model";
+import { parseDateOnly } from "../utils/format-date";
 
 // Helper: Convert Pet document to PetResponse
 const formatPetResponse = (pet: IPet): PetResponse => {
@@ -69,7 +71,7 @@ export const getUserPetsService = async (userId: Types.ObjectId) => {
   return { pets: pets.map(formatPetResponse) };
 };
 export const getPetStatsService = async (
-  userId: Types.ObjectId
+  userId: Types.ObjectId,
 ): Promise<PetStatsResponse> => {
   const pets = await PetModel.find({ ownerId: userId, isActive: true });
 
@@ -98,7 +100,7 @@ export const getPetStatsService = async (
     if (pet.vaccinations) {
       const hasUpcoming = pet.vaccinations.some(
         (v) =>
-          v.nextDueDate && v.nextDueDate >= today && v.nextDueDate <= in30Days
+          v.nextDueDate && v.nextDueDate >= today && v.nextDueDate <= in30Days,
       );
       if (hasUpcoming) stats.upcomingVaccinations++;
     }
@@ -109,7 +111,7 @@ export const getPetStatsService = async (
 // Get all pets (admin/employee)
 export const getAllPetsService = async (
   filters?: PetFilterQuery,
-  role?: RoleType
+  role?: RoleType,
 ): Promise<PetListResponse> => {
   if (role !== Roles.ADMIN && role !== Roles.EMPLOYEE) {
     throw new UnauthorizedException("Không có quyền xem tất cả thú cưng");
@@ -270,7 +272,7 @@ export const updatePetService = async ({
 
     if (existingPet) {
       throw new BadRequestException(
-        "Mã chip này đã được đăng ký cho thú cưng khác"
+        "Mã chip này đã được đăng ký cho thú cưng khác",
       );
     }
   }
@@ -281,7 +283,7 @@ export const updatePetService = async ({
     {
       new: true,
       runValidators: false,
-    }
+    },
   );
 
   return { pet: formatPetResponse(updatedPet!) };
@@ -309,16 +311,15 @@ export const deletePetService = async ({
   }
 
   // Check for upcoming appointments
-  const Appointment = mongoose.model("Appointment");
-  const upcomingAppointments = await Appointment.countDocuments({
+  const upcomingAppointments = await BookingModel.countDocuments({
     petId: petId,
-    scheduledDate: { $gte: new Date() },
+    scheduledDate: { $gte: parseDateOnly(new Date().toISOString()) },
     status: { $in: ["pending", "confirmed"] },
   });
 
   if (upcomingAppointments > 0) {
     throw new BadRequestException(
-      `Không thể xóa thú cưng vì còn ${upcomingAppointments} lịch hẹn sắp tới`
+      `Không thể xóa thú cưng vì còn ${upcomingAppointments} lịch hẹn sắp tới`,
     );
   }
 
@@ -453,7 +454,7 @@ export const updateVaccinationService = async ({
   }
 
   const vaccination = pet.vaccinations?.find(
-    (v) => v._id?.toString() === vaccinationId
+    (v) => v._id?.toString() === vaccinationId,
   );
   if (!vaccination) {
     throw new NotFoundException("Không tìm thấy thông tin tiêm phòng");
@@ -499,7 +500,7 @@ export const deleteVaccinationService = async ({
   }
 
   pet.vaccinations = pet.vaccinations?.filter(
-    (v) => v._id?.toString() !== vaccinationId
+    (v) => v._id?.toString() !== vaccinationId,
   );
   const updatedPet = await pet.save();
   return { pet: formatPetResponse(updatedPet) };
@@ -581,7 +582,7 @@ export const updateMedicalRecordService = async ({
   }
 
   const record = pet.medicalHistory?.find(
-    (m) => m._id?.toString() === recordId
+    (m) => m._id?.toString() === recordId,
   );
   if (!record) {
     throw new NotFoundException("Không tìm thấy hồ sơ y tế");
@@ -628,7 +629,7 @@ export const deleteMedicalRecordService = async ({
   }
 
   pet.medicalHistory = pet.medicalHistory?.filter(
-    (m) => m._id?.toString() !== recordId
+    (m) => m._id?.toString() !== recordId,
   );
   const updatedPet = await pet.save();
   return { pet: formatPetResponse(updatedPet) };
