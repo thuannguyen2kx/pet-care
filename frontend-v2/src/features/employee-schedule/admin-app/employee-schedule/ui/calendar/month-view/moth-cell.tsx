@@ -26,8 +26,8 @@ export function MonthCell({ day, onClick }: { day: CalendarDayWithSchedule; onCl
 
         {isOverride && (
           <span
-            className="flex items-center gap-1 text-xs text-orange-600"
-            title={schedule?.reason}
+            className="text-destructive flex items-center gap-1 text-xs"
+            title={schedule?.override?.reason}
           >
             <AlertCircle className="h-3 w-3" />
             Lịch điều chỉnh

@@ -29,7 +29,7 @@ export function ShiftOverrideList({ shiftOverrides }: Props) {
                 </div>
                 <p className="mt-1 text-sm text-gray-600">{override.reason}</p>
                 <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                  <span>Bởi: {override.createdBy.fullName}</span>
+                  <span>Bởi: {override.createdBy?.fullName}</span>
                   <span>•</span>
                   <span>{format(override.createdAt, 'dd/MM/yyyy HH:mm')}</span>
                 </div>

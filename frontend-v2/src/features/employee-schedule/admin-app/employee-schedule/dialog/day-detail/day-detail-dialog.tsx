@@ -60,7 +60,7 @@ export function DayDetailDialog({ day, onClose }: Props) {
             {schedule.override && (
               <div className="text-destructive text-xs">
                 <span className="font-medium">Lịch điều chỉnh</span>
-                {schedule.reason && `: ${schedule.reason}`}
+                {schedule.override.reason && `: ${schedule.override.reason}`}
               </div>
             )}
           </div>
