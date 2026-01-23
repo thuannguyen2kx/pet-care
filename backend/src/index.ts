@@ -16,7 +16,7 @@ import { passportAuthenticateJWT } from "./config/passport.config";
 import commentRoutes from "./routes/comment.route";
 import serviceRoutes from "./routes/service.route";
 import employeeRoutes from "./routes/employee.route";
-import paymentRoutes from "./routes/payment.route";
+// import paymentRoutes from "./routes/payment.route";
 // import webhookRoutes from "./routes/webhook.route";
 import reportRoutes from "./routes/report.route";
 import bookingRoutes from "./routes/booking.route";
