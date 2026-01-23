@@ -18,6 +18,7 @@ export const getProfleQueryOptions = () => {
     queryFn: async ({ signal }) => {
       const config = { signal };
       const raw = await getEmployeeProfile(config);
+
       const response = EmployeeProfileResponseSchema.parse(raw);
       return mapEmployeeDtoToEntity(response.data.user);
     },

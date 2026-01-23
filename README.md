@@ -1,191 +1,318 @@
-# Pet Care Service Management System
+# 🐾 PetCare – Pet Care & Booking Management System
 
-A comprehensive web application for managing pet care services, appointments, and employee scheduling. Built with Node.js, Express, MongoDB, React and TypeScript.
+**PetCare** is a full‑stack web application that simulates a real‑world **pet care service platform** (pet spa / pet clinic).
 
-🔗 **Live Demo**: [https://pet-care.thuannguyen2kx.site/](https://pet-care.thuannguyen2kx.site/)  
-⚠️ *Note: Please wait 2–3 minutes for the server to fully start.*
+This project is built as a **portfolio project for Junior Frontend / Full‑stack Developer roles**, with a strong focus on:
 
-## Demo Accounts
+- Building complete end‑to‑end features
+- Applying React & TypeScript in a real product context
+- Understanding and implementing real business workflows
 
-### 🛠 Administrator
-- **Email**: `petcare@gmail.com`
-- **Password**: `1234qwer`
+---
 
-### 👨‍⚕️ Employee
-- **Email**: `haidong@gmail.com`
-- **Password**: `1234qwer`
+## 🎯 Project Goals
 
-## Features
+- Apply **React / TypeScript / API integration** in a real‑world system
+- Practice **state management, data fetching, authentication**
+- Organize code using a **feature‑based architecture**
+- Demonstrate product thinking, not just isolated UI components
 
-### For Customers
-- Book appointments for pet care services
-- View available time slots
-- Track appointment status
-- Manage pet profiles
-- View service history
-- View social pet(create post, comment, reaction)
-- Payment with Stripe
-### For Employees
-- View and manage work schedules
-- Handle appointments
-- Manage user
-- Track assigned services
-- Update availability
-- Manage social pet
+---
 
-### For Administrators
-- Manage services and pricing
-- Employee scheduling
-- View analytics and reports
-- Handle customer feedback
-- Manage payment
-- AI assistant create content(create post, service)
+## 🚀 Key Features
 
-## Tech Stack
+### 🔐 Authentication & Authorization
 
-### Backend
-- Node.js with Express
-- TypeScript
-- MongoDB with Mongoose
-- JWT Authentication
+- Login / logout with JWT
+- Role‑based access control:
+  - Admin
+  - Employee
+  - Customer
+
+- Protected routes and role‑based UI rendering
+
+### 🐶 Pet Management
+
+- Customers can manage multiple pets
+- Store pet information:
+  - Breed, weight, gender
+  - Date of birth
+
+- Track care history and vaccinations
+
+### 🛎️ Booking System
+
+- Customers can book services based on:
+  - Pet
+  - Service
+  - Employee
+
+- Booking status workflow:
+  - Pending
+  - Confirmed
+  - Completed
+  - Cancelled
+
+- Service snapshot stored at booking time (price & duration)
+- Customer reviews after service completion
+
+### 👨‍⚕️ Employee & Schedule
+
+- Employee profile management
+- Daily and weekly working schedules
+- Designed to support availability validation and future expansion
+
+### 🌐 Social Features
+
+- Users can create posts about their pets
+- Comment and reaction system
+- Engagement statistics
+
+### 🛠️ Admin Dashboard
+
+- User management
+- Service management
+- Booking overview
+- Social content moderation
+
+---
+
+## 🧱 Tech Stack
 
 ### Frontend
-- React
+
+- React 19
+- React Router
 - TypeScript
-- TailwindCSS
+- Tailwind CSS
 - React Query
-- Zustand
 
-## Getting Started
+### Backend
 
-### Prerequisites
-- Node.js >= 16.0.0
-- MongoDB >= 4.4
-- npm >= 7.0.0
+- Node.js
+- Express.js
+- TypeScript
+- MongoDB + Mongoose
+- JWT Authentication
 
-### Installation
+---
 
-1. Clone the repository
+## 🗂️ Frontend Structure
+
+```
+src/
+├── app/            # App bootstrap & global providers
+├── features/       # Core business features (domain-driven)
+├── routes/         # Route definitions & access control
+├── services/       # API services & external integrations
+├── shared/         # Reusable UI, hooks, utilities
+├── stores/         # Global state management
+├── styles/         # Global styles & theme config
+├── resources/      # Static configs, constants, enums
+└── main.tsx        # Application entry point
+```
+
+This structure follows a **feature-first (domain-driven)** approach rather than a traditional layer-based one.
+
+This structure helps:
+
+- Keep the codebase scalable and readable
+- Make team collaboration easier
+- Frontend Architecture: see `frontend/README.md`
+
+---
+
+## 🌱 Seed Data
+
+The project includes a **seed script** to generate demo data:
+
+- Users with multiple roles
+- Pets
+- Services
+- Bookings
+- Social posts
+
 ```bash
-git clone https://github.com/thuannguyen2kx/pet-care.git
-cd pet-care
+npm run seed:dev
 ```
 
-2. Install backend dependencies
-```bash
-cd backend
-npm install      # or: bun install
-```
+---
 
-3. Install frontend dependencies
-```bash
-cd ../frontend
-npm install      # or: bun install
-```
+## ⏱️ How to Review This Project
 
-4. Set up environment variables
-```bash
-# Backend (.env)
-PORT=8000
-NODE_ENV=development
-MONGO_URI=mongodb_url
-FRONTEND_ORIGIN=http://localhost:5173
-FRONTEND_GOOGLE_CALLBACK_URL="http://localhost:5173/google/oauth/callback"
+1️⃣ **Check the booking flow**
 
-JWT_SECRET="jwt_sercret"
-JWT_EXPIRES_IN='1d'
+- Create and manage bookings
+- Observe booking status transitions
 
-GOOGLE_CLIENT_ID="google_client_id"
-GOOGLE_CLIENT_SECRET="google_client_secret"
-GOOGLE_CALLBACK_URL="http://localhost:8000/api/auth/google/callback"
+2️⃣ **Review frontend architecture**
 
-#cloudinary
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+- Feature‑based folder structure
+- Clear separation between UI, logic, and API layers
 
-# Email
-EMAIL_HOST=smtp.example.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@example.com
-EMAIL_PASS=your_email_password
-EMAIL_FROM=no-reply@petcare.com
+3️⃣ **Inspect state & data handling**
 
-# Stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
+- Zustand for global state
+- React Query for server state
+- Loading and error handling
 
-# Frontend (.env)
-VITE_API_BASE_URL="http://localhost:8000/api"
-VITE_BASE_PATH="/"
-VITE_GEMINI_API_KEY=your_gemini_api_key
-```
+---
 
-5. Start development servers
-```bash
-# Backend
-cd backend
-npm run dev
+## 🧪 Project Status
 
-# Frontend (in new terminal)
-cd frontend
-npm run dev
-```
+- ✅ ~80–90% core features completed
+- 🔧 Potential future enhancements:
+  - Online payment flow
+  - Realtime notifications
+  - Improved UI/UX
 
-## Project Structure
-```
-pet-care/
-├── backend/
-│   ├── src/
-│   │   ├── controllers/     # Route handlers
-│   │   ├── models/          # Mongoose schemas and models
-│   │   ├── routes/          # API route definitions
-│   │   ├── services/        # Business logic
-│   │   ├── middlewares/     # Express middlewares
-│   │   ├── config/          # Configuration (DB, environment)
-│   │   ├── utils/           # Utility functions
-│   │   └── index.ts         # Server entry point
-│   └── package.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── api/             # API integration layer
-│   │   ├── assets/          # Static assets (images, icons)
-│   │   ├── components/      # Reusable components
-│   │   │   ├── ui/          # Base UI components (Button, Modal, etc.)
-│   │   │   └── common/      # Shared components across features
-│   │   ├── features/        # Feature-based components
-│   │   │   ├── appointments/
-│   │   │   ├── employees/
-│   │   │   ├── services/
-│   │   │   ├── pets/
-│   │   │   ├── users/
-│   │   │   └── posts/
-│   │   ├── hooks/           # Custom React hooks
-│   │   ├── layouts/         # Application layouts (e.g., DashboardLayout)
-│   │   ├── pages/           # Route-based pages
-│   │   ├── stores/          # Zustand state management
-│   │   ├── types/           # Global TypeScript types/interfaces
-│   │   └── utils/           # Helper functions
-│   └── package.json
-│
-└── README.md
+---
 
-```
+## 📘 What I Learned From This Project
 
-## Contributing
+While building **PetCare**, I focused not only on making features work, but also on understanding how a **real product** is structured and maintained.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### 🧠 Frontend Development
 
-## License
+- Organizing a React project using **feature‑based architecture**
+- Managing complex state with **Controller Hook Pattern** and **React Query**
+- Handling common UI states:
+  - loading / empty / error
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+- Using **TypeScript** and **Zod** to:
+  - Define clear data contracts with APIs
+  - Reduce bugs during refactoring
+  - Improve confidence when working with a larger codebase
 
-## Contact
+### 🔐 Authentication & Authorization
 
-Your Name - fe.thanhthuan@gmail.com
-Project Link: https://github.com/thuannguyen2kx/pet-care
+- Implementing JWT authentication flows
+- Building role‑based access control (Admin / Employee / Customer)
+- Protecting routes and UI elements based on permissions
+
+### 🧩 Working With Real Business Logic
+
+- Designing a **booking workflow** with multiple states
+- Using service snapshots to prevent price or duration inconsistencies
+- Synchronizing frontend logic with backend validation
+
+### 🗄️ Backend & API Awareness
+
+- Working with structured REST APIs
+- Designing MongoDB schemas based on business needs
+- Writing seed data to simulate a production‑like environment
+
+### 🧪 Development Mindset
+
+- Debugging real issues (validation errors, edge cases, data mismatch)
+- Reading logs and tracing problems step by step
+- Understanding that clean structure matters as much as features
+
+### 🚀 Personal Takeaways
+
+- Gained confidence working with a larger codebase
+- Better understanding of full product development flow
+- Stronger foundation for deeper frontend architecture learning
+
+---
+
+## 🧩 Challenges & How I Solved Them
+
+### 🗓️ Employee Schedule Management
+
+**Challenge**
+
+Employee scheduling is one of the most complex parts of real booking systems such as clinics or salons. The system must handle:
+
+- Weekly recurring working schedules
+- Date‑specific overrides (leave days, special shifts)
+- Different UI representations (calendar view vs table/grid view)
+
+**How I solved it**
+
+I designed the schedule system using a **two‑layer business model**:
+
+- **Base weekly schedule** (by day of week)
+- **Date‑specific overrides** (by exact date)
+
+Priority rules were applied:
+
+> Date override → Weekly schedule → Not available
+
+This approach allows the frontend to:
+
+- Accurately render availability in different views
+- Reuse the same business logic for booking validation
+- Reflect how real clinics and service businesses manage staff schedules
+
+---
+
+### ⏰ Booking Time Validation
+
+**Challenge**
+
+- Booking time depends on start time, service duration, and end time
+- Time is stored as `HH:mm` strings but must follow strict logic rules
+- Edge cases like invalid end times or overlapping ranges
+
+**How I solved it**
+
+- Normalized time calculations by converting everything to **minutes**
+- Added validation at the **backend schema level**
+- Frontend always calculates end time based on service duration snapshot
+
+➡️ This reinforced the importance of validating business rules at multiple layers.
+
+---
+
+### 🔐 Role‑Based UI & Permission Handling
+
+**Challenge**
+
+- Different roles require different UI and actions
+- Hard‑coding role checks easily leads to messy logic
+
+**How I solved it**
+
+- Implemented permission‑based UI rendering
+- Separated role logic from presentational components
+- Enforced permissions on the backend for security
+
+➡️ Helped me understand how frontend and backend work together to ensure proper access control.
+
+---
+
+## 🔮 Next Improvements (If I Had More Time)
+
+### 🚀 Frontend
+
+- Refactor large features into clearer custom hooks
+- Add skeleton loading and micro‑interactions
+- Increase test coverage for critical flows (booking, auth)
+
+### ⚙️ System & Features
+
+- Automatic employee availability checks during booking
+- Realtime booking notifications (WebSocket)
+- Complete online payment flow with webhook handling
+
+### 🧠 Code Quality
+
+- Standardize error handling and messaging
+- Improve type sharing between frontend and backend
+
+➡️ These are improvements I would focus on to bring the project closer to a production‑ready system.
+
+---
+
+## 👨‍💻 Author
+
+**Nguyễn Thành Thuận**
+Junior Frontend / Full‑stack Developer
+
+**Core Skills:**
+React • Next.js • TypeScript • Node.js
+
+---
+
+Thank you for reviewing my project 🚀

@@ -29,7 +29,7 @@ export function ServiceCard({ service }: Props) {
     <Card className="group border-border/50 hover:border-primary/30 overflow-hidden rounded-none shadow-none transition-all">
       <div className="relative aspect-4/3 overflow-hidden">
         <img
-          src={service.images[0].url || '/placeholder.svg'}
+          src={service.images[0]?.url || '/placeholder.svg'}
           alt={service.name}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />

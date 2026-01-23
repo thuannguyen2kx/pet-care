@@ -66,7 +66,7 @@ export const UpdatePetSchema = z
 export const PetVaccinationDtoSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  date: z.date(),
+  date: z.string(),
   expiryDate: z.string().optional(),
   nextDueDate: z.string().optional(),
   batchNumber: z.string().optional(),

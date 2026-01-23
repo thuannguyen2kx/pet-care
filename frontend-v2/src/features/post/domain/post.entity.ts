@@ -19,7 +19,15 @@ export const PostSchema = z.object({
   title: z.string().optional(),
   content: z.string(),
   tags: z.array(z.string()),
-  petIds: z.array(mongoObjectIdSchema),
+  petIds: z
+    .array(
+      z.object({
+        id: mongoObjectIdSchema,
+        name: z.string(),
+        breed: z.string(),
+      }),
+    )
+    .optional(),
 
   visibility: VisibilitySchema,
   status: PostStatusSchema,

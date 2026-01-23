@@ -56,7 +56,7 @@ export const EmployeeInfoSchema = z.object({
   }),
 
   hireDate: z.string(),
-  employeeId: mongoObjectIdSchema.optional(),
+  employeeId: z.string().optional(),
   department: z.string().optional(),
   isAcceptingBookings: z.boolean(),
   maxDailyBookings: z.number(),

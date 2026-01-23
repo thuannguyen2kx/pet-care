@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { GoogleOauthButton } from './google-oauth-button';
 
+import { DemoAccounts } from '@/features/auth/components/demo-account';
 import { resolveHomeRoute } from '@/features/auth/helpers/resolve-home-route';
 import { HTTPSTATUS } from '@/shared/constant';
 import {
@@ -32,6 +33,15 @@ export const LoginForm = () => {
       remenberMe: false,
     },
   });
+
+  const handleSelectDemoAccount = (email: string, password: string) => {
+    form.setValue('email', email);
+    form.setValue('password', password);
+    form.clearErrors();
+    form.setFocus('password');
+    // Optional: Auto submit sau khi chọn
+    // setTimeout(() => form.handleSubmit(onSubmit)(), 300);
+  };
 
   function onSubmit(data: TLoginInput) {
     const payload: TLoginPayload = {
@@ -66,74 +76,78 @@ export const LoginForm = () => {
     });
   }
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <FieldGroup>
-        <Controller
-          control={form.control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-              <Input
-                {...field}
-                id={field.name}
-                type="email"
-                aria-invalid={fieldState.invalid}
-                placeholder="lananh@gmail.com"
-                autoComplete="off"
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-      </FieldGroup>
-      <FieldGroup>
-        <Controller
-          control={form.control}
-          name="password"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Mật khẩu</FieldLabel>
-              <Input
-                {...field}
-                id={field.name}
-                type="password"
-                aria-invalid={fieldState.invalid}
-                placeholder="*********"
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-      </FieldGroup>
-      <FieldGroup data-grop="checkbox-group">
-        <Controller
-          control={form.control}
-          name="remenberMe"
-          render={({ field, fieldState }) => (
-            <Field orientation="horizontal">
-              <Checkbox
-                name={field.name}
-                id={field.name}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <FieldLabel htmlFor={field.name}>Ghi nhớ đăng nhập</FieldLabel>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-      </FieldGroup>
+    <div className="space-y-6">
+      <DemoAccounts onSelectAccount={handleSelectDemoAccount} />
 
-      <Button type="submit" className="w-full" disabled={login.isPending}>
-        {login.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}
-      </Button>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FieldGroup>
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type="email"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="lananh@gmail.com"
+                  autoComplete="off"
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Mật khẩu</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type="password"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="*********"
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </FieldGroup>
+        <FieldGroup data-grop="checkbox-group">
+          <Controller
+            control={form.control}
+            name="remenberMe"
+            render={({ field, fieldState }) => (
+              <Field orientation="horizontal">
+                <Checkbox
+                  name={field.name}
+                  id={field.name}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor={field.name}>Ghi nhớ đăng nhập</FieldLabel>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </FieldGroup>
 
-      <FieldSeparator className="my-4">
-        <span className="bg-background text-muted-foreground px-2 uppercase">Hoặc</span>
-      </FieldSeparator>
+        <Button type="submit" className="w-full" disabled={login.isPending}>
+          {login.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}
+        </Button>
 
-      <GoogleOauthButton label="Đăng nhập" />
-    </form>
+        <FieldSeparator className="my-4">
+          <span className="bg-background text-muted-foreground px-2 uppercase">Hoặc</span>
+        </FieldSeparator>
+
+        <GoogleOauthButton label="Đăng nhập" />
+      </form>
+    </div>
   );
 };

@@ -15,6 +15,11 @@ export const getCustomerProfileQueryOptions = () => {
     queryKey: customerQueryKey.profile(),
     queryFn: getProfile,
     select: (raw) => {
+      try {
+        mapCustomerDtoToEntity(raw);
+      } catch (error) {
+        console.log(error);
+      }
       return mapCustomerDtoToEntity(raw);
     },
   });

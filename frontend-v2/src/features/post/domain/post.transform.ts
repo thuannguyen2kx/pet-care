@@ -66,7 +66,11 @@ export const mapPostDtoToEntity = (dto: PostDto): Post => {
     title: dto.title,
     content: dto.content,
     tags: dto.tags,
-    petIds: dto.petIds,
+    petIds: dto.petIds?.map((pet) => ({
+      id: pet._id,
+      name: pet.name,
+      breed: pet.breed,
+    })),
 
     visibility: dto.visibility,
     status: dto.status,

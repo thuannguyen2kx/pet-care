@@ -4,7 +4,6 @@ import { authorizeRoles } from "../middlewares/auth.middleware";
 import { Roles } from "../enums/role.enum";
 const petRoutes = express.Router();
 
-// Routes cơ bản CRUD
 // Get user's pets with filters
 petRoutes.get("/", controller.getUserPetsController);
 
@@ -12,7 +11,7 @@ petRoutes.get("/", controller.getUserPetsController);
 petRoutes.get(
   "/all",
   authorizeRoles([Roles.ADMIN, Roles.EMPLOYEE]),
-  controller.getAllPetsController
+  controller.getAllPetsController,
 );
 
 // Get statistics
@@ -38,22 +37,22 @@ petRoutes.post("/:id/image", controller.updatePetImageController);
 petRoutes.post("/:id/vaccinations", controller.addVaccinationController);
 petRoutes.put(
   "/:id/vaccinations/:vaccinationId",
-  controller.updateVaccinationController
+  controller.updateVaccinationController,
 );
 petRoutes.delete(
   "/:id/vaccinations/:vaccinationId",
-  controller.deleteVaccinationController
+  controller.deleteVaccinationController,
 );
 
 // Medical record management
 petRoutes.post("/:id/medical", controller.addMedicalRecordController);
 petRoutes.put(
   "/:id/medical/:recordId",
-  controller.updateMedicalRecordController
+  controller.updateMedicalRecordController,
 );
 petRoutes.delete(
   "/:id/medical/:recordId",
-  controller.deleteMedicalRecordController
+  controller.deleteMedicalRecordController,
 );
 
 export default petRoutes;
