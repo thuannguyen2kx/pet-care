@@ -82,9 +82,7 @@ const authConfig = {
 export const { useUser, useLogin, useLogout, useRegister, AuthLoader } = configureAuth(authConfig);
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const user = useUser({
-    staleTime: 0,
-  });
+  const user = useUser();
   const location = useLocation();
 
   if (!user.data) {

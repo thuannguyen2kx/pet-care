@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import React, { useEffect } from 'react';
 
-import { MainErrorFallback } from '@/shared/components/errors/main';
+import { SplashScreen } from '@/shared/components/template/splash-screen';
+import { paths } from '@/shared/config/paths';
 import { queryConfig } from '@/shared/lib/react-query';
+import { LocalStorageEventTarget } from '@/shared/lib/storage';
 import { Toaster } from '@/shared/ui/sonner';
 
 type AppProviderProps = {
@@ -17,16 +18,23 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       }),
   );
 
+  useEffect(() => {
+    const handleTokenCleared = () => {
+      window.location.replace(paths.auth.login.path);
+    };
+
+    LocalStorageEventTarget.addEventListener('tokenCleared', handleTokenCleared);
+    return () => {
+      LocalStorageEventTarget.removeEventListener('tokenCleared', handleTokenCleared);
+    };
+  }, []);
+
   return (
-    <React.Suspense
-      fallback={<div className="flex h-screen w-screen items-center justify-center">Loading</div>}
-    >
-      <ErrorBoundary FallbackComponent={MainErrorFallback}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <Toaster position="top-right" />
-        </QueryClientProvider>
-      </ErrorBoundary>
+    <React.Suspense fallback={<SplashScreen />}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster position="top-right" />
+      </QueryClientProvider>
     </React.Suspense>
   );
 };

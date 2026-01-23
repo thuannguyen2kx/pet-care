@@ -9,6 +9,7 @@ import { ForbiddenFallback } from '@/shared/components/forbidden/main';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
 import { Authorization } from '@/shared/lib/authorization';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convert = (queryClient: QueryClient) => (m: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = m;

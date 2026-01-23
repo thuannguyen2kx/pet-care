@@ -66,7 +66,7 @@ class Http {
       (error: AxiosError) => {
         const data = error.response?.data as TApiResponseError;
         const message = data?.message || error.message;
-        const errorCode = data?.errorCode || ErrorCodeEnum.UNKNOW_ERROR;
+        const errorCode = data?.errorCode || error.code || ErrorCodeEnum.UNKNOW_ERROR;
         const apiError = new ApiError(
           errorCode,
           message,
@@ -74,10 +74,10 @@ class Http {
           data.errors,
         );
 
-        // if (apiError.status === HTTPSTATUS.UNAUTHORIZED) {
-        //   this.accessToken = '';
-        //   storage.clearToken();
-        // }
+        if (apiError.status === HTTPSTATUS.UNAUTHORIZED) {
+          this.accessToken = '';
+          storage.clearToken();
+        }
 
         if (apiError.status !== HTTPSTATUS.UNAUTHORIZED) {
           toast.error(apiError.message);
