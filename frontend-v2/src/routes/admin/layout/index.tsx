@@ -1,5 +1,6 @@
 import type React from 'react';
 
+import { useAdminNotificationSocket } from '@/features/notification/hooks/use-admin-notification-socket';
 import { DashboardHeader } from '@/routes/admin/layout/header';
 import { DashboardSidebar } from '@/routes/admin/layout/sidebar';
 import { useUser } from '@/shared/lib/auth';
@@ -11,9 +12,12 @@ type Props = {
 };
 export default function DashboardLayout({ title, description, children }: Props) {
   const user = useUser();
+  useAdminNotificationSocket();
+
   if (!user.data) return null;
 
   const { profile } = user.data;
+
   return (
     <div className="bg-background flex min-h-dvh">
       <DashboardSidebar

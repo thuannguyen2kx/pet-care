@@ -5,6 +5,7 @@ import {
 } from "../@types/notification.type";
 import { UserNotificationModel } from "../models/user-notification";
 import { NotificationModel } from "../models/notification.model";
+import { emitNewNotification } from "../socket/emitters/notification.emitter";
 
 type NotificationPayload = Omit<CreateNotificationInput, "recipientIds">;
 export class NotificationFactory {
@@ -289,6 +290,10 @@ export class NotificationService {
         notificationId: notification._id,
       })),
     );
+
+    for (const userId of input.recipientIds) {
+      emitNewNotification(userId);
+    }
 
     return notification;
   }

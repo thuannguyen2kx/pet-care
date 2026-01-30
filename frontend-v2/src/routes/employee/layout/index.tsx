@@ -1,5 +1,6 @@
 import type React from 'react';
 
+import { useEmployeeNotificationSocket } from '@/features/notification/hooks/use-employee-notification-socket';
 import { EmployeeDashboardHeader } from '@/routes/employee/layout/header';
 import { EmployeeDashboardSidebar } from '@/routes/employee/layout/sidebar';
 import { useUser } from '@/shared/lib/auth';
@@ -11,6 +12,8 @@ type Props = {
 };
 export default function EmployeeLayout({ children, title, description }: Props) {
   const user = useUser();
+  useEmployeeNotificationSocket();
+
   if (!user.data) return null;
 
   return (

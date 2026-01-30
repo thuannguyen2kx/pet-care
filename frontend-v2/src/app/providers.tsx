@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 
+import { SocketProvider } from '@/app/socket.provider';
 import { SplashScreen } from '@/shared/components/template/splash-screen';
 import { paths } from '@/shared/config/paths';
 import { queryConfig } from '@/shared/lib/react-query';
@@ -32,8 +33,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   return (
     <React.Suspense fallback={<SplashScreen />}>
       <QueryClientProvider client={queryClient}>
-        {children}
-        <Toaster position="top-right" />
+        <SocketProvider>
+          {children}
+          <Toaster position="top-right" />
+        </SocketProvider>
       </QueryClientProvider>
     </React.Suspense>
   );

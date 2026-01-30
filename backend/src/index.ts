@@ -22,12 +22,18 @@ import reportRoutes from "./routes/report.route";
 import bookingRoutes from "./routes/booking.route";
 import availabilityRoutes from "./routes/availability.route";
 import notificationRoutes from "./routes/notification.route";
+import { initSocket } from "./socket";
+import http from "http";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
 
 // app.use(`${BASE_PATH}/webhook`, webhookRoutes);
 app.use(express.json());
+
+const httpServer = http.createServer(app);
+initSocket(httpServer);
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
@@ -62,7 +68,7 @@ app.use(
 );
 app.use(errorHandler);
 
-app.listen(config.PORT, async () => {
+httpServer.listen(config.PORT, async () => {
   console.log(`Server listening on port ${config.PORT} in ${config.NODE_ENV}`);
   await connectDatabase();
 });

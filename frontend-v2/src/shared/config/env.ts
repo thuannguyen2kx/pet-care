@@ -3,6 +3,7 @@ import z from 'zod';
 const creatEnv = () => {
   const EnvSchema = z.object({
     API_URL: z.string(),
+    SOCKET_URL: z.string(),
   });
 
   const envVars = Object.entries(import.meta.env).reduce<Record<string, string>>((acc, curr) => {
