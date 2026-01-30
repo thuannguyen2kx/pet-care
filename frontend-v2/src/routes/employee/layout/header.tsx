@@ -1,15 +1,7 @@
-import { Bell, Moon, Search, Sun } from 'lucide-react';
+import { Moon, Search, Sun } from 'lucide-react';
 
-import { Badge } from '@/shared/ui/badge';
+import { EmployeeNotificationDropdown } from '@/features/notification/employee-app/notification-list/ui/notification-dropdown';
 import { Button } from '@/shared/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
 import { Input } from '@/shared/ui/input';
 import { useThemeStore } from '@/stores/theme.store';
 
@@ -45,30 +37,7 @@ export const EmployeeDashboardHeader = ({ title, description }: Props) => {
           {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
         </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground relative">
-              <Bell className="h-5 w-5" />
-              <Badge className="bg-destructive text-destructive-foreground absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center p-0 text-[10px]">
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="border-border w-80">
-            <DropdownMenuLabel>Thông báo</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">Lịch hẹn mới</span>
-              <span className="text-muted-foreground text-xs">
-                Khách hàng Minh Anh đặt lịch tắm cho Milu
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">Đánh giá mới</span>
-              <span className="text-muted-foreground text-xs">Bạn nhận được đánh giá 5 sao</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <EmployeeNotificationDropdown />
       </div>
     </header>
   );

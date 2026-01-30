@@ -17,6 +17,7 @@ export enum PaymentStatus {
 }
 
 export interface IBooking extends Document {
+  _id: Types.ObjectId;
   // Participants
   customerId: Types.ObjectId;
   petId: Types.ObjectId;
@@ -196,7 +197,7 @@ const BookingSchema = new Schema<IBooking>(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Compound indexes for common queries

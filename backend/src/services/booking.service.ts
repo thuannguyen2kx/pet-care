@@ -22,6 +22,11 @@ import {
   startOfTomorrow,
 } from "date-fns";
 import { parseDateOnly } from "../utils/format-date";
+import {
+  NotificationFactory,
+  NotificationService,
+} from "./notification.service";
+import PetModel from "../models/pet.model";
 
 export type BookingView = "today" | "upcoming" | "ongoing" | "past" | "all";
 const DEFAULT_BOOKING_STATUS_STATS: Record<BookingStatus, number> = {
@@ -60,7 +65,7 @@ class BookingService {
 
       if (!pet) {
         throw new Error(
-          "Không tìm thấy thú cưng hoặc thú cưng đó không thuộc về bạn."
+          "Không tìm thấy thú cưng hoặc thú cưng đó không thuộc về bạn.",
         );
       }
 
@@ -81,12 +86,12 @@ class BookingService {
           (await this.findAvailableEmployee(
             data.serviceId,
             data.scheduledDate,
-            data.startTime
+            data.startTime,
           )) ?? undefined;
 
         if (!employeeId) {
           throw new Error(
-            "Hiện không có nhân viên nào phù hợp với khung giờ này."
+            "Hiện không có nhân viên nào phù hợp với khung giờ này.",
           );
         }
       }
@@ -103,17 +108,17 @@ class BookingService {
 
       if (!employee) {
         throw new BadRequestException(
-          "Không tìm thấy nhân viên hoặc nhân viên không nhận đặt chỗ."
+          "Không tìm thấy nhân viên hoặc nhân viên không nhận đặt chỗ.",
         );
       }
 
       if (service.requiredSpecialties) {
         const hasSpecialty = service.requiredSpecialties.some((required) =>
-          employee.employeeInfo?.specialties?.includes(required)
+          employee.employeeInfo?.specialties?.includes(required),
         );
         if (!hasSpecialty) {
           throw new BadRequestException(
-            ` Nhân viên không có chuyên môn cần thiết:${service.requiredSpecialties}`
+            ` Nhân viên không có chuyên môn cần thiết:${service.requiredSpecialties}`,
           );
         }
       }
@@ -146,7 +151,7 @@ class BookingService {
 
       if (recentNoShows >= 3) {
         throw new BadRequestException(
-          "Quá nhiều lần không đến. Vui lòng liên hệ với chúng tôi để khôi phục quyền đặt phòng."
+          "Quá nhiều lần không đến. Vui lòng liên hệ với chúng tôi để khôi phục quyền đặt phòng.",
         );
       }
 
@@ -182,7 +187,7 @@ class BookingService {
             ],
           },
         ],
-        { session }
+        { session },
       );
 
       // 9. Update customer stats
@@ -191,13 +196,31 @@ class BookingService {
         {
           $inc: { "customerInfo.stats.totalBookings": 1 },
         },
-        { session }
+        { session },
       );
 
       await session.commitTransaction();
 
       // 10. Send confirmation (outside transaction)
       //   this.sendBookingConfirmation(booking[0]._id.toString());
+
+      const bookingDoc = booking[0];
+
+      await NotificationService.create({
+        ...NotificationFactory.bookingCreated(
+          bookingDoc._id.toString(),
+          pet.name,
+        ),
+        recipientIds: [data.customerId.toString()],
+      });
+
+      await NotificationService.create({
+        ...NotificationFactory.newBookingAssigned(
+          bookingDoc._id.toString(),
+          pet.name,
+        ),
+        recipientIds: [employeeId.toString()],
+      });
 
       return booking[0];
     } catch (error) {
@@ -251,7 +274,7 @@ class BookingService {
         .populate("petId", "name type breed image")
         .populate(
           "employeeId",
-          "fullName profilePicture employeeInfo.specialties"
+          "fullName profilePicture employeeInfo.specialties",
         )
         .populate("serviceId", "name category duration price")
         .sort({ scheduledDate: -1, startTime: -1 })
@@ -293,7 +316,7 @@ class BookingService {
       .populate("petId", "name type breed image")
       .populate(
         "employeeId",
-        "fullName profilePicture employeeInfo.specialties"
+        "fullName profilePicture employeeInfo.specialties",
       )
       .populate("serviceId", "name category duration price")
       .sort({ scheduledDate: 1, startTime: 1 })
@@ -308,7 +331,7 @@ class BookingService {
   async getBookingById(
     bookingId: string,
     userId: Types.ObjectId,
-    userRole: string
+    userRole: string,
   ) {
     const booking = await BookingModel.findById(bookingId)
       .populate("customerId", "fullName email phoneNumber profilePicture")
@@ -327,7 +350,7 @@ class BookingService {
 
     if (!isCustomer && !isEmployee && !isAdmin) {
       throw new ForbiddenException(
-        "Không được phép xem thông tin đặt lịch này."
+        "Không được phép xem thông tin đặt lịch này.",
       );
     }
 
@@ -345,7 +368,7 @@ class BookingService {
       startTime?: string;
       employeeId?: string;
       customerNotes?: string;
-    }
+    },
   ) {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -360,7 +383,7 @@ class BookingService {
       // Check permissions
       if (booking.customerId.toString() !== userId.toString()) {
         throw new ForbiddenException(
-          "Không được phép cập nhật thông tin đặt lịch này."
+          "Không được phép cập nhật thông tin đặt lịch này.",
         );
       }
 
@@ -370,7 +393,7 @@ class BookingService {
         booking.status !== BookingStatus.CONFIRMED
       ) {
         throw new BadRequestException(
-          "Không thể cập nhật đặt lịch ở trạng thái hiện tại."
+          "Không thể cập nhật đặt lịch ở trạng thái hiện tại.",
         );
       }
 
@@ -383,7 +406,7 @@ class BookingService {
 
       if (hoursUntil < 24) {
         throw new BadRequestException(
-          "Không thể thay đổi lịch đặt nếu thời gian còn lại dưới 24 giờ so với giờ dự kiến."
+          "Không thể thay đổi lịch đặt nếu thời gian còn lại dưới 24 giờ so với giờ dự kiến.",
         );
       }
 
@@ -417,7 +440,7 @@ class BookingService {
             .findById(booking.serviceId);
           booking.endTime = this.calculateEndTime(
             data.startTime,
-            service!.duration + (service!.bufferTime || 0)
+            service!.duration + (service!.bufferTime || 0),
           );
         }
         if (data.employeeId)
@@ -450,7 +473,7 @@ class BookingService {
     bookingId: string,
     userId: Types.ObjectId,
     userRole: string,
-    reason: string
+    reason: string,
   ) {
     const booking = await BookingModel.findById(bookingId);
 
@@ -469,7 +492,7 @@ class BookingService {
       booking.status === BookingStatus.NO_SHOW
     ) {
       throw new BadRequestException(
-        "Không thể hủy các đặt lịch đã hoàn tất hoặc khách không đến."
+        "Không thể hủy các đặt lịch đã hoàn tất hoặc khách không đến.",
       );
     }
 
@@ -497,7 +520,7 @@ class BookingService {
 
       if (hoursUntil < 24) {
         throw new Error(
-          "Khách hàng phải hủy đặt lịch ít nhất 24 giờ trước giờ đặt lịch. Vui lòng liên hệ với chúng tôi để được hỗ trợ."
+          "Khách hàng phải hủy đặt lịch ít nhất 24 giờ trước giờ đặt lịch. Vui lòng liên hệ với chúng tôi để được hỗ trợ.",
         );
       }
     }
@@ -533,6 +556,32 @@ class BookingService {
     // Send cancellation notification
     // this.sendCancellationNotification(bookingId);
 
+    const notifyTargets: string[] = [];
+    if (initiator === "customer") {
+      notifyTargets.push(booking.employeeId.toString());
+    }
+
+    if (initiator === "employee") {
+      notifyTargets.push(booking.customerId.toString());
+    }
+
+    if (initiator === "admin") {
+      notifyTargets.push(
+        booking.customerId.toString(),
+        booking.employeeId.toString(),
+      );
+    }
+
+    await NotificationService.create({
+      ...NotificationFactory.bookingCancelled(
+        booking._id.toString(),
+        booking.petId.toString(),
+        initiator,
+        reason,
+      ),
+      recipientIds: notifyTargets,
+    });
+
     return booking;
   }
 
@@ -547,7 +596,7 @@ class BookingService {
       status: BookingStatus;
       reason?: string;
       employeeNotes?: string;
-    }
+    },
   ) {
     const booking = await BookingModel.findById(bookingId);
 
@@ -561,7 +610,7 @@ class BookingService {
 
     if (!isEmployee && !isAdmin) {
       throw new ForbiddenException(
-        "Không được phép cập nhật trạng thái đặt chỗ"
+        "Không được phép cập nhật trạng thái đặt chỗ",
       );
     }
 
@@ -611,6 +660,42 @@ class BookingService {
     // Send status update notification
     // this.sendStatusUpdateNotification(bookingId, data.status);
 
+    const pet = await PetModel.findById(booking.petId);
+
+    switch (data.status) {
+      case BookingStatus.CONFIRMED:
+        await NotificationService.create({
+          ...NotificationFactory.bookingConfirmed(
+            booking._id.toString(),
+            pet?.name || "",
+            booking.scheduledDate.toISOString().split("T")[0],
+            booking.startTime,
+          ),
+          recipientIds: [booking.customerId.toString()],
+        });
+        break;
+
+      case BookingStatus.COMPLETED:
+        await NotificationService.create({
+          ...NotificationFactory.bookingCompleted(
+            booking._id.toString(),
+            pet?.name || "",
+          ),
+          recipientIds: [booking.customerId.toString()],
+        });
+        break;
+
+      case BookingStatus.NO_SHOW:
+        await NotificationService.create({
+          ...NotificationFactory.bookingNoShow(
+            booking._id.toString(),
+            pet?.name || "",
+          ),
+          recipientIds: [booking.customerId.toString()],
+        });
+        break;
+    }
+
     return booking;
   }
 
@@ -623,7 +708,7 @@ class BookingService {
     data: {
       score: number;
       feedback?: string;
-    }
+    },
   ) {
     const booking = await BookingModel.findById(bookingId);
 
@@ -634,14 +719,14 @@ class BookingService {
     // Only customer can rate
     if (booking.customerId.toString() !== userId.toString()) {
       throw new ForbiddenException(
-        "Chỉ khách hàng mới có thể đánh giá đặt phòng này."
+        "Chỉ khách hàng mới có thể đánh giá đặt phòng này.",
       );
     }
 
     // Must be completed
     if (booking.status !== BookingStatus.COMPLETED) {
       throw new BadRequestException(
-        "Chỉ có thể đánh giá các đặt chỗ đã hoàn tất."
+        "Chỉ có thể đánh giá các đặt chỗ đã hoàn tất.",
       );
     }
 
@@ -699,10 +784,13 @@ class BookingService {
         ]),
       ]);
 
-    const byStatusMapped = byStatus.reduce((acc, item) => {
-      acc[item._id as BookingStatus] = item.count;
-      return acc;
-    }, {} as Partial<Record<BookingStatus, number>>);
+    const byStatusMapped = byStatus.reduce(
+      (acc, item) => {
+        acc[item._id as BookingStatus] = item.count;
+        return acc;
+      },
+      {} as Partial<Record<BookingStatus, number>>,
+    );
     return {
       totalBookings,
       byStatus: {
@@ -773,10 +861,13 @@ class BookingService {
         ]),
       ]);
 
-    const byStatusMapped = byStatus.reduce((acc, item) => {
-      acc[item._id as BookingStatus] = item.count;
-      return acc;
-    }, {} as Partial<Record<BookingStatus, number>>);
+    const byStatusMapped = byStatus.reduce(
+      (acc, item) => {
+        acc[item._id as BookingStatus] = item.count;
+        return acc;
+      },
+      {} as Partial<Record<BookingStatus, number>>,
+    );
 
     return {
       date: start,
@@ -807,7 +898,7 @@ class BookingService {
 
     return `${String(endHour).padStart(2, "0")}:${String(endMinute).padStart(
       2,
-      "0"
+      "0",
     )}`;
   }
 
@@ -818,7 +909,7 @@ class BookingService {
   private async findAvailableEmployee(
     serviceId: string,
     scheduledDate: string,
-    startTime: string
+    startTime: string,
   ): Promise<string | null> {
     // 1. Lấy service
     const Service = mongoose.model("Service");
@@ -853,7 +944,7 @@ class BookingService {
       });
 
       const matchedSlot = slots.find(
-        (slot) => slot.startTime === startTime && slot.available
+        (slot) => slot.startTime === startTime && slot.available,
       );
 
       if (matchedSlot) {
@@ -870,7 +961,7 @@ class BookingService {
    */
   private validateStatusTransition(
     currentStatus: BookingStatus,
-    newStatus: BookingStatus
+    newStatus: BookingStatus,
   ): void {
     const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
       [BookingStatus.PENDING]: [
@@ -903,7 +994,7 @@ class BookingService {
    */
   private async updateEmployeeRating(
     employeeId: string,
-    newRating: number
+    newRating: number,
   ): Promise<void> {
     const User = mongoose.model("User");
     const employee = await User.findById(employeeId);
@@ -999,7 +1090,7 @@ class BookingService {
 
   private groupBookingsByWeek<T extends { scheduledDate: Date }>(
     bookings: T[],
-    weekStart: Date
+    weekStart: Date,
   ) {
     const normalizedWeekStart = startOfDay(weekStart);
 
@@ -1023,7 +1114,7 @@ class BookingService {
 
       const diffDays = differenceInCalendarDays(
         bookingDate,
-        normalizedWeekStart
+        normalizedWeekStart,
       );
 
       if (diffDays >= 0 && diffDays < 7) {
@@ -1036,8 +1127,8 @@ class BookingService {
         startDate: normalizedWeekStart,
         endDate: new Date(
           new Date(normalizedWeekStart).setDate(
-            normalizedWeekStart.getDate() + 6
-          )
+            normalizedWeekStart.getDate() + 6,
+          ),
         ),
       },
       days,

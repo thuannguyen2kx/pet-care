@@ -10,8 +10,11 @@ import {
   getServiceReportController,
   getTopEmployeesController,
 } from "../controllers/report.controller";
+import { passportAuthenticateJWT } from "../config/passport.config";
 
 const reportRoutes = Router();
+
+reportRoutes.use(passportAuthenticateJWT);
 reportRoutes.use(authorizeRoles([Roles.ADMIN]));
 
 reportRoutes.get("/overview", getReportOverviewController);

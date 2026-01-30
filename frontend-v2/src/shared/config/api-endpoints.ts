@@ -13,6 +13,7 @@ export const API_BASE = {
   AVAILABILITY: `${API_VERSION}/availability`,
   REPORT: `${API_VERSION}/reports`,
   POST: `${API_VERSION}/posts`,
+  NOTIFICATION: `${API_VERSION}/notifications`,
 };
 
 /* ================= AUTH ================= */
@@ -156,4 +157,12 @@ export const POST_ENDPOINTS = {
   FEATURED: `${API_BASE.POST}/featured`,
   SET_FEATURE: (postId: string) => `${API_BASE.POST}/admin/${postId}/featured`,
   ME: `${API_BASE.POST}/me`,
+};
+
+/* ================= NOTIFICATION ================= */
+export const NOTIFICATION_ENDPOINTS = {
+  LIST: `${API_BASE.NOTIFICATION}`,
+  UNREAD_COUNT: `${API_BASE.NOTIFICATION}/unread-count`,
+  MARK_AS_READ: (notificationId: string) => `${API_BASE.NOTIFICATION}/${notificationId}/read`,
+  MARK_ALL_AS_READ: `${API_BASE.NOTIFICATION}/read-all`,
 };

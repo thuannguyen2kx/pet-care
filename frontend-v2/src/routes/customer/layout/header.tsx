@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Bell,
   Calendar,
   ChevronDown,
   Home,
@@ -16,6 +15,7 @@ import {
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 
+import { NotificationDropdown } from '@/features/notification/customer-app/notification-list/ui/notification-dropdown';
 import { paths } from '@/shared/config/paths';
 import { useLogout, useUser } from '@/shared/lib/auth';
 import { getInitials } from '@/shared/lib/utils';
@@ -83,11 +83,7 @@ export const Header = () => {
               </Button>
 
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="bg-destructive absolute top-1.5 right-1.5 h-2 w-2 rounded-full" />
-                <span className="sr-only">Thông báo</span>
-              </Button>
+              <NotificationDropdown />
 
               {/* User Menu */}
               <DropdownMenu>

@@ -21,6 +21,7 @@ import employeeRoutes from "./routes/employee.route";
 import reportRoutes from "./routes/report.route";
 import bookingRoutes from "./routes/booking.route";
 import availabilityRoutes from "./routes/availability.route";
+import notificationRoutes from "./routes/notification.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -53,7 +54,12 @@ app.use(`${BASE_PATH}/employees`, passportAuthenticateJWT, employeeRoutes);
 app.use(`${BASE_PATH}/availability`, availabilityRoutes);
 app.use(`${BASE_PATH}/bookings`, bookingRoutes);
 // app.use(`${BASE_PATH}/payments`, passportAuthenticateJWT, paymentRoutes);
-app.use(`${BASE_PATH}/reports`, passportAuthenticateJWT, reportRoutes);
+app.use(`${BASE_PATH}/reports`, reportRoutes);
+app.use(
+  `${BASE_PATH}/notifications`,
+  passportAuthenticateJWT,
+  notificationRoutes,
+);
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
