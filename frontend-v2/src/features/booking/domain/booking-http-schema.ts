@@ -28,5 +28,12 @@ export const bookingScheduleResponseSchema = z.object({
     days: z.array(bookingScheduleDayDtoSchema),
   }),
 });
+
+export const createBookingResponseDtoSchema = z.object({
+  booking: z.object({
+    _id: bookingDetailDtoSchema.shape._id,
+  }),
+});
+
 export type GetBookingsResponseDto = z.infer<typeof getBookingsResponseDtoSchema>;
 export type BookingDetailResponseDto = z.infer<typeof bookingDetailResponseDtoSchema>;

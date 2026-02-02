@@ -11,6 +11,7 @@ import {
   type BookingDetail,
   type BookingStatus,
 } from '@/features/booking/domain/booking.entity';
+import { formatPaymentMethod } from '@/features/payments/config/payment-method.config';
 import { formatPetType } from '@/features/pets/config';
 import { BackLink } from '@/shared/components/template/back-link';
 import { paths } from '@/shared/config/paths';
@@ -209,7 +210,9 @@ export function BookingDetailView({ booking }: Props) {
                 {booking.paymentMethod && (
                   <div>
                     <p className="text-muted-foreground mb-1 text-xs">Phương thức thanh toán</p>
-                    <p className="text-foreground text-sm font-medium">{booking.paymentMethod}</p>
+                    <p className="text-foreground text-sm font-medium">
+                      {formatPaymentMethod(booking.paymentMethod)}
+                    </p>
                   </div>
                 )}
                 {booking.customerNotes && (

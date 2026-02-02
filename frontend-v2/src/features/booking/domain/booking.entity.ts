@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { PaymentMethodSchema } from '@/features/payments/domain/payment.entity';
 import { imageDtoSchema } from '@/shared/lib/zod-primitives';
 
 // ============================================
@@ -154,7 +155,7 @@ export const bookingDetailSchema = z.object({
   paymentStatus: paymentStatusSchema,
   totalAmount: z.number().min(0),
   paidAmount: z.number().min(0),
-  paymentMethod: z.string().optional(),
+  paymentMethod: PaymentMethodSchema.optional(),
   transactionId: z.string().optional(),
 
   customerNotes: z.string().optional(),

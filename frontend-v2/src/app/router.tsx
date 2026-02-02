@@ -118,6 +118,27 @@ const createAppRouter = (queryClient: QueryClient) => {
                       path: paths.customer.profile.path,
                       lazy: () => import('@/routes/customer/profile').then(convert(queryClient)),
                     },
+                    {
+                      path: paths.customer.payment.path,
+                      lazy: () =>
+                        import('@/routes/customer/payments/create-payment').then(
+                          convert(queryClient),
+                        ),
+                    },
+                    {
+                      path: paths.customer.paymentSuccess.path,
+                      lazy: () =>
+                        import('@/routes/customer/payments/payment-success').then(
+                          convert(queryClient),
+                        ),
+                    },
+                    {
+                      path: paths.customer.paymentCancel.path,
+                      lazy: () =>
+                        import('@/routes/customer/payments/payment-cancel').then(
+                          convert(queryClient),
+                        ),
+                    },
                   ],
                 },
               ],

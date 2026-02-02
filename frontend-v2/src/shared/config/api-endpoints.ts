@@ -14,6 +14,7 @@ export const API_BASE = {
   REPORT: `${API_VERSION}/reports`,
   POST: `${API_VERSION}/posts`,
   NOTIFICATION: `${API_VERSION}/notifications`,
+  PAYMENTS: `${API_VERSION}/payments`,
 };
 
 /* ================= AUTH ================= */
@@ -165,4 +166,10 @@ export const NOTIFICATION_ENDPOINTS = {
   UNREAD_COUNT: `${API_BASE.NOTIFICATION}/unread-count`,
   MARK_AS_READ: (notificationId: string) => `${API_BASE.NOTIFICATION}/${notificationId}/read`,
   MARK_ALL_AS_READ: `${API_BASE.NOTIFICATION}/read-all`,
+};
+
+/* ================= PAYMENTS ================= */
+export const PAYMENTS_ENDPOINTS = {
+  STRIPE_CHECKOUT: `${API_BASE.PAYMENTS}/stripe/checkout`,
+  PROCESS: (bookingId: string) => `${API_BASE.PAYMENTS}/${bookingId}/process`,
 };

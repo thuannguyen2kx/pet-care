@@ -88,10 +88,10 @@ export const useCreateBookingController = (serviceId: string) => {
 
   const createBooking = useCreateBooking({
     mutationConfig: {
-      onSuccess: () => {
+      onSuccess: (data) => {
         state.resetDraft();
         toast.success('Đã đặt lịch thành công');
-        navigate(paths.customer.successBooking.path);
+        navigate(paths.customer.payment.getHref(data.bookingId));
       },
       onError: (error) => {
         toast.error(error.message || 'Đặt lịch thất bại');

@@ -82,6 +82,18 @@ export const paths = {
       path: '/app/settings',
       getHref: () => '/app/settings',
     },
+    payment: {
+      path: '/app/payment/booking/:bookingId',
+      getHref: (bookingId: string) => `/app/payment/booking/${bookingId}`,
+    },
+    paymentSuccess: {
+      path: '/app/payments/success',
+      getHref: () => `/app/payment/success`,
+    },
+    paymentCancel: {
+      path: '/app/payments/cancel',
+      getHref: () => `/app/payment/cancel`,
+    },
   },
 
   /* ===================== EMPLOYEE ===================== */

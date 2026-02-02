@@ -6,4 +6,7 @@ export const SOCKET_EVENTS = {
   NOTIFICATION: {
     NEW: "notification:new",
   },
+  PAYMENT: {
+    PAID: "payment:paid",
+  },
 } as const;
