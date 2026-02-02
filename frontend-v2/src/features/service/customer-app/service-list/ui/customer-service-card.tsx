@@ -31,7 +31,7 @@ export function ServiceCard({ service }: Props) {
         <img
           src={service.images[0]?.url || '/placeholder.svg'}
           alt={service.name}
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
         <Badge className={`absolute top-3 left-3 ${categoryColors}`}>{categoryLabel}</Badge>
@@ -40,10 +40,10 @@ export function ServiceCard({ service }: Props) {
           {formatDuration(service.duration)}
         </Badge>
       </div>
-      <CardContent className="p-4">
+      <CardContent className="flex flex-1 flex-col pb-4">
         <h3 className="text-foreground mb-1 text-lg font-semibold">{service.name}</h3>
         <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">{service.description}</p>
-        <div className="flex items-center justify-between">
+        <div className="mt-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-primary text-lg font-bold">{formatCurrency(service.price)}</span>
           </div>

@@ -9,11 +9,12 @@ import {
   type BookingStatus,
 } from '@/features/booking/domain/booking.entity';
 import { formatEmployeeSpecialty } from '@/features/employee/config';
+import { formatPaymentMethod } from '@/features/payments/config/payment-method.config';
 import { formatPetType } from '@/features/pets/config';
 import { getServiceCategoryLabel } from '@/features/service/config';
 import { BackLink } from '@/shared/components/template/back-link';
 import { paths } from '@/shared/config/paths';
-import { cn, getInitials } from '@/shared/lib/utils';
+import { cn, formatCurrency, getInitials } from '@/shared/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -310,9 +311,12 @@ function TransactionSection({ booking }: { booking: BookingDetail }) {
   return (
     <Section title="Giao dịch">
       <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard label="Tổng tiền" value={`$${booking.totalAmount}`} />
-        <SummaryCard label="Đã thanh toán" value={`$${booking.paidAmount}`} />
-        <SummaryCard label="Phương thức" value={booking.paymentMethod || 'N/A'} />
+        <SummaryCard label="Tổng tiền" value={formatCurrency(booking.totalAmount)} />
+        <SummaryCard label="Đã thanh toán" value={formatCurrency(booking.paidAmount)} />
+        <SummaryCard
+          label="Phương thức"
+          value={formatPaymentMethod(booking.paymentMethod) || 'N/A'}
+        />
       </div>
     </Section>
   );

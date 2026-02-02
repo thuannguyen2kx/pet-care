@@ -1,4 +1,4 @@
-import { ArrowRight, Badge, Calendar } from 'lucide-react';
+import { ArrowRight, Calendar } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAdminBookings } from '@/features/booking/api/get-bookings';
@@ -7,6 +7,7 @@ import type { Booking } from '@/features/booking/domain/booking.entity';
 import { BOOKING_VIEW } from '@/features/booking/domain/booking.state';
 import { getServiceCategoryConfig } from '@/features/service/config';
 import { paths } from '@/shared/config/paths';
+import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -64,21 +65,20 @@ function RecentBookingItem({ booking }: { booking: Booking }) {
   const bookingStatus = getStatusConfig(booking.status);
   const categoryConfig = getServiceCategoryConfig(booking.service.category);
   return (
-    <div
-      key={booking.id}
-      className="bg-muted/30 hover:bg-muted/50 flex items-center gap-4 rounded-xl p-4 transition-colors"
-    >
-      <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-xl">
-        <categoryConfig.icon className="text-primary h-5 w-5" />
+    <Link key={booking.id} to={paths.admin.bookingDetail.getHref(booking.id)} className="block">
+      <div className="bg-muted/30 hover:bg-muted/50 flex items-center gap-4 rounded-xl p-4 transition-colors">
+        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-xl">
+          <categoryConfig.icon className="text-primary h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground font-medium">{booking.service?.name}</p>
+          <p className="text-muted-foreground text-sm">
+            {booking.startTime} - {booking.endTime}
+          </p>
+        </div>
+        <Badge className={bookingStatus.className}>{bookingStatus.label}</Badge>
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-foreground font-medium">{booking.service?.name}</p>
-        <p className="text-muted-foreground text-sm">
-          {booking.startTime} - {booking.endTime}
-        </p>
-      </div>
-      <Badge className={bookingStatus.className}>{bookingStatus.label}</Badge>
-    </div>
+    </Link>
   );
 }
 

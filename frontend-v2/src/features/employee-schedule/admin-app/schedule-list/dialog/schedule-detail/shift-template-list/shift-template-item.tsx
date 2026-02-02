@@ -35,17 +35,17 @@ export function ShiftTemplateItem({ shift, onDisable, onReplace }: ItemProps) {
   const handleDisabeShift = () => onDisable({ shiftId: shift.id, effectiveTo: new Date() });
 
   return (
-    <div className="rounded-lg border border-gray-200">
-      <div className="group flex items-center justify-between p-4 hover:bg-gray-50">
+    <div className="border-border rounded-lg border">
+      <div className="group flex items-center justify-between p-4">
         <ShiftRow shift={shift} />
 
-        <button className="rounded-lg p-2 hover:bg-gray-100" onClick={() => setExpanded((v) => !v)}>
-          <Edit2 className="h-4 w-4 text-gray-600" />
+        <button className="hover:bg-muted rounded-lg p-2" onClick={() => setExpanded((v) => !v)}>
+          <Edit2 className="text-foreground h-4 w-4" />
         </button>
       </div>
 
       {expanded && (
-        <div className="border-border space-y-3 border-t bg-gray-50 px-4 py-4">
+        <div className="border-border space-y-3 border-t px-4 py-4">
           <ReplaceShiftTemplateForm form={form} />
 
           <div className="flex justify-between">

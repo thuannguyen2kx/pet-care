@@ -38,7 +38,7 @@ export function TodayBookingsWidget() {
   }
 
   return (
-    <Card className="border-primary/30 bg-primary/5 shadow-none">
+    <Card className="border-primary/30 bg-primary/5 p-4 shadow-none">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg">📅 Lịch hẹn hôm nay</CardTitle>
         <Link to={paths.customer.myBookings.path}>
@@ -55,7 +55,10 @@ export function TodayBookingsWidget() {
           const category = getServiceCategoryConfig(booking.service.category);
 
           return (
-            <div key={booking.id} className="bg-background flex gap-4 rounded-xl border p-4">
+            <div
+              key={booking.id}
+              className="bg-background border-border flex gap-4 rounded-xl border p-4"
+            >
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-xl">
                 <category.icon className="text-primary h-6 w-6" />
               </div>

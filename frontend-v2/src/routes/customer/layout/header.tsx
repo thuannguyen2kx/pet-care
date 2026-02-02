@@ -6,9 +6,11 @@ import {
   LogOut,
   Menu,
   MessageCircle,
+  Moon,
   PawPrint,
   Search,
   Settings,
+  Sun,
   User,
   X,
 } from 'lucide-react';
@@ -29,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { Logo } from '@/shared/ui/logo';
+import { useThemeStore } from '@/stores/theme.store';
 
 const navItems = [
   { label: 'Trang chủ', href: paths.customer.root.path, icon: Home },
@@ -43,6 +46,8 @@ export const Header = () => {
   const user = useUser();
   const logout = useLogout();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { isDark, toggleDarkMode } = useThemeStore();
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -107,6 +112,12 @@ export const Header = () => {
                       <User className="h-4 w-4" />
                       Hồ sơ cá nhân
                     </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={toggleDarkMode}>
+                    <div className="flex items-center gap-2">
+                      {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+                      {isDark ? 'Chế độ sáng' : 'Chế độ tối'}
+                    </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to={paths.customer.settings.path} className="flex items-center gap-2">
@@ -189,6 +200,15 @@ export const Header = () => {
                   <User className="h-5 w-5" />
                   Hồ sơ cá nhân
                 </Link>
+                <div
+                  onClick={toggleDarkMode}
+                  className="text-muted-foreground hover:bg-muted hover:text-foreground mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+                    {isDark ? 'Chế độ sáng' : 'Chế độ tối'}
+                  </div>
+                </div>
                 <Link
                   to={paths.customer.settings.path}
                   className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"

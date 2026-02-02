@@ -47,7 +47,7 @@ export const NotificationDropdown = () => {
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
-              className="border-background absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 p-0 text-[10px] font-semibold shadow-sm"
+              className="border-background absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full border-2 p-1 text-[10px] font-semibold shadow-sm"
               variant="destructive"
             >
               {unreadCount > 9 ? '9+' : unreadCount}

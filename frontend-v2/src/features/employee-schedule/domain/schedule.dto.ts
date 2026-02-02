@@ -97,7 +97,7 @@ export const ShiftTemplateDtoSchema = z.object({
   startTime: time24hSchema,
   endTime: time24hSchema,
   effectiveFrom: z.string(),
-  effectiveTo: z.string().nullable(),
+  effectiveTo: z.string().nullable().optional(),
   isActive: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),

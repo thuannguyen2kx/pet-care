@@ -27,4 +27,6 @@ export const PAYMENT_METHODS_CONFIG: Record<PaymentMethod, PaymentMethodConfig> 
 
 export const getPaymentMethodConfig = (method: PaymentMethod) => PAYMENT_METHODS_CONFIG[method];
 
-export const formatPaymentMethod = (method: PaymentMethod) => getPaymentMethodConfig(method).name;
+export const formatPaymentMethod = (method?: PaymentMethod) => {
+  return method ? getPaymentMethodConfig(method).name : '';
+};

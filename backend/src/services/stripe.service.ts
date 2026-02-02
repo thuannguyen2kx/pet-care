@@ -78,13 +78,11 @@ export const createCheckoutSession = async ({
     bookingId,
     customerId: userId,
     amount: serviceDetails.price,
-    currency: "USD",
+    currency: "VND",
     method: PaymentMethodEnum.CARD,
     status: PaymentStatusEnum.PENDING,
     paymentProcessor: PaymentProcessorEnum.STRIPE,
   });
-
-  const unitAmountUSD = Math.round((serviceDetails.price / 25000) * 100);
 
   const params: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
@@ -92,8 +90,8 @@ export const createCheckoutSession = async ({
     line_items: [
       {
         price_data: {
-          currency: "usd",
-          unit_amount: unitAmountUSD,
+          currency: "vnd",
+          unit_amount: serviceDetails.price,
           product_data: {
             name: serviceDetails.name,
             description: `Dịch vụ ${serviceDetails.name} cho ${customerDetails.petName}`,
@@ -164,6 +162,7 @@ export const processStripeWebhook = async (event: Stripe.Event) => {
       }
 
       booking.paymentStatus = PaymentStatus.PAID;
+      booking.paidAmount = payment.amount;
       await booking.save();
 
       await NotificationService.create({
@@ -205,6 +204,7 @@ export const processStripeWebhook = async (event: Stripe.Event) => {
         const booking = await BookingModel.findById(payment.bookingId);
         if (booking) {
           booking.paymentStatus = PaymentStatus.PAID;
+          booking.paidAmount = payment.amount;
           await booking.save();
         }
 

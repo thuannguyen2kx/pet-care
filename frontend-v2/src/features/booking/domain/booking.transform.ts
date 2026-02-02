@@ -38,6 +38,7 @@ import {
   type CustomerBookingQuery,
   type UpdateBookingStatus,
 } from '@/features/booking/domain/booking.state';
+import type { PaymentMethod } from '@/features/payments/domain/payment.entity';
 
 // ====================
 // DTO => Entity
@@ -182,7 +183,7 @@ export function mapBookingDetailDtoToEntity(dto: BookingDetailDto): BookingDetai
     paymentStatus: dto.paymentStatus as PaymentStatus,
     totalAmount: dto.totalAmount,
     paidAmount: dto.paidAmount,
-    paymentMethod: dto.paymentMethod,
+    paymentMethod: dto.paymentMethod as PaymentMethod,
     transactionId: dto.transactionId,
 
     customerNotes: dto.customerNotes,

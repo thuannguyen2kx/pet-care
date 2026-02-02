@@ -9,20 +9,20 @@ const dayOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ
 export function ShiftRow({ shift }: { shift: ShiftTemplate }) {
   return (
     <div className="flex flex-1 items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-        <Calendar className="h-5 w-5 text-gray-600" />
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg">
+        <Calendar className="text-foreground h-5 w-5" />
       </div>
 
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-gray-900">{dayOfWeek[shift.dayOfWeek]}</p>
+          <p className="text-muted-foreground font-medium">{dayOfWeek[shift.dayOfWeek]}</p>
 
           <Badge variant={shift.isActive ? 'default' : 'destructive'}>
             {shift.isActive ? 'Hoạt động' : 'Tạm ngưng'}
           </Badge>
         </div>
 
-        <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+        <div className="text-foreground mt-1 flex items-center gap-2 text-sm">
           <Clock className="h-4 w-4" />
           {shift.startTime} – {shift.endTime}
         </div>

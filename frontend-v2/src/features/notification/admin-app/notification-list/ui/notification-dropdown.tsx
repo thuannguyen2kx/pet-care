@@ -4,10 +4,7 @@ import { useNavigate } from 'react-router';
 
 import { useAdminNotificationListController } from '@/features/notification/admin-app/notification-list/application/use-notification-list-controller';
 import { useAdminCountUnread } from '@/features/notification/api/get-count-unread';
-import {
-  useAdminMarkAllAsRead,
-  useMarkAllAsRead,
-} from '@/features/notification/api/react-all-notification';
+import { useAdminMarkAllAsRead } from '@/features/notification/api/react-all-notification';
 import { getNotificationTypeConfig } from '@/features/notification/config';
 import {
   NOTIFICATION_TYPES,

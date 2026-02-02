@@ -24,7 +24,7 @@ const MOCK_IMAGES = {
   users: {
     male: [
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
+      "https://images.unsplash.com/photo-1606577017430-20c1a74aa888?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGV0JTIwd2l0aCUyMHBlb3BsZXxlbnwwfHwwfHx8MA%3D%3D",
       "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
       "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400",
     ],
@@ -59,7 +59,7 @@ const MOCK_IMAGES = {
       "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600",
     ],
     spa: [
-      "https://images.unsplash.com/photo-1583511655826-05700d2f54bf?w=600",
+      "https://images.unsplash.com/photo-1669910803409-a447456beaca?q=80&w=1886&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=600",
     ],
     healthcare: [
